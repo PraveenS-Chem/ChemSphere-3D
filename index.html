@@ -1,730 +1,1058 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChemSphere Pro — 3D Molecular Visualizer for NEET & JEE</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ChemSphere Pro — 3D Molecular Visualizer for NEET & JEE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="https://3dmol.csb.pitt.edu/build/3Dmol-min.js"></script>
+<style>
+:root {
+  --bg: #060810;
+  --surface: #0a0e1a;
+  --surface2: #0f1525;
+  --surface3: #141c30;
+  --border: rgba(99,155,255,0.09);
+  --border-hi: rgba(99,155,255,0.25);
+  --accent: #4a8fff;
+  --accent2: #00e5b4;
+  --accent3: #ff6b35;
+  --accent4: #c084fc;
+  --text: #dde8ff;
+  --text-muted: #5a6e96;
+  --text-dim: #2e3d5c;
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Syne', sans-serif;
+  --sidebar-w: 320px;
+  --header-h: 56px;
+  --radius: 10px;
+  --shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
 
-    <!-- jQuery FIRST — 3Dmol has jQuery as a dependency -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <!-- 3Dmol.js — official CDN (cdnjs 2.5.3 does not exist; use official pitt.edu CDN) -->
-    <script src="https://3dmol.csb.pitt.edu/build/3Dmol-min.js"></script>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    <style>
-        :root {
-            --bg: #04060f;
-            --surface: #080d1a;
-            --surface2: #0d1428;
-            --border: rgba(100,160,255,0.1);
-            --border-glow: rgba(100,160,255,0.3);
-            --accent: #3b7fff;
-            --accent2: #00d4aa;
-            --accent3: #ff6b35;
-            --text: #e8f0ff;
-            --text-muted: #6b80a8;
-            --text-dim: #3a4a6a;
-            --mono: 'Space Mono', monospace;
-            --sans: 'Outfit', sans-serif;
-        }
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--sans); overflow: hidden; }
-        body::before {
-            content: ''; position: fixed; inset: 0;
-            background:
-                radial-gradient(ellipse 60% 50% at 10% 20%, rgba(59,127,255,0.07) 0%, transparent 60%),
-                radial-gradient(ellipse 40% 40% at 90% 80%, rgba(0,212,170,0.05) 0%, transparent 60%);
-            pointer-events: none; z-index: 0;
-        }
+html, body {
+  height: 100%; background: var(--bg);
+  color: var(--text); font-family: var(--sans);
+  overflow: hidden;
+}
 
-        /* HEADER */
-        header {
-            position: relative; z-index: 10; display: flex; align-items: center; justify-content: space-between;
-            padding: 12px 24px; border-bottom: 1px solid var(--border);
-            background: rgba(8,13,26,0.97); backdrop-filter: blur(20px); height: 58px; flex-shrink: 0;
-        }
-        .logo { display: flex; align-items: center; gap: 12px; }
-        .logo-mark {
-            width: 36px; height: 36px; background: linear-gradient(135deg, var(--accent), var(--accent2));
-            border-radius: 9px; display: flex; align-items: center; justify-content: center;
-            font-family: var(--mono); font-size: 11px; font-weight: 700; color: #fff;
-            box-shadow: 0 0 18px rgba(59,127,255,0.35);
-        }
-        .logo-text h1 {
-            font-size: 16px; font-weight: 800; letter-spacing: -0.5px;
-            background: linear-gradient(90deg,#fff 0%,var(--accent2) 100%);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height: 1;
-        }
-        .logo-text p { font-size: 10px; color: var(--text-muted); margin-top: 2px; font-family: var(--mono); }
-        .header-right { display: flex; align-items: center; gap: 10px; }
-        .hint-pill { font-size: 10px; font-family: var(--mono); color: var(--text-muted); border: 1px solid var(--border); padding: 5px 11px; border-radius: 20px; background: rgba(255,255,255,0.02); }
-        .pro-badge { font-size: 9px; font-family: var(--mono); font-weight: 700; letter-spacing: 1px; color: #fff; background: linear-gradient(90deg,var(--accent),var(--accent2)); padding: 4px 9px; border-radius: 5px; }
+/* Ambient glow bg */
+body::before {
+  content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background:
+    radial-gradient(ellipse 55% 45% at 8% 15%, rgba(74,143,255,0.06) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 35% at 92% 85%, rgba(0,229,180,0.04) 0%, transparent 65%),
+    radial-gradient(ellipse 30% 30% at 50% 50%, rgba(192,132,252,0.02) 0%, transparent 70%);
+}
 
-        /* LAYOUT */
-        .app-body { display: flex; height: calc(100vh - 58px); position: relative; z-index: 1; }
+/* ── HEADER ── */
+header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: var(--header-h); display: flex; align-items: center;
+  justify-content: space-between; padding: 0 20px;
+  background: rgba(6,8,16,0.92); backdrop-filter: blur(24px);
+  border-bottom: 1px solid var(--border);
+}
 
-        /* SIDEBAR */
-        .sidebar {
-            width: 330px; flex-shrink: 0; display: flex; flex-direction: column;
-            border-right: 1px solid var(--border); background: rgba(8,13,26,0.85);
-            overflow-y: auto; overflow-x: hidden;
-        }
-        .sidebar::-webkit-scrollbar { width: 3px; }
-        .sidebar::-webkit-scrollbar-thumb { background: var(--border-glow); border-radius: 2px; }
+.logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+.logo-mark {
+  width: 34px; height: 34px; border-radius: 8px;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 11px; font-weight: 700; color: #fff;
+  box-shadow: 0 0 20px rgba(74,143,255,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+  flex-shrink: 0;
+}
+.logo-info h1 {
+  font-size: 15px; font-weight: 800; letter-spacing: -0.3px; line-height: 1;
+  background: linear-gradient(90deg, #fff 0%, var(--accent2) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.logo-info p { font-size: 9px; color: var(--text-muted); font-family: var(--mono); margin-top: 2px; }
 
-        .s-block { padding: 16px 18px; border-bottom: 1px solid var(--border); }
-        .s-label {
-            font-family: var(--mono); font-size: 8px; letter-spacing: 2px;
-            text-transform: uppercase; color: var(--text-dim);
-            margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
-        }
-        .s-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.header-center { display: flex; align-items: center; gap: 6px; }
+.nav-pill {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.5px; padding: 5px 12px;
+  border-radius: 20px; border: 1px solid var(--border); color: var(--text-muted);
+  background: transparent; cursor: pointer; transition: all .15s;
+}
+.nav-pill:hover { border-color: var(--border-hi); color: var(--text); }
+.nav-pill.active { border-color: var(--accent2); color: var(--accent2); background: rgba(0,229,180,0.06); }
 
-        /* Search */
-        .search-row { display: flex; gap: 7px; }
-        .search-input {
-            flex: 1; background: var(--surface2); border: 1px solid var(--border);
-            border-radius: 9px; padding: 9px 13px; font-size: 12px; font-family: var(--sans);
-            color: var(--text); outline: none; transition: border-color .2s, box-shadow .2s;
-        }
-        .search-input::placeholder { color: var(--text-dim); }
-        .search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59,127,255,0.12); }
-        .btn-go {
-            background: var(--accent); border: none; border-radius: 9px;
-            padding: 9px 14px; color: #fff; font-size: 12px; font-family: var(--sans);
-            font-weight: 600; cursor: pointer; transition: background .2s, transform .1s;
-        }
-        .btn-go:hover { background: #5090ff; }
-        .btn-go:active { transform: scale(0.96); }
+.header-right { display: flex; align-items: center; gap: 8px; }
+.hint-tag {
+  font-size: 9px; font-family: var(--mono); color: var(--text-dim);
+  border: 1px solid var(--border); padding: 4px 10px; border-radius: 20px;
+  display: none;
+}
+.btn-upgrade {
+  font-family: var(--sans); font-size: 11px; font-weight: 700;
+  padding: 7px 14px; border-radius: 8px; border: none; cursor: pointer;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #fff; transition: opacity .2s, transform .1s;
+  box-shadow: 0 4px 14px rgba(74,143,255,0.25);
+}
+.btn-upgrade:hover { opacity: 0.88; }
+.btn-upgrade:active { transform: scale(0.97); }
+.free-badge {
+  font-size: 9px; font-family: var(--mono); font-weight: 700; letter-spacing: 0.5px;
+  padding: 3px 8px; border-radius: 5px; color: var(--accent2);
+  border: 1px solid rgba(0,229,180,0.3); background: rgba(0,229,180,0.05);
+}
 
-        /* View mode tabs */
-        .view-tabs { display: flex; gap: 5px; }
-        .view-tab {
-            flex: 1; font-size: 10px; font-family: var(--mono); padding: 6px; border-radius: 6px;
-            border: 1px solid var(--border); color: var(--text-muted); cursor: pointer; text-align: center;
-            transition: all .15s; background: transparent;
-        }
-        .view-tab:hover, .view-tab.active { border-color: var(--accent2); color: var(--accent2); background: rgba(0,212,170,0.08); }
+/* ── LAYOUT ── */
+.app-body {
+  display: flex; position: relative; z-index: 1;
+  height: calc(100vh - var(--header-h)); margin-top: var(--header-h);
+}
 
-        /* Cat tabs */
-        .cat-tabs { display: flex; gap: 5px; flex-wrap: wrap; }
-        .cat-tab {
-            font-size: 10px; font-family: var(--mono); padding: 4px 10px; border-radius: 5px;
-            border: 1px solid var(--border); color: var(--text-muted); cursor: pointer; transition: all .15s; background: transparent;
-        }
-        .cat-tab:hover, .cat-tab.active { border-color: var(--accent); color: var(--accent); background: rgba(59,127,255,0.08); }
+/* ── SIDEBAR ── */
+.sidebar {
+  width: var(--sidebar-w); flex-shrink: 0; display: flex; flex-direction: column;
+  border-right: 1px solid var(--border); background: rgba(10,14,26,0.9);
+  overflow-y: auto; overflow-x: hidden;
+}
+.sidebar::-webkit-scrollbar { width: 3px; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 2px; }
 
-        /* Mol grid */
-        .mol-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
-        .mol-card {
-            background: var(--surface2); border: 1px solid var(--border);
-            border-radius: 9px; padding: 11px 12px; cursor: pointer; transition: all .2s;
-        }
-        .mol-card:hover { border-color: var(--accent); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(59,127,255,0.14); }
-        .mol-card.selected { border-color: var(--accent2); box-shadow: 0 0 0 1px var(--accent2), 0 4px 18px rgba(0,212,170,0.14); }
-        .mc-formula { font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--accent2); margin-bottom: 3px; }
-        .mc-name { font-size: 10px; color: var(--text-muted); line-height: 1.3; }
-        .mc-shape { font-size: 8px; font-family: var(--mono); color: var(--text-dim); margin-top: 5px; }
+.s-block { padding: 14px 16px; border-bottom: 1px solid var(--border); }
 
-        /* Controls */
-        .ctrl-row { display: flex; align-items: center; justify-content: space-between; padding: 7px 0; }
-        .ctrl-row + .ctrl-row { border-top: 1px solid var(--border); }
-        .ctrl-label { font-size: 11px; color: var(--text-muted); }
-        .ctrl-select {
-            background: var(--surface2); border: 1px solid var(--border); border-radius: 6px;
-            padding: 4px 8px; font-size: 10px; font-family: var(--mono); color: var(--text); outline: none; cursor: pointer;
-        }
-        .toggle { position: relative; display: inline-block; width: 34px; height: 18px; }
-        .toggle input { opacity: 0; width: 0; height: 0; }
-        .toggle-sl { position: absolute; inset: 0; background: var(--surface2); border: 1px solid var(--border); border-radius: 18px; cursor: pointer; transition: all .2s; }
-        .toggle-sl::before { content: ''; position: absolute; width: 12px; height: 12px; left: 2px; top: 2px; background: var(--text-dim); border-radius: 50%; transition: all .2s; }
-        .toggle input:checked + .toggle-sl { background: rgba(0,212,170,0.18); border-color: var(--accent2); }
-        .toggle input:checked + .toggle-sl::before { transform: translateX(16px); background: var(--accent2); }
+.s-label {
+  font-family: var(--mono); font-size: 8px; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--text-dim);
+  margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
+}
+.s-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.s-label .count { color: var(--accent2); margin-left: auto; font-size: 9px; }
 
-        /* Info card */
-        .info-card { display: none; flex-direction: column; gap: 11px; }
-        .info-card.visible { display: flex; }
-        .info-mol-name { font-size: 15px; font-weight: 700; color: #fff; line-height: 1.2; text-transform: capitalize; }
-        .info-mol-formula { font-family: var(--mono); font-size: 11px; color: var(--accent); margin-top: 2px; }
-        .info-divider { height: 1px; background: var(--border); }
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .info-stat { background: var(--surface2); border: 1px solid var(--border); border-radius: 9px; padding: 10px; }
-        .info-stat-lbl { font-size: 8px; font-family: var(--mono); letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 4px; }
-        .info-stat-val { font-size: 12px; font-weight: 600; color: var(--text); line-height: 1.3; }
-        .geo-badge { background: rgba(0,212,170,0.07); border: 1px solid rgba(0,212,170,0.22); border-radius: 9px; padding: 11px; }
-        .geo-badge .lbl { font-size: 8px; font-family: var(--mono); letter-spacing: 1.5px; text-transform: uppercase; color: rgba(0,212,170,0.55); margin-bottom: 4px; }
-        .geo-badge .val { font-size: 12px; font-weight: 600; color: var(--accent2); line-height: 1.4; }
-        .fact-strip { background: rgba(255,107,53,0.05); border: 1px solid rgba(255,107,53,0.18); border-radius: 9px; padding: 11px; }
-        .fact-strip .fh { font-size: 8px; font-family: var(--mono); letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,107,53,0.65); margin-bottom: 4px; }
-        .fact-strip .fb { font-size: 11px; color: var(--text-muted); line-height: 1.6; }
+/* Search */
+.search-wrap { position: relative; }
+.search-input {
+  width: 100%; background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 9px 80px 9px 12px;
+  font-size: 12px; font-family: var(--sans); color: var(--text); outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+.search-input::placeholder { color: var(--text-dim); }
+.search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(74,143,255,0.1); }
+.btn-search {
+  position: absolute; right: 5px; top: 50%; transform: translateY(-50%);
+  background: var(--accent); border: none; border-radius: 7px;
+  padding: 5px 11px; color: #fff; font-size: 11px; font-family: var(--sans);
+  font-weight: 700; cursor: pointer; transition: background .2s;
+}
+.btn-search:hover { background: #6aaeff; }
+.err-box {
+  background: rgba(255,60,60,0.05); border: 1px solid rgba(255,60,60,0.18);
+  border-radius: 8px; padding: 9px 12px; font-size: 11px; color: #ff7070;
+  display: none; line-height: 1.5; margin-top: 8px; font-family: var(--mono);
+}
+.err-box.show { display: block; }
 
-        /* Error */
-        .err-box { background: rgba(255,60,60,0.06); border: 1px solid rgba(255,60,60,0.22); border-radius: 9px; padding: 10px; font-size: 11px; color: #ff7070; display: none; line-height: 1.5; margin-top: 8px; }
-        .err-box.visible { display: block; }
+/* Category tabs */
+.cat-tabs { display: flex; gap: 5px; flex-wrap: wrap; }
+.cat-tab {
+  font-size: 9px; font-family: var(--mono); padding: 4px 10px; border-radius: 5px;
+  border: 1px solid var(--border); color: var(--text-muted); cursor: pointer;
+  transition: all .15s; background: transparent; display: flex; align-items: center; gap: 5px;
+}
+.cat-tab:hover { border-color: var(--border-hi); color: var(--text); }
+.cat-tab.active { border-color: var(--accent); color: var(--accent); background: rgba(74,143,255,0.07); }
+.cat-tab .n { font-size: 8px; opacity: 0.6; }
 
-        /* VIEWER */
-        .viewer-wrap { flex: 1; position: relative; background: var(--bg); overflow: hidden; }
+/* Molecule grid */
+.mol-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.mol-card {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 10px; cursor: pointer; transition: all .18s;
+  position: relative; overflow: hidden;
+}
+.mol-card::before {
+  content: ''; position: absolute; inset: 0; opacity: 0;
+  background: linear-gradient(135deg, rgba(74,143,255,0.05), transparent);
+  transition: opacity .18s;
+}
+.mol-card:hover { border-color: var(--accent); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(74,143,255,0.12); }
+.mol-card:hover::before { opacity: 1; }
+.mol-card.selected { border-color: var(--accent2); box-shadow: 0 0 0 1px rgba(0,229,180,0.4), 0 4px 18px rgba(0,229,180,0.1); }
+.mc-formula { font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--accent2); margin-bottom: 2px; }
+.mc-name { font-size: 10px; color: var(--text-muted); line-height: 1.3; }
+.mc-shape { font-size: 8px; font-family: var(--mono); color: var(--text-dim); margin-top: 4px; }
 
-        /* 3D panel */
-        #panel-3d { width: 100%; height: 100%; position: absolute; inset: 0; display: block; }
-        #container-3d { width: 100%; height: 100%; display: block; }
+/* 3D Settings */
+.ctrl-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; }
+.ctrl-row + .ctrl-row { border-top: 1px solid var(--border); }
+.ctrl-label { font-size: 11px; color: var(--text-muted); font-family: var(--mono); font-size: 10px; }
+.ctrl-select {
+  background: var(--surface3); border: 1px solid var(--border); border-radius: 6px;
+  padding: 4px 8px; font-size: 10px; font-family: var(--mono); color: var(--text); outline: none; cursor: pointer;
+}
+.ctrl-select:focus { border-color: var(--accent); }
 
-        /* 2D panel */
-        #panel-2d {
-            display: none; position: absolute; inset: 0;
-            align-items: center; justify-content: center;
-            background: var(--bg); flex-direction: column; gap: 16px;
-        }
-        #panel-2d.active { display: flex; }
-        #img-2d {
-            max-width: 65%; max-height: 65%;
-            border: 1px solid var(--border); border-radius: 14px;
-            background: #fff; padding: 18px;
-            box-shadow: 0 12px 50px rgba(0,0,0,0.6);
-        }
-        .img-2d-lbl { font-family: var(--mono); font-size: 11px; color: var(--text-muted); }
+/* Toggle */
+.toggle { position: relative; display: inline-block; width: 32px; height: 17px; }
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle-sl {
+  position: absolute; inset: 0; background: var(--surface3); border: 1px solid var(--border);
+  border-radius: 17px; cursor: pointer; transition: all .2s;
+}
+.toggle-sl::before {
+  content: ''; position: absolute; width: 11px; height: 11px; left: 2px; top: 2px;
+  background: var(--text-dim); border-radius: 50%; transition: all .2s;
+}
+.toggle input:checked + .toggle-sl { background: rgba(0,229,180,0.15); border-color: var(--accent2); }
+.toggle input:checked + .toggle-sl::before { transform: translateX(15px); background: var(--accent2); }
 
-        /* Props panel */
-        #panel-props {
-            display: none; position: absolute; inset: 0;
-            padding: 30px; overflow-y: auto; flex-direction: column; gap: 16px;
-        }
-        #panel-props.active { display: flex; }
-        .props-title { font-size: 18px; font-weight: 700; color: #fff; text-transform: capitalize; }
-        .props-sub { font-size: 10px; color: var(--text-dim); font-family: var(--mono); margin-top: 3px; margin-bottom: 4px; }
-        .props-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; }
-        .prop-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
-        .prop-lbl { font-size: 8px; font-family: var(--mono); letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 6px; }
-        .prop-val { font-size: 15px; font-weight: 600; color: var(--text); }
+/* Info card */
+.info-card { display: none; flex-direction: column; gap: 10px; }
+.info-card.visible { display: flex; }
+.info-name { font-size: 14px; font-weight: 700; color: #fff; line-height: 1.2; text-transform: capitalize; }
+.info-formula { font-family: var(--mono); font-size: 11px; color: var(--accent); margin-top: 2px; }
+.info-divider { height: 1px; background: var(--border); }
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+.istat { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 9px; }
+.istat-lbl { font-size: 8px; font-family: var(--mono); letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 3px; }
+.istat-val { font-size: 12px; font-weight: 600; color: var(--text); }
+.geo-card { background: rgba(0,229,180,0.04); border: 1px solid rgba(0,229,180,0.18); border-radius: 8px; padding: 10px; }
+.geo-card .geo-lbl { font-size: 8px; font-family: var(--mono); letter-spacing: 1.5px; text-transform: uppercase; color: rgba(0,229,180,0.5); margin-bottom: 4px; }
+.geo-card .geo-val { font-size: 11px; font-weight: 600; color: var(--accent2); line-height: 1.5; }
+.fact-card { background: rgba(255,107,53,0.04); border: 1px solid rgba(255,107,53,0.15); border-radius: 8px; padding: 10px; }
+.fact-card .fact-lbl { font-size: 8px; font-family: var(--mono); letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,107,53,0.55); margin-bottom: 4px; }
+.fact-card .fact-val { font-size: 10px; color: var(--text-muted); line-height: 1.65; }
 
-        /* Loader */
-        .loader {
-            position: absolute; inset: 0; z-index: 30;
-            background: rgba(4,6,15,0.9); backdrop-filter: blur(8px);
-            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
-            transition: opacity .3s;
-        }
-        .loader.hidden { opacity: 0; pointer-events: none; }
-        .spinner { width: 38px; height: 38px; border: 2px solid rgba(59,127,255,0.18); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .loader-text { font-family: var(--mono); font-size: 10px; color: var(--text-muted); letter-spacing: 1px; }
+/* ── VIEWER ── */
+.viewer-wrap { flex: 1; position: relative; background: var(--bg); overflow: hidden; }
+#panel-3d { width: 100%; height: 100%; position: absolute; inset: 0; display: block; }
+#container-3d { width: 100%; height: 100%; display: block; }
 
-        /* Empty state */
-        .empty-state { position: absolute; inset: 0; z-index: 5; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
-        .empty-icon { font-size: 52px; opacity: 0.12; }
-        .empty-text { font-family: var(--mono); font-size: 11px; color: var(--text-dim); }
+#panel-2d {
+  display: none; position: absolute; inset: 0;
+  align-items: center; justify-content: center;
+  background: var(--bg); flex-direction: column; gap: 16px;
+}
+#panel-2d.active { display: flex; }
+.img2d-frame {
+  max-width: 60%; max-height: 62%;
+  border: 1px solid var(--border-hi); border-radius: 14px;
+  background: #fff; padding: 20px;
+  box-shadow: 0 16px 60px rgba(0,0,0,0.7);
+  display: none; position: relative;
+}
+.img2d-frame.loaded { display: block; }
+#img-2d { max-width: 100%; max-height: 100%; display: block; }
+.img2d-lbl { font-family: var(--mono); font-size: 10px; color: var(--text-muted); }
+.img2d-spinner { width: 32px; height: 32px; border: 2px solid rgba(74,143,255,0.15); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
 
-        /* Active badge */
-        .viewer-badge {
-            position: absolute; top: 18px; left: 50%; transform: translateX(-50%);
-            z-index: 10; display: none; background: rgba(8,13,26,0.9); backdrop-filter: blur(10px);
-            border: 1px solid var(--border-glow); border-radius: 20px; padding: 6px 14px;
-            gap: 7px; align-items: center; font-family: var(--mono); font-size: 11px; color: var(--text-muted);
-        }
-        .viewer-badge.show { display: flex; }
-        .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent2); animation: pulse 2s infinite; }
-        @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.3} }
+#panel-props {
+  display: none; position: absolute; inset: 0;
+  padding: 28px; overflow-y: auto; flex-direction: column; gap: 14px;
+}
+#panel-props.active { display: flex; }
+.props-header { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.props-title { font-size: 18px; font-weight: 800; color: #fff; text-transform: capitalize; }
+.props-mol-formula { font-family: var(--mono); font-size: 11px; color: var(--accent); }
+.props-sub { font-size: 9px; color: var(--text-dim); font-family: var(--mono); }
+.props-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 9px; }
+.prop-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 13px; }
+.prop-lbl { font-size: 8px; font-family: var(--mono); letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 5px; }
+.prop-val { font-size: 14px; font-weight: 600; color: var(--text); word-break: break-all; }
+.prop-copy {
+  display: inline-block; margin-top: 5px; font-size: 9px; font-family: var(--mono);
+  color: var(--accent2); cursor: pointer; opacity: 0.7; transition: opacity .15s; border: none; background: none; padding: 0;
+}
+.prop-copy:hover { opacity: 1; }
 
-        /* Viewer ctrl buttons */
-        .viewer-ctrl { position: absolute; bottom: 20px; right: 20px; z-index: 10; display: flex; flex-direction: column; gap: 6px; }
-        .vbtn {
-            width: 34px; height: 34px; border-radius: 9px; border: 1px solid var(--border-glow);
-            background: rgba(8,13,26,0.92); backdrop-filter: blur(10px);
-            color: var(--text-muted); font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .15s;
-        }
-        .vbtn:hover { border-color: var(--accent); color: var(--accent); background: rgba(59,127,255,0.1); }
+/* Loader */
+.loader {
+  position: absolute; inset: 0; z-index: 30;
+  background: rgba(6,8,16,0.88); backdrop-filter: blur(10px);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+  transition: opacity .3s, pointer-events .3s;
+}
+.loader.hidden { opacity: 0; pointer-events: none; }
+.spinner { width: 36px; height: 36px; border: 2px solid rgba(74,143,255,0.15); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.loader-txt { font-family: var(--mono); font-size: 9px; color: var(--text-muted); letter-spacing: 1.5px; }
+.loader-mol { font-family: var(--mono); font-size: 11px; color: var(--accent2); }
 
-        /* Lib status corner */
-        .lib-status { position: absolute; bottom: 20px; left: 20px; z-index: 10; font-family: var(--mono); font-size: 9px; display: flex; flex-direction: column; gap: 3px; }
-        .lib-ok { color: var(--accent2); }
-        .lib-fail { color: #ff7070; }
+/* Empty state */
+.empty-state {
+  position: absolute; inset: 0; z-index: 5;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+}
+.empty-icon { font-size: 56px; opacity: 0.07; }
+.empty-text { font-family: var(--mono); font-size: 10px; color: var(--text-dim); letter-spacing: 1px; }
+.empty-sub { font-size: 10px; color: var(--text-dim); opacity: 0.6; }
 
-        @media (max-width: 760px) {
-            html, body { overflow: auto; }
-            .app-body { flex-direction: column; height: auto; }
-            .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border); }
-            .viewer-wrap { height: 60vw; min-height: 280px; }
-            .header-right { display: none; }
-        }
-    </style>
+/* Molecule badge */
+.mol-badge {
+  position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
+  z-index: 10; background: rgba(10,14,26,0.88); backdrop-filter: blur(12px);
+  border: 1px solid var(--border-hi); border-radius: 20px; padding: 6px 14px;
+  display: none; gap: 7px; align-items: center; font-family: var(--mono); font-size: 10px; color: var(--text-muted);
+  white-space: nowrap;
+}
+.mol-badge.show { display: flex; }
+.badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent2); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:.3} }
+
+/* Viewer controls */
+.viewer-ctrl {
+  position: absolute; bottom: 16px; right: 16px; z-index: 10;
+  display: flex; flex-direction: column; gap: 5px;
+}
+.vbtn {
+  width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border-hi);
+  background: rgba(10,14,26,0.9); backdrop-filter: blur(10px);
+  color: var(--text-muted); font-size: 14px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; transition: all .15s;
+}
+.vbtn:hover { border-color: var(--accent); color: var(--accent); background: rgba(74,143,255,0.1); }
+
+/* Status corner */
+.status-corner {
+  position: absolute; bottom: 16px; left: 16px; z-index: 10;
+  font-family: var(--mono); font-size: 8px; display: flex; flex-direction: column; gap: 3px;
+}
+.s-ok { color: var(--accent2); }
+.s-fail { color: #ff7070; }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+  z-index: 200; background: rgba(10,14,26,0.95); backdrop-filter: blur(16px);
+  border: 1px solid var(--border-hi); border-radius: 10px;
+  padding: 10px 18px; font-family: var(--mono); font-size: 11px; color: var(--text);
+  transition: transform .3s cubic-bezier(.34,1.56,.64,1), opacity .3s;
+  opacity: 0; pointer-events: none; white-space: nowrap;
+}
+.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+.toast.error { border-color: rgba(255,60,60,0.3); color: #ff7070; }
+.toast.success { border-color: rgba(0,229,180,0.3); color: var(--accent2); }
+
+/* ── UPGRADE MODAL ── */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 300;
+  background: rgba(0,0,0,0.75); backdrop-filter: blur(10px);
+  display: none; align-items: center; justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--surface); border: 1px solid var(--border-hi);
+  border-radius: 16px; padding: 36px; max-width: 480px; width: 90%;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.7); position: relative;
+  animation: modalIn .3s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes modalIn { from { transform: scale(0.92) translateY(20px); opacity: 0; } }
+.modal-close {
+  position: absolute; top: 16px; right: 16px; width: 28px; height: 28px;
+  border: 1px solid var(--border); border-radius: 6px; background: transparent;
+  color: var(--text-muted); cursor: pointer; font-size: 14px;
+  display: flex; align-items: center; justify-content: center; transition: all .15s;
+}
+.modal-close:hover { border-color: var(--border-hi); color: var(--text); }
+.modal-badge {
+  display: inline-block; font-size: 9px; font-family: var(--mono); font-weight: 700;
+  letter-spacing: 1px; padding: 3px 10px; border-radius: 5px; margin-bottom: 14px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  color: #fff;
+}
+.modal h2 { font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 6px; }
+.modal p { font-size: 12px; color: var(--text-muted); line-height: 1.7; margin-bottom: 20px; }
+.plan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+.plan-card {
+  border: 1px solid var(--border); border-radius: 10px; padding: 16px; cursor: pointer;
+  transition: all .2s; background: var(--surface2);
+}
+.plan-card.featured {
+  border-color: var(--accent2); background: rgba(0,229,180,0.04);
+  box-shadow: 0 0 0 1px rgba(0,229,180,0.2);
+}
+.plan-name { font-size: 12px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+.plan-price { font-family: var(--mono); font-size: 18px; font-weight: 700; color: var(--accent2); }
+.plan-price span { font-size: 10px; color: var(--text-muted); font-weight: 400; }
+.plan-feat { font-size: 10px; color: var(--text-muted); margin-top: 8px; line-height: 1.6; }
+.plan-feat li { list-style: none; padding: 0; margin: 0; }
+.plan-feat li::before { content: '✓ '; color: var(--accent2); font-weight: 700; }
+.btn-join {
+  width: 100%; padding: 12px; border: none; border-radius: 10px; cursor: pointer;
+  font-family: var(--sans); font-size: 13px; font-weight: 700; color: #fff;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  box-shadow: 0 4px 18px rgba(74,143,255,0.25); transition: opacity .2s;
+}
+.btn-join:hover { opacity: 0.88; }
+.modal-note { font-size: 9px; font-family: var(--mono); color: var(--text-dim); text-align: center; margin-top: 10px; }
+
+/* ── KEYBOARD SHORTCUT HINT ── */
+kbd {
+  font-family: var(--mono); font-size: 8px; padding: 2px 5px;
+  border: 1px solid var(--border); border-radius: 3px; color: var(--text-dim); background: var(--surface2);
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  html, body { overflow: auto; }
+  .app-body { flex-direction: column; height: auto; }
+  .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border); max-height: 70vh; }
+  .viewer-wrap { height: 70vw; min-height: 300px; }
+  .header-center { display: none; }
+  .hint-tag { display: none; }
+  .plan-grid { grid-template-columns: 1fr; }
+  .mol-badge { font-size: 9px; }
+}
+@media (min-width: 768px) {
+  .hint-tag { display: block; }
+}
+</style>
 </head>
 <body>
 
+<!-- HEADER -->
 <header>
-    <div class="logo">
-        <div class="logo-mark">CS</div>
-        <div class="logo-text">
-            <h1>ChemSphere Pro</h1>
-            <p>NEET · JEE · Class 11 Molecular Visualizer</p>
-        </div>
+  <a class="logo" href="#">
+    <div class="logo-mark">CS</div>
+    <div class="logo-info">
+      <h1>ChemSphere Pro</h1>
+      <p>NEET · JEE · Class 11 · 12 Molecular Visualizer</p>
     </div>
-    <div class="header-right">
-        <div class="hint-pill">⟳ Drag · Scroll to zoom</div>
-        <div class="pro-badge">PRO</div>
-    </div>
+  </a>
+  <div class="header-center">
+    <button class="nav-pill active" id="nav-3d" onclick="switchMode('3d',this)">3D Model</button>
+    <button class="nav-pill" id="nav-2d" onclick="switchMode('2d',this)">2D Structure</button>
+    <button class="nav-pill" id="nav-props" onclick="switchMode('props',this)">Properties</button>
+  </div>
+  <div class="header-right">
+    <span class="hint-tag">⟳ Drag · Scroll zoom · <kbd>⌘K</kbd> search</span>
+    <span class="free-badge">FREE</span>
+    <button class="btn-upgrade" onclick="openModal()">Upgrade →</button>
+  </div>
 </header>
 
+<!-- APP -->
 <div class="app-body">
 
-    <aside class="sidebar">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
 
-        <!-- Search -->
-        <div class="s-block">
-            <div class="s-label">Search Any Molecule</div>
-            <div class="search-row">
-                <input class="search-input" id="mol-input" placeholder="caffeine, aspirin, glucose…">
-                <button class="btn-go" onclick="loadBySearch()">View →</button>
-            </div>
-            <div class="err-box" id="err-box"></div>
-        </div>
-
-        <!-- View Mode -->
-        <div class="s-block">
-            <div class="s-label">View Mode</div>
-            <div class="view-tabs">
-                <button class="view-tab active" id="tab-3d"    onclick="switchMode('3d',    this)">3D Model</button>
-                <button class="view-tab"         id="tab-2d"    onclick="switchMode('2d',    this)">2D Structure</button>
-                <button class="view-tab"         id="tab-props" onclick="switchMode('props', this)">Properties</button>
-            </div>
-        </div>
-
-        <!-- Chapter -->
-        <div class="s-block">
-            <div class="s-label">Chapter</div>
-            <div class="cat-tabs">
-                <button class="cat-tab active" onclick="filterCat('vsepr',    this)">VSEPR</button>
-                <button class="cat-tab"        onclick="filterCat('organic',  this)">Organic</button>
-                <button class="cat-tab"        onclick="filterCat('biomol',   this)">Biomolecules</button>
-                <button class="cat-tab"        onclick="filterCat('inorganic',this)">Inorganic</button>
-            </div>
-        </div>
-
-        <!-- Grid -->
-        <div class="s-block">
-            <div class="s-label">Quick Load</div>
-            <div class="mol-grid" id="mol-grid"></div>
-        </div>
-
-        <!-- 3D Controls -->
-        <div class="s-block" id="ctrl-block">
-            <div class="s-label">3D Settings</div>
-            <div class="ctrl-row">
-                <span class="ctrl-label">Model Style</span>
-                <select class="ctrl-select" id="style-sel" onchange="updateStyle()">
-                    <option value="stick">Stick</option>
-                    <option value="sphere">Spacefill</option>
-                    <option value="line">Wireframe</option>
-                    <option value="cartoon">Cartoon</option>
-                </select>
-            </div>
-            <div class="ctrl-row">
-                <span class="ctrl-label">Color Scheme</span>
-                <select class="ctrl-select" id="color-sel" onchange="updateStyle()">
-                    <option value="Jmol">Jmol (CPK)</option>
-                    <option value="ssPyMol">PyMol</option>
-                    <option value="rasmol">RasMol</option>
-                </select>
-            </div>
-            <div class="ctrl-row">
-                <span class="ctrl-label">Auto-Rotate</span>
-                <label class="toggle">
-                    <input type="checkbox" id="rot-tog" checked onchange="toggleRot()">
-                    <span class="toggle-sl"></span>
-                </label>
-            </div>
-        </div>
-
-        <!-- Info Card -->
-        <div class="s-block">
-            <div class="s-label">Molecule Info</div>
-            <div class="info-card" id="info-card">
-                <div>
-                    <div class="info-mol-name" id="i-name">—</div>
-                    <div class="info-mol-formula" id="i-formula">—</div>
-                </div>
-                <div class="info-divider"></div>
-                <div class="info-grid">
-                    <div class="info-stat"><div class="info-stat-lbl">Mol. Weight</div><div class="info-stat-val" id="i-wt">—</div></div>
-                    <div class="info-stat"><div class="info-stat-lbl">Hybridization</div><div class="info-stat-val" id="i-hyb">—</div></div>
-                    <div class="info-stat"><div class="info-stat-lbl">Bond Angle</div><div class="info-stat-val" id="i-angle">—</div></div>
-                    <div class="info-stat"><div class="info-stat-lbl">Dipole Moment</div><div class="info-stat-val" id="i-dipole">—</div></div>
-                </div>
-                <div class="geo-badge">
-                    <div class="lbl">VSEPR Geometry</div>
-                    <div class="val" id="i-geo">—</div>
-                </div>
-                <div class="fact-strip">
-                    <div class="fh">⚡ NEET / JEE Fact</div>
-                    <div class="fb" id="i-fact">—</div>
-                </div>
-            </div>
-        </div>
-
-    </aside>
-
-    <!-- VIEWER -->
-    <div class="viewer-wrap">
-
-        <div class="loader hidden" id="loader">
-            <div class="spinner"></div>
-            <div class="loader-text" id="loader-txt">FETCHING DATA...</div>
-        </div>
-
-        <div class="empty-state" id="empty-st">
-            <div class="empty-icon">⬡</div>
-            <div class="empty-text">Select or search a molecule to begin</div>
-        </div>
-
-        <!-- 3D -->
-        <div id="panel-3d"><div id="container-3d"></div></div>
-
-        <!-- 2D -->
-        <div id="panel-2d">
-            <img id="img-2d" src="" alt="2D Structure" onerror="this.style.display='none'">
-            <div class="img-2d-lbl" id="img-2d-lbl">2D Structure — PubChem</div>
-        </div>
-
-        <!-- Props -->
-        <div id="panel-props">
-            <div>
-                <div class="props-title" id="props-title">Properties</div>
-                <div class="props-sub">Live data · PubChem REST API</div>
-            </div>
-            <div class="props-grid" id="props-grid"></div>
-        </div>
-
-        <!-- Badge -->
-        <div class="viewer-badge" id="v-badge"><span class="dot"></span><span id="badge-lbl">—</span></div>
-
-        <!-- Controls -->
-        <div class="viewer-ctrl" id="v-ctrl">
-            <button class="vbtn" onclick="resetView()" title="Reset view">⌖</button>
-            <button class="vbtn" onclick="doZoom(1.3)" title="Zoom in">+</button>
-            <button class="vbtn" onclick="doZoom(0.7)" title="Zoom out">−</button>
-        </div>
-
-        <!-- Lib status -->
-        <div class="lib-status" id="lib-status"></div>
+    <!-- Search -->
+    <div class="s-block">
+      <div class="s-label">Search Any Molecule</div>
+      <div class="search-wrap">
+        <input class="search-input" id="mol-input" placeholder="caffeine, aspirin, glucose, benzene…" autocomplete="off">
+        <button class="btn-search" onclick="loadBySearch()">Go →</button>
+      </div>
+      <div class="err-box" id="err-box"></div>
     </div>
+
+    <!-- Category -->
+    <div class="s-block">
+      <div class="s-label">Chapter</div>
+      <div class="cat-tabs" id="cat-tabs">
+        <button class="cat-tab active" data-cat="vsepr" onclick="filterCat('vsepr',this)">VSEPR <span class="n">8</span></button>
+        <button class="cat-tab" data-cat="organic" onclick="filterCat('organic',this)">Organic <span class="n">5</span></button>
+        <button class="cat-tab" data-cat="biomol" onclick="filterCat('biomol',this)">Bio <span class="n">4</span></button>
+        <button class="cat-tab" data-cat="inorganic" onclick="filterCat('inorganic',this)">Inorganic <span class="n">4</span></button>
+      </div>
+    </div>
+
+    <!-- Grid -->
+    <div class="s-block">
+      <div class="s-label">Quick Load</div>
+      <div class="mol-grid" id="mol-grid"></div>
+    </div>
+
+    <!-- 3D Controls -->
+    <div class="s-block" id="ctrl-block">
+      <div class="s-label">3D Settings</div>
+      <div class="ctrl-row">
+        <span class="ctrl-label">Model Style</span>
+        <select class="ctrl-select" id="style-sel" onchange="updateStyle()">
+          <option value="stick">Stick</option>
+          <option value="sphere">Spacefill</option>
+          <option value="line">Wireframe</option>
+        </select>
+      </div>
+      <div class="ctrl-row">
+        <span class="ctrl-label">Color Scheme</span>
+        <select class="ctrl-select" id="color-sel" onchange="updateStyle()">
+          <option value="Jmol">Jmol (CPK)</option>
+          <option value="ssPyMol">PyMol</option>
+          <option value="rasmol">RasMol</option>
+        </select>
+      </div>
+      <div class="ctrl-row">
+        <span class="ctrl-label">Auto-Rotate</span>
+        <label class="toggle">
+          <input type="checkbox" id="rot-tog" checked onchange="toggleRot()">
+          <span class="toggle-sl"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="s-block">
+      <div class="s-label">Molecule Info</div>
+      <div class="info-card" id="info-card">
+        <div>
+          <div class="info-name" id="i-name">—</div>
+          <div class="info-formula" id="i-formula">—</div>
+        </div>
+        <div class="info-divider"></div>
+        <div class="info-grid">
+          <div class="istat"><div class="istat-lbl">Mol. Weight</div><div class="istat-val" id="i-wt">—</div></div>
+          <div class="istat"><div class="istat-lbl">Hybridization</div><div class="istat-val" id="i-hyb">—</div></div>
+          <div class="istat"><div class="istat-lbl">Bond Angle</div><div class="istat-val" id="i-angle">—</div></div>
+          <div class="istat"><div class="istat-lbl">Dipole Moment</div><div class="istat-val" id="i-dipole">—</div></div>
+        </div>
+        <div class="geo-card">
+          <div class="geo-lbl">VSEPR Geometry</div>
+          <div class="geo-val" id="i-geo">—</div>
+        </div>
+        <div class="fact-card">
+          <div class="fact-lbl">⚡ NEET / JEE Fact</div>
+          <div class="fact-val" id="i-fact">—</div>
+        </div>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- VIEWER AREA -->
+  <div class="viewer-wrap">
+
+    <!-- Loader -->
+    <div class="loader hidden" id="loader">
+      <div class="spinner"></div>
+      <div class="loader-mol" id="loader-mol"></div>
+      <div class="loader-txt" id="loader-txt">FETCHING DATA…</div>
+    </div>
+
+    <!-- Empty state -->
+    <div class="empty-state" id="empty-st">
+      <div class="empty-icon">⬡</div>
+      <div class="empty-text">SELECT OR SEARCH A MOLECULE</div>
+      <div class="empty-sub">Methane loading…</div>
+    </div>
+
+    <!-- 3D panel -->
+    <div id="panel-3d"><div id="container-3d"></div></div>
+
+    <!-- 2D panel -->
+    <div id="panel-2d">
+      <div class="img2d-spinner" id="img2d-spinner"></div>
+      <div class="img2d-frame" id="img2d-frame">
+        <img id="img-2d" src="" alt="">
+      </div>
+      <div class="img2d-lbl" id="img2d-lbl">2D Structure — NCI Cactus</div>
+    </div>
+
+    <!-- Properties panel -->
+    <div id="panel-props">
+      <div>
+        <div class="props-header">
+          <div class="props-title" id="props-title">Properties</div>
+          <div class="props-mol-formula" id="props-formula"></div>
+        </div>
+        <div class="props-sub">Live data · NCI Cactus API</div>
+      </div>
+      <div class="props-grid" id="props-grid"></div>
+    </div>
+
+    <!-- Molecule badge -->
+    <div class="mol-badge" id="mol-badge">
+      <span class="badge-dot"></span>
+      <span id="badge-name">—</span>
+    </div>
+
+    <!-- Viewer controls (3D only) -->
+    <div class="viewer-ctrl" id="v-ctrl">
+      <button class="vbtn" onclick="resetView()" title="Reset view">⌖</button>
+      <button class="vbtn" onclick="doZoom(1.3)" title="Zoom in">+</button>
+      <button class="vbtn" onclick="doZoom(0.7)" title="Zoom out">−</button>
+    </div>
+
+    <!-- Library status -->
+    <div class="status-corner" id="status-corner"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- UPGRADE MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-badge">CHEMSPHERE PRO</div>
+    <h2>Unlock Everything</h2>
+    <p>Free version gives you 21 hand-picked NEET/JEE molecules. Pro unlocks 500+ molecules, 3D protein structures, quiz mode, offline access, and AI-powered molecular explanations.</p>
+    <div class="plan-grid">
+      <div class="plan-card">
+        <div class="plan-name">Free</div>
+        <div class="plan-price">₹0 <span>/ forever</span></div>
+        <ul class="plan-feat">
+          <li>21 NEET/JEE molecules</li>
+          <li>3D · 2D · Properties</li>
+          <li>VSEPR facts & geometry</li>
+          <li>NCI Cactus search</li>
+        </ul>
+      </div>
+      <div class="plan-card featured">
+        <div class="plan-name">Pro</div>
+        <div class="plan-price">₹199 <span>/ month</span></div>
+        <ul class="plan-feat">
+          <li>500+ molecules</li>
+          <li>Protein 3D structures</li>
+          <li>Quiz & flashcard mode</li>
+          <li>Offline access</li>
+          <li>AI molecular assistant</li>
+          <li>Export structures</li>
+        </ul>
+      </div>
+    </div>
+    <button class="btn-join" onclick="showToast('Coming soon — notify me list opened!','success'); closeModal();">Join Pro Waitlist →</button>
+    <div class="modal-note">No credit card required · Cancel anytime · Made for Indian students 🇮🇳</div>
+  </div>
 </div>
 
 <script>
-// ── MOLECULE DATABASE ──────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════
+   MOLECULE DATABASE — curated for NEET / JEE
+═══════════════════════════════════════════════════════ */
 const DB = {
-    vsepr: [
-        { key:"H2O",   pname:"water",                   formula:"H₂O",   name:"Water",                  shape:"Bent",               weight:"18.02",  hybrid:"sp³",    angle:"104.5°",   dipole:"1.85 D", geo:"Bent / V-Shape — 2 lone pairs on O reduce angle from 109.5°",   fact:"Bond angle 104.5° (not 109.5°) due to lone pair–bond pair repulsion. Most common NEET VSEPR question." },
-        { key:"CO2",   pname:"carbon dioxide",          formula:"CO₂",   name:"Carbon Dioxide",         shape:"Linear",             weight:"44.01",  hybrid:"sp",     angle:"180°",     dipole:"0 D",    geo:"Linear — symmetric, 2 C=O bonds, no lone pairs on C",           fact:"ZERO net dipole despite polar C=O bonds. Symmetry causes cancellation — classic NEET trap!" },
-        { key:"BF3",   pname:"boron trifluoride",       formula:"BF₃",   name:"Boron Trifluoride",      shape:"Trigonal Planar",    weight:"67.81",  hybrid:"sp²",    angle:"120°",     dipole:"0 D",    geo:"Trigonal Planar — sp², empty p-orbital on B (Lewis acid)",       fact:"BF₃ is a strong Lewis acid. Its empty p-orbital accepts lone pairs. Dipole = 0 (symmetric)." },
-        { key:"CH4",   pname:"methane",                 formula:"CH₄",   name:"Methane",                shape:"Tetrahedral",        weight:"16.04",  hybrid:"sp³",    angle:"109.5°",   dipole:"0 D",    geo:"Tetrahedral — perfect symmetry, all 4 bond pairs equivalent",    fact:"All bonds equivalent by symmetry → dipole = 0. The ideal tetrahedral reference molecule." },
-        { key:"NH3",   pname:"ammonia",                 formula:"NH₃",   name:"Ammonia",                shape:"Trigonal Pyramidal", weight:"17.03",  hybrid:"sp³",    angle:"107°",     dipole:"1.47 D", geo:"Trigonal Pyramidal — 1 lone pair on N lowers angle to 107°",     fact:"NH₃ is a Lewis base & Brønsted base. Lone pair on N is key for H-bond donation & nucleophilicity." },
-        { key:"PCl5",  pname:"phosphorus pentachloride",formula:"PCl₅",  name:"Phosphorus Pentachloride",shape:"Trig. Bipyramidal", weight:"208.2",  hybrid:"sp³d",   angle:"90°/120°", dipole:"0 D",    geo:"Trigonal Bipyramidal — axial bonds longer than equatorial",      fact:"Axial bonds (240 pm) > equatorial bonds (202 pm) — expanded octet on P. JEE Advanced level." },
-        { key:"SF6",   pname:"sulfur hexafluoride",     formula:"SF₆",   name:"Sulfur Hexafluoride",    shape:"Octahedral",         weight:"146.06", hybrid:"sp³d²",  angle:"90°",      dipole:"0 D",    geo:"Octahedral — sp³d², all 90° bond angles, no lone pairs",         fact:"SF₆ is a greenhouse gas 23,500× more potent than CO₂. Completely inert due to perfect octahedral symmetry." },
-        { key:"XeF4",  pname:"xenon tetrafluoride",     formula:"XeF₄",  name:"Xenon Tetrafluoride",    shape:"Square Planar",      weight:"207.28", hybrid:"sp³d²",  angle:"90°",      dipole:"0 D",    geo:"Square Planar — 2 lone pairs sit opposite (trans) each other",   fact:"6 electron pairs (sp³d²) but 2 lone pairs cancel → Square Planar NOT octahedral. Key distinction." },
-    ],
-    organic: [
-        { key:"C6H6",        pname:"benzene",       formula:"C₆H₆",    name:"Benzene",       shape:"Hexagonal",       weight:"78.11",  hybrid:"sp²",   angle:"120°",   dipole:"0 D",    geo:"Planar hexagonal ring — resonance stabilized, delocalized π", fact:"6 equivalent C-C bonds via resonance. Aromatic by Hückel's rule (4n+2, n=1). Dipole = 0." },
-        { key:"ethanol",     pname:"ethanol",       formula:"C₂H₅OH",  name:"Ethanol",       shape:"Tetrahedral",     weight:"46.07",  hybrid:"sp³",   angle:"109.5°", dipole:"1.69 D", geo:"Tetrahedral C atoms; bent O (H-bond donor, -OH group)",       fact:"–OH forms H-bonds with water → fully miscible. Bp (78°C) >> propane (–42°C) despite similar MW." },
-        { key:"acetone",     pname:"acetone",       formula:"C₃H₆O",   name:"Acetone",       shape:"Trigonal Planar", weight:"58.08",  hybrid:"sp²",   angle:"~120°",  dipole:"2.91 D", geo:"Trigonal planar at carbonyl C (sp²) — C=O double bond",      fact:"Ketone (propanone). Most polar common solvent without H-bond donation. Used in nail polish remover." },
-        { key:"acetic acid", pname:"acetic acid",   formula:"CH₃COOH", name:"Acetic Acid",   shape:"Planar",          weight:"60.05",  hybrid:"sp²",   angle:"~120°",  dipole:"1.74 D", geo:"Planar –COOH group; sp² carbonyl carbon with resonance",     fact:"Forms H-bonded DIMERS in nonpolar solvents → apparent MW ~120 g/mol. Classic JEE concept." },
-        { key:"formaldehyde",pname:"formaldehyde",  formula:"CH₂O",    name:"Formaldehyde",  shape:"Trigonal Planar", weight:"30.03",  hybrid:"sp²",   angle:"~120°",  dipole:"2.33 D", geo:"Trigonal planar (sp²) — simplest aldehyde, C=O double bond", fact:"Formalin (37% aq. solution) = preservative. Reacts with NaHSO₃ to form bisulfite addition product." },
-    ],
-    biomol: [
-        { key:"glucose",     pname:"glucose",       formula:"C₆H₁₂O₆", name:"Glucose",       shape:"Pyranose Ring",   weight:"180.16", hybrid:"sp³",   angle:"109.5°", dipole:"—",      geo:"Pyranose ring — 6-membered; chair conformation, all sp³ C",  fact:"α-glucose (36%) and β-glucose (64%) in solution — mutarotation occurs. D-glucose is dextrorotatory." },
-        { key:"adenine",     pname:"adenine",       formula:"C₅H₅N₅",  name:"Adenine",       shape:"Planar Bicyclic", weight:"135.13", hybrid:"sp²",   angle:"~120°",  dipole:"—",      geo:"Planar purine — bicyclic aromatic (sp² N and C atoms)",      fact:"Pairs with Thymine via 2 H-bonds in DNA; Uracil in RNA. Component of ATP (adenosine triphosphate)." },
-        { key:"cholesterol", pname:"cholesterol",   formula:"C₂₇H₄₆O", name:"Cholesterol",   shape:"Steroid Core",    weight:"386.65", hybrid:"sp³",   angle:"109.5°", dipole:"—",      geo:"Four fused rings (steroid skeleton) — mostly sp³ carbons",   fact:"Precursor to Vitamin D, bile acids & steroid hormones. Transported in blood by LDL ('bad' cholesterol)." },
-        { key:"alanine",     pname:"alanine",       formula:"C₃H₇NO₂", name:"Alanine",       shape:"Tetrahedral",     weight:"89.09",  hybrid:"sp³",   angle:"109.5°", dipole:"—",      geo:"Tetrahedral α-carbon (sp³) — simplest chiral amino acid",    fact:"Simplest chiral (L-configuration) amino acid. R-group = –CH₃. Non-essential amino acid." },
-    ],
-    inorganic: [
-        { key:"H2SO4",           pname:"sulfuric acid",    formula:"H₂SO₄",  name:"Sulfuric Acid",    shape:"Tetrahedral",     weight:"98.08",  hybrid:"sp³",   angle:"109.5°", dipole:"—",      geo:"Tetrahedral around S — sp³, two S=O and two S–OH bonds",    fact:"Conc. H₂SO₄ = strong dehydrating & oxidizing agent. ALWAYS add acid to water (not the reverse!)." },
-        { key:"HNO3",            pname:"nitric acid",      formula:"HNO₃",   name:"Nitric Acid",      shape:"Trigonal Planar", weight:"63.01",  hybrid:"sp²",   angle:"~120°",  dipole:"—",      geo:"Trigonal planar around N (sp²) — resonance in NO₃⁻",        fact:"HNO₃ + conc. HCl (1:3 ratio) = Aqua Regia — dissolves gold & platinum. Brown ring test for NO₃⁻." },
-        { key:"ammonia",         pname:"ammonia",          formula:"NH₃",    name:"Ammonia",          shape:"Pyramidal",        weight:"17.03",  hybrid:"sp³",   angle:"107°",   dipole:"1.47 D", geo:"Trigonal Pyramidal — 1 lone pair on N",                      fact:"Haber Process: N₂ + 3H₂ ⇌ 2NH₃ (Fe catalyst, ~500°C, ~200 atm). Reversible reaction — Le Chatelier." },
-        { key:"phosphoric acid", pname:"phosphoric acid",  formula:"H₃PO₄",  name:"Phosphoric Acid",  shape:"Tetrahedral",     weight:"98.0",   hybrid:"sp³",   angle:"~109.5°",dipole:"—",      geo:"Tetrahedral around P — sp³ hybridized phosphorus",           fact:"Triprotic acid (Ka1 >> Ka2 >> Ka3). Phosphodiester bonds in DNA/RNA backbone — crucial for life." },
-    ]
+  vsepr: [
+    { key:'H2O',   pname:'water',                    formula:'H₂O',   name:'Water',                   shape:'Bent',               weight:'18.02',  hybrid:'sp³',   angle:'104.5°',   dipole:'1.85 D', geo:'Bent / V-Shape — 2 lone pairs on O reduce angle below 109.5°', fact:'Bond angle 104.5° (not 109.5°) due to lone pair–bond pair repulsion. Most common NEET VSEPR question.' },
+    { key:'CO2',   pname:'carbon dioxide',            formula:'CO₂',   name:'Carbon Dioxide',          shape:'Linear',             weight:'44.01',  hybrid:'sp',    angle:'180°',     dipole:'0 D',    geo:'Linear — symmetric 2 C=O bonds, no lone pairs on C', fact:'ZERO net dipole despite polar C=O bonds. Symmetry causes cancellation — classic NEET trap!' },
+    { key:'BF3',   pname:'boron trifluoride',         formula:'BF₃',   name:'Boron Trifluoride',       shape:'Trigonal Planar',    weight:'67.81',  hybrid:'sp²',   angle:'120°',     dipole:'0 D',    geo:'Trigonal Planar — sp², empty p-orbital on B (Lewis acid)', fact:'BF₃ is a strong Lewis acid. Its empty p-orbital accepts lone pairs. Dipole = 0 (symmetric).' },
+    { key:'CH4',   pname:'methane',                   formula:'CH₄',   name:'Methane',                 shape:'Tetrahedral',        weight:'16.04',  hybrid:'sp³',   angle:'109.5°',   dipole:'0 D',    geo:'Tetrahedral — perfect symmetry, all 4 bond pairs equivalent', fact:'All bonds equivalent by symmetry → dipole = 0. The ideal tetrahedral reference molecule.' },
+    { key:'NH3',   pname:'ammonia',                   formula:'NH₃',   name:'Ammonia',                 shape:'Pyramidal',          weight:'17.03',  hybrid:'sp³',   angle:'107°',     dipole:'1.47 D', geo:'Trigonal Pyramidal — 1 lone pair on N lowers angle to 107°', fact:'NH₃ is a Lewis base & Brønsted base. Lone pair on N is key for H-bond donation & nucleophilicity.' },
+    { key:'PCl5',  pname:'phosphorus pentachloride',  formula:'PCl₅',  name:'Phosphorus Pentachloride',shape:'Trig. Bipyramidal',  weight:'208.24', hybrid:'sp³d',  angle:'90°/120°', dipole:'0 D',    geo:'Trigonal Bipyramidal — axial bonds longer than equatorial', fact:'Axial bonds (240 pm) > equatorial bonds (202 pm) — expanded octet on P. JEE Advanced level.' },
+    { key:'SF6',   pname:'sulfur hexafluoride',       formula:'SF₆',   name:'Sulfur Hexafluoride',     shape:'Octahedral',         weight:'146.06', hybrid:'sp³d²', angle:'90°',      dipole:'0 D',    geo:'Octahedral — sp³d², all 90° bond angles, no lone pairs', fact:'SF₆ is a greenhouse gas 23,500× more potent than CO₂. Completely inert due to perfect octahedral symmetry.' },
+    { key:'XeF4',  pname:'xenon tetrafluoride',       formula:'XeF₄',  name:'Xenon Tetrafluoride',     shape:'Square Planar',      weight:'207.28', hybrid:'sp³d²', angle:'90°',      dipole:'0 D',    geo:'Square Planar — 2 lone pairs sit opposite (trans) each other', fact:'6 electron pairs (sp³d²) but 2 lone pairs cancel → Square Planar NOT octahedral. Key JEE distinction.' },
+  ],
+  organic: [
+    { key:'C6H6',        pname:'benzene',      formula:'C₆H₆',    name:'Benzene',       shape:'Hexagonal',       weight:'78.11',  hybrid:'sp²', angle:'120°',   dipole:'0 D',    geo:'Planar hexagonal ring — resonance stabilized, delocalized π electrons', fact:'6 equivalent C-C bonds via resonance. Aromatic by Hückel's rule (4n+2, n=1). Dipole = 0.' },
+    { key:'ethanol',     pname:'ethanol',      formula:'C₂H₅OH',  name:'Ethanol',       shape:'Tetrahedral C',   weight:'46.07',  hybrid:'sp³', angle:'109.5°', dipole:'1.69 D', geo:'Tetrahedral C atoms; bent O (H-bond donor, –OH group)', fact:'–OH forms H-bonds with water → fully miscible. Bp (78°C) >> propane (–42°C) despite similar MW.' },
+    { key:'acetone',     pname:'acetone',      formula:'C₃H₆O',   name:'Acetone',       shape:'Trigonal Planar', weight:'58.08',  hybrid:'sp²', angle:'~120°',  dipole:'2.91 D', geo:'Trigonal planar at carbonyl C (sp²) — C=O double bond', fact:'Ketone (propanone). Most polar common solvent without H-bond donation. Used in nail polish remover.' },
+    { key:'acetic acid', pname:'acetic acid',  formula:'CH₃COOH', name:'Acetic Acid',   shape:'Planar',          weight:'60.05',  hybrid:'sp²', angle:'~120°',  dipole:'1.74 D', geo:'Planar –COOH group; sp² carbonyl carbon with resonance', fact:'Forms H-bonded DIMERS in nonpolar solvents → apparent MW ~120 g/mol. Classic JEE concept.' },
+    { key:'formaldehyde',pname:'formaldehyde', formula:'CH₂O',    name:'Formaldehyde',  shape:'Trigonal Planar', weight:'30.03',  hybrid:'sp²', angle:'~120°',  dipole:'2.33 D', geo:'Trigonal planar (sp²) — simplest aldehyde, C=O double bond', fact:'Formalin (37% aq. solution) = preservative. Reacts with NaHSO₃ to form bisulfite addition product.' },
+  ],
+  biomol: [
+    { key:'glucose',     pname:'glucose',      formula:'C₆H₁₂O₆', name:'Glucose',       shape:'Pyranose Ring',   weight:'180.16', hybrid:'sp³', angle:'109.5°', dipole:'—', geo:'Pyranose ring — 6-membered; chair conformation, all sp³ C', fact:'α-glucose (36%) and β-glucose (64%) in solution — mutarotation occurs. D-glucose is dextrorotatory.' },
+    { key:'adenine',     pname:'adenine',      formula:'C₅H₅N₅',  name:'Adenine',       shape:'Planar Bicyclic', weight:'135.13', hybrid:'sp²', angle:'~120°',  dipole:'—', geo:'Planar purine — bicyclic aromatic (sp² N and C atoms)', fact:'Pairs with Thymine via 2 H-bonds in DNA; Uracil in RNA. Component of ATP (adenosine triphosphate).' },
+    { key:'cholesterol', pname:'cholesterol',  formula:'C₂₇H₄₆O', name:'Cholesterol',   shape:'Steroid Core',    weight:'386.65', hybrid:'sp³', angle:'109.5°', dipole:'—', geo:'Four fused rings (steroid skeleton) — mostly sp³ carbons', fact:'Precursor to Vitamin D, bile acids & steroid hormones. Transported in blood by LDL ("bad" cholesterol).' },
+    { key:'alanine',     pname:'alanine',      formula:'C₃H₇NO₂', name:'Alanine',       shape:'Tetrahedral',     weight:'89.09',  hybrid:'sp³', angle:'109.5°', dipole:'—', geo:'Tetrahedral α-carbon (sp³) — simplest chiral amino acid', fact:'Simplest chiral (L-configuration) amino acid. R-group = –CH₃. Non-essential amino acid.' },
+  ],
+  inorganic: [
+    { key:'H2SO4',           pname:'sulfuric acid',    formula:'H₂SO₄',  name:'Sulfuric Acid',    shape:'Tetrahedral',     weight:'98.08',  hybrid:'sp³',   angle:'109.5°', dipole:'—', geo:'Tetrahedral around S — sp³, two S=O and two S–OH bonds', fact:'Conc. H₂SO₄ = strong dehydrating & oxidizing agent. ALWAYS add acid to water (not the reverse!).' },
+    { key:'HNO3',            pname:'nitric acid',      formula:'HNO₃',   name:'Nitric Acid',      shape:'Trigonal Planar', weight:'63.01',  hybrid:'sp²',   angle:'~120°',  dipole:'—', geo:'Trigonal planar around N (sp²) — resonance in NO₃⁻', fact:'HNO₃ + conc. HCl (1:3 ratio) = Aqua Regia — dissolves gold & platinum. Brown ring test for NO₃⁻.' },
+    { key:'ammonia',         pname:'ammonia',          formula:'NH₃',    name:'Ammonia',          shape:'Pyramidal',        weight:'17.03',  hybrid:'sp³',   angle:'107°',   dipole:'1.47 D', geo:'Trigonal Pyramidal — 1 lone pair on N', fact:'Haber Process: N₂ + 3H₂ ⇌ 2NH₃ (Fe catalyst, ~500°C, ~200 atm). Reversible reaction — Le Chatelier.' },
+    { key:'phosphoric acid', pname:'phosphoric acid',  formula:'H₃PO₄',  name:'Phosphoric Acid',  shape:'Tetrahedral',     weight:'98.0',   hybrid:'sp³',   angle:'~109.5°',dipole:'—', geo:'Tetrahedral around P — sp³ hybridized phosphorus', fact:'Triprotic acid (Ka1 >> Ka2 >> Ka3). Phosphodiester bonds in DNA/RNA backbone — crucial for life.' },
+  ]
 };
 
-// ── STATE ──────────────────────────────────────
-let viewer = null;
+/* ═══════════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════════ */
+let viewer       = null;
 let currentModel = null;
-let isRotating = true;
-let currentCat = 'vsepr';
-let selectedKey = null;
-let currentCID = null;
-let currentQuery = null; // track last searched name for Cactus
-let currentMeta = null;
-let currentMode = '3d';
-let dmolReady = false;
+let isRotating   = true;
+let currentCat   = 'vsepr';
+let selectedKey  = null;
+let currentQuery = null;
+let currentMeta  = null;
+let currentMode  = '3d';
+let dmolReady    = false;
+let renderToken  = 0;  // cancellation token for race conditions
 
-// ── INIT ───────────────────────────────────────
+const CACTUS = 'https://cactus.nci.nih.gov/chemical/structure';
+
+/* ═══════════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════════ */
 window.addEventListener('load', () => {
-    // Check libraries
-    const libEl = document.getElementById('lib-status');
-    if (typeof $3Dmol !== 'undefined') {
-        dmolReady = true;
-        libEl.innerHTML = '<span class="lib-ok">✓ 3Dmol.js (official)</span><span class="lib-ok">✓ NCI Cactus API</span>';
-    } else {
-        libEl.innerHTML = '<span class="lib-fail">✗ 3Dmol failed → 2D fallback active</span><span class="lib-ok">✓ NCI Cactus API</span>';
+  // Library check
+  const corner = document.getElementById('status-corner');
+  if (typeof $3Dmol !== 'undefined') {
+    dmolReady = true;
+    corner.innerHTML = '<span class="s-ok">✓ 3Dmol.js ready</span><span class="s-ok">✓ NCI Cactus API</span>';
+  } else {
+    corner.innerHTML = '<span class="s-fail">✗ 3Dmol failed — 2D fallback</span><span class="s-ok">✓ NCI Cactus API</span>';
+  }
+
+  // Init viewer
+  if (dmolReady) {
+    try {
+      viewer = $3Dmol.createViewer(document.getElementById('container-3d'), { backgroundColor: '#060810' });
+      viewer.resize();
+    } catch(e) { dmolReady = false; console.warn('3Dmol init:', e); }
+  }
+
+  renderGrid('vsepr');
+  window.addEventListener('resize', () => { if (viewer) viewer.resize(); });
+
+  // Keyboard shortcut: Cmd/Ctrl+K → focus search
+  document.addEventListener('keydown', e => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      e.preventDefault();
+      document.getElementById('mol-input').focus();
+      document.getElementById('mol-input').select();
     }
+    if (e.key === 'Escape') closeModal();
+  });
 
-    // Init 3Dmol viewer
-    if (dmolReady) {
-        try {
-            const el = document.getElementById('container-3d');
-            viewer = $3Dmol.createViewer(el, { backgroundColor: '#04060f' });
-            viewer.resize();
-        } catch(e) {
-            dmolReady = false;
-            console.warn('3Dmol init error:', e);
-        }
-    }
+  // Event delegation for mol-grid (fixes XSS-prone inline onclick)
+  document.getElementById('mol-grid').addEventListener('click', e => {
+    const card = e.target.closest('.mol-card');
+    if (card) loadByKey(card.dataset.key);
+  });
 
-    renderGrid('vsepr');
-    setTimeout(() => loadByKey('CH4'), 1200);
-
-    // Resize viewer on window resize
-    window.addEventListener('resize', () => { if (viewer) viewer.resize(); });
+  // Auto-load methane after libs settle
+  setTimeout(() => loadByKey('CH4'), 1400);
 });
 
-// ── GRID ───────────────────────────────────────
+/* ═══════════════════════════════════════════════════════
+   GRID
+═══════════════════════════════════════════════════════ */
 function filterCat(cat, btn) {
-    currentCat = cat;
-    document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
-    btn.classList.add('active');
-    renderGrid(cat);
+  currentCat = cat;
+  document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  renderGrid(cat);
 }
 
 function renderGrid(cat) {
-    const mols = DB[cat] || [];
-    document.getElementById('mol-grid').innerHTML = mols.map(m => `
-        <div class="mol-card ${m.key === selectedKey ? 'selected' : ''}" onclick="loadByKey('${m.key}')">
-            <div class="mc-formula">${m.formula}</div>
-            <div class="mc-name">${m.name}</div>
-            <div class="mc-shape">${m.shape}</div>
-        </div>
-    `).join('');
+  const mols = DB[cat] || [];
+  document.getElementById('mol-grid').innerHTML = mols.map(m => `
+    <div class="mol-card${m.key === selectedKey ? ' selected' : ''}" data-key="${m.key}">
+      <div class="mc-formula">${m.formula}</div>
+      <div class="mc-name">${m.name}</div>
+      <div class="mc-shape">${m.shape}</div>
+    </div>`).join('');
 }
 
-// ── VIEW MODE ──────────────────────────────────
+/* ═══════════════════════════════════════════════════════
+   VIEW MODE — header nav
+═══════════════════════════════════════════════════════ */
 function switchMode(mode, btn) {
-    currentMode = mode;
-    document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
-    btn.classList.add('active');
+  currentMode = mode;
+  document.querySelectorAll('.nav-pill').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
 
-    document.getElementById('panel-3d').style.display    = mode === '3d'    ? 'block' : 'none';
-    document.getElementById('panel-2d').classList.toggle('active',    mode === '2d');
-    document.getElementById('panel-props').classList.toggle('active', mode === 'props');
-    document.getElementById('ctrl-block').style.display  = mode === '3d'    ? 'block' : 'none';
-    document.getElementById('v-ctrl').style.display      = mode === '3d'    ? 'flex'  : 'none';
+  document.getElementById('panel-3d').style.display      = mode === '3d'    ? 'block' : 'none';
+  document.getElementById('panel-2d').classList.toggle('active',    mode === '2d');
+  document.getElementById('panel-props').classList.toggle('active', mode === 'props');
+  document.getElementById('ctrl-block').style.display    = mode === '3d'    ? 'block' : 'none';
+  document.getElementById('v-ctrl').style.display        = mode === '3d'    ? 'flex'  : 'none';
 
-    if (currentQuery) {
-        if (mode === '2d')    load2D(currentQuery);
-        if (mode === 'props') loadProps(currentQuery, currentMeta);
-    }
+  if (currentQuery) {
+    if (mode === '2d')    load2D(currentQuery);
+    if (mode === 'props') loadProps(currentQuery, currentMeta);
+  }
 }
 
-// ── LOAD BY KEY ────────────────────────────────
+/* ═══════════════════════════════════════════════════════
+   LOAD BY KEY (grid click)
+═══════════════════════════════════════════════════════ */
 function loadByKey(key) {
-    selectedKey = key;
-    renderGrid(currentCat);
-    let meta = null;
-    for (const cat of Object.values(DB)) { meta = cat.find(m => m.key === key); if (meta) break; }
-    // Use pname (proper English name) for PubChem lookup, not the formula key
-    fetchAndRender(meta ? meta.pname : key, meta);
+  selectedKey = key;
+  renderGrid(currentCat);
+  let meta = null;
+  for (const mols of Object.values(DB)) {
+    meta = mols.find(m => m.key === key);
+    if (meta) break;
+  }
+  fetchAndRender(meta ? meta.pname : key, meta);
 }
 
-// ── LOAD BY SEARCH ─────────────────────────────
+/* ═══════════════════════════════════════════════════════
+   LOAD BY SEARCH
+═══════════════════════════════════════════════════════ */
 function loadBySearch() {
-    const val = document.getElementById('mol-input').value.trim();
-    if (!val) return;
-    selectedKey = null;
-    renderGrid(currentCat);
-    fetchAndRender(val, null);
+  const val = document.getElementById('mol-input').value.trim();
+  if (!val) return;
+  selectedKey = null;
+  renderGrid(currentCat);
+  clearError();
+  fetchAndRender(val, null);
 }
 
-// ── NCI CACTUS — single reliable helper ────────
-// Cactus accepts any name/formula and returns data directly. No API key, full CORS support.
-const CACTUS = 'https://cactus.nci.nih.gov/chemical/structure';
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('mol-input').addEventListener('keypress', e => {
+    if (e.key === 'Enter') loadBySearch();
+  });
+});
 
-async function cactusGet(nameOrFormula, representation) {
-    const url = `${CACTUS}/${encodeURIComponent(nameOrFormula)}/${representation}`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`Cactus ${res.status}`);
-    const text = await res.text();
-    if (!text || text.includes('Page not found') || text.trim() === '') throw new Error('empty');
-    return text.trim();
+/* ═══════════════════════════════════════════════════════
+   NCI CACTUS helper
+═══════════════════════════════════════════════════════ */
+async function cactusGet(name, rep) {
+  const url = `${CACTUS}/${encodeURIComponent(name)}/${rep}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Cactus ${res.status}`);
+  const txt = await res.text();
+  if (!txt || txt.includes('Page not found') || txt.trim() === '') throw new Error('not found');
+  return txt.trim();
 }
 
-// ── MAIN FETCH ─────────────────────────────────
+/* ═══════════════════════════════════════════════════════
+   MAIN FETCH & RENDER — with race condition guard
+═══════════════════════════════════════════════════════ */
 async function fetchAndRender(query, meta) {
-    showLoader(true, 'RESOLVING MOLECULE...');
-    showError(null);
-    document.getElementById('empty-st').style.display = 'none';
-    currentCID = null;
-    currentQuery = query;
-    currentMeta = meta;
+  const token = ++renderToken; // each call gets a unique token
 
-    try {
-        // Verify molecule exists on Cactus by fetching its IUPAC name
-        const iupac = await cactusGet(query, 'iupac_name').catch(() => query);
+  showLoader(true, query, 'RESOLVING MOLECULE…');
+  clearError();
+  document.getElementById('empty-st').style.display = 'none';
+  currentQuery = query;
+  currentMeta  = meta;
 
-        // Render according to mode
-        if      (currentMode === '3d')    await render3D(query);
-        else if (currentMode === '2d')    await load2D(query);
-        else if (currentMode === 'props') await loadProps(query, meta);
+  try {
+    // Verify molecule exists; get IUPAC name for badge
+    const iupac = await cactusGet(query, 'iupac_name').catch(() => null);
+    if (token !== renderToken) return; // stale — newer call took over
 
-        // Info card
-        if (meta) fillInfo(meta);
-        else await fetchLiveMeta(query, iupac);
+    // Render for current mode
+    if      (currentMode === '3d')    await render3D(query, token);
+    else if (currentMode === '2d')    await load2D(query);
+    else if (currentMode === 'props') await loadProps(query, meta);
 
-        // Badge
-        document.getElementById('badge-lbl').textContent = meta ? meta.name : (iupac || query);
-        document.getElementById('v-badge').classList.add('show');
+    if (token !== renderToken) return;
 
-    } catch(err) {
-        showError(`"${query}" not found. Try a common English name like "water", "caffeine", "aspirin".`);
-        document.getElementById('empty-st').style.display = 'flex';
-    } finally {
-        showLoader(false);
-    }
+    // Fill sidebar info
+    if (meta) fillInfo(meta);
+    else      await fetchLiveMeta(query, iupac);
+
+    // Badge
+    const displayName = meta ? meta.name : (iupac || query);
+    document.getElementById('badge-name').textContent = displayName;
+    document.getElementById('mol-badge').classList.add('show');
+
+  } catch(err) {
+    if (token !== renderToken) return;
+    showError(`"${query}" not found. Try: water, caffeine, aspirin, benzene.`);
+    document.getElementById('empty-st').style.display = 'flex';
+  } finally {
+    if (token === renderToken) showLoader(false);
+  }
 }
 
-// ── 3D RENDER via Cactus SDF ───────────────────
-async function render3D(query) {
-    if (!dmolReady || !viewer) {
-        showError('3D library unavailable — showing 2D instead.');
-        switchMode('2d', document.getElementById('tab-2d'));
-        await load2D(query);
-        return;
-    }
+/* ═══════════════════════════════════════════════════════
+   3D RENDER via NCI Cactus SDF
+═══════════════════════════════════════════════════════ */
+async function render3D(query, token) {
+  if (!dmolReady || !viewer) {
+    showToast('3D library unavailable — switching to 2D', 'error');
+    switchMode('2d', document.getElementById('nav-2d'));
+    await load2D(query);
+    return;
+  }
 
-    showLoader(true, 'LOADING 3D STRUCTURE...');
+  showLoader(true, query, 'LOADING 3D STRUCTURE…');
+  const sdf = await cactusGet(query, 'SDF?get3d=true');
+  if (token !== renderToken) return;
 
-    // Cactus returns a 3D SDF directly from a name — no CID needed
-    const sdf = await cactusGet(query, 'SDF?get3d=true');
-
-    viewer.stopAnimate();
-    viewer.clear();
-    currentModel = viewer.addModel(sdf, 'sdf');
-    updateStyle();
-    viewer.zoomTo();
-    viewer.render();
-    viewer.resize();
-    if (isRotating) viewer.animate({ loop: 'forward', step: 0.5 });
+  viewer.stopAnimate();
+  viewer.clear();
+  currentModel = viewer.addModel(sdf, 'sdf');
+  applyStyle();
+  viewer.zoomTo();
+  viewer.render();
+  viewer.resize();
+  if (isRotating) viewer.animate({ loop: 'forward', step: 0.5 });
 }
 
-// ── 2D IMAGE via Cactus ────────────────────────
+/* ═══════════════════════════════════════════════════════
+   2D IMAGE via Cactus — with loading state
+═══════════════════════════════════════════════════════ */
 async function load2D(query) {
-    // Cactus serves a 2D PNG directly by name
-    const url = `${CACTUS}/${encodeURIComponent(query)}/image`;
-    const img = document.getElementById('img-2d');
+  const frame   = document.getElementById('img2d-frame');
+  const spinner = document.getElementById('img2d-spinner');
+  const img     = document.getElementById('img-2d');
+  const lbl     = document.getElementById('img2d-lbl');
+
+  frame.classList.remove('loaded');
+  spinner.style.display = 'block';
+  lbl.textContent = 'Loading 2D structure…';
+
+  const url = `${CACTUS}/${encodeURIComponent(query)}/image`;
+  return new Promise((resolve) => {
+    img.onload = () => {
+      frame.classList.add('loaded');
+      spinner.style.display = 'none';
+      lbl.textContent = `${query} · 2D Structure · NCI Cactus`;
+      resolve();
+    };
+    img.onerror = () => {
+      spinner.style.display = 'none';
+      lbl.textContent = '2D structure unavailable';
+      resolve();
+    };
     img.src = url;
-    img.style.display = 'block';
-    document.getElementById('img-2d-lbl').textContent = `${query} · 2D Structure · NCI Cactus`;
+  });
 }
 
-// ── PROPERTIES via Cactus ──────────────────────
+/* ═══════════════════════════════════════════════════════
+   PROPERTIES via Cactus
+═══════════════════════════════════════════════════════ */
 async function loadProps(query, meta) {
-    const title = meta ? meta.name : query;
-    document.getElementById('props-title').textContent = title;
+  const titleEl   = document.getElementById('props-title');
+  const formulaEl = document.getElementById('props-formula');
+  const grid      = document.getElementById('props-grid');
 
-    // Fetch individual properties from Cactus in parallel
-    const fields = [
-        { label: 'Molecular Formula',   key: 'formula' },
-        { label: 'Molecular Weight',    key: 'mw' },
-        { label: 'IUPAC Name',          key: 'iupac_name' },
-        { label: 'InChI Key',           key: 'stdinchikey' },
-        { label: 'SMILES',              key: 'smiles' },
-        { label: 'LogP (est.)',         key: 'xlogp2' },
-        { label: 'H-Bond Donors',       key: 'h_bond_donor_count' },
-        { label: 'H-Bond Acceptors',    key: 'h_bond_acceptor_count' },
-        { label: 'Rotatable Bonds',     key: 'rotatable_bond_count' },
-        { label: 'Heavy Atom Count',    key: 'heavy_atom_count' },
-    ];
+  titleEl.textContent   = meta ? meta.name : query;
+  formulaEl.textContent = '';
+  grid.innerHTML        = '<div style="font-family:var(--mono);font-size:10px;color:var(--text-dim);padding:8px;">Fetching properties…</div>';
 
-    const results = await Promise.allSettled(
-        fields.map(f => cactusGet(query, f.key))
-    );
+  const fields = [
+    { label:'Molecular Formula',  key:'formula' },
+    { label:'Molecular Weight',   key:'mw' },
+    { label:'IUPAC Name',         key:'iupac_name' },
+    { label:'SMILES',             key:'smiles' },
+    { label:'InChIKey',           key:'stdinchikey' },
+    { label:'LogP (est.)',        key:'xlogp2' },
+    { label:'H-Bond Donors',      key:'h_bond_donor_count' },
+    { label:'H-Bond Acceptors',   key:'h_bond_acceptor_count' },
+    { label:'Rotatable Bonds',    key:'rotatable_bond_count' },
+    { label:'Heavy Atom Count',   key:'heavy_atom_count' },
+  ];
 
-    document.getElementById('props-grid').innerHTML = fields.map((f, i) => {
-        const val = results[i].status === 'fulfilled' ? results[i].value : '—';
-        return `<div class="prop-card">
-            <div class="prop-lbl">${f.label}</div>
-            <div class="prop-val" style="font-size:${val.length > 20 ? '10px' : '15px'}">${val}</div>
-        </div>`;
-    }).join('');
+  const results = await Promise.allSettled(fields.map(f => cactusGet(query, f.key)));
+
+  // Update formula badge in header
+  const formulaResult = results[0];
+  if (formulaResult.status === 'fulfilled') {
+    formulaEl.textContent = formulaResult.value;
+  }
+
+  grid.innerHTML = fields.map((f, i) => {
+    const val    = results[i].status === 'fulfilled' ? results[i].value : '—';
+    const copyable = ['SMILES', 'InChIKey', 'IUPAC Name'].includes(f.label) && val !== '—';
+    const small  = val.length > 20;
+    return `<div class="prop-card">
+      <div class="prop-lbl">${f.label}</div>
+      <div class="prop-val" style="font-size:${small ? '10px' : '14px'}">${val}</div>
+      ${copyable ? `<button class="prop-copy" onclick="copyText('${val.replace(/'/g,"\\'")}','${f.label}')">⎘ Copy</button>` : ''}
+    </div>`;
+  }).join('');
 }
 
-// ── LIVE META via Cactus ───────────────────────
+/* ═══════════════════════════════════════════════════════
+   LIVE META for searched molecules
+═══════════════════════════════════════════════════════ */
 async function fetchLiveMeta(query, iupac) {
-    try {
-        const [formula, mw] = await Promise.all([
-            cactusGet(query, 'formula').catch(() => '—'),
-            cactusGet(query, 'mw').catch(() => '—'),
-        ]);
-        const fmt = formula.replace(/([0-9]+)/g, '<sub>$1</sub>');
-        fillInfo({
-            name: iupac || query,
-            formula: fmt,
-            weight: mw,
-            hybrid: '—', angle: '—', dipole: '—',
-            geo: 'Apply VSEPR theory based on electron pairs around the central atom.',
-            fact: `Search powered by NCI Cactus. Check NCERT for exam-specific details.`
-        });
-    } catch {
-        fillInfo({ name: query, formula:'—', weight:'—', hybrid:'—', angle:'—', dipole:'—', geo:'—', fact:'—' });
-    }
+  try {
+    const [formula, mw] = await Promise.all([
+      cactusGet(query, 'formula').catch(() => '—'),
+      cactusGet(query, 'mw').catch(() => '—'),
+    ]);
+    const fmtFormula = formula.replace(/([0-9]+)/g, '<sub>$1</sub>');
+    fillInfo({
+      name:   iupac || query,
+      formula: fmtFormula,
+      weight:  mw,
+      hybrid: '—', angle: '—', dipole: '—',
+      geo:  'Apply VSEPR theory based on number of electron pairs around the central atom.',
+      fact: `Search powered by NCI Cactus. For exam details, refer to NCERT textbook.`
+    });
+  } catch {
+    fillInfo({ name:query, formula:'—', weight:'—', hybrid:'—', angle:'—', dipole:'—', geo:'—', fact:'—' });
+  }
 }
 
-// ── FILL INFO ──────────────────────────────────
+/* ═══════════════════════════════════════════════════════
+   FILL INFO CARD
+═══════════════════════════════════════════════════════ */
 function fillInfo(m) {
-    document.getElementById('i-name').textContent    = m.name;
-    document.getElementById('i-formula').innerHTML   = m.formula;
-    document.getElementById('i-wt').textContent      = (m.weight && m.weight !== '—') ? (String(m.weight).includes('g/mol') ? m.weight : m.weight + ' g/mol') : '—';
-    document.getElementById('i-hyb').textContent     = m.hybrid;
-    document.getElementById('i-angle').textContent   = m.angle;
-    document.getElementById('i-dipole').textContent  = m.dipole;
-    document.getElementById('i-geo').textContent     = m.geo;
-    document.getElementById('i-fact').textContent    = m.fact;
-    document.getElementById('info-card').classList.add('visible');
+  document.getElementById('i-name').textContent    = m.name;
+  document.getElementById('i-formula').innerHTML   = m.formula;
+  document.getElementById('i-wt').textContent      = (m.weight && m.weight !== '—') ? (String(m.weight).includes('g/mol') ? m.weight : m.weight + ' g/mol') : '—';
+  document.getElementById('i-hyb').textContent     = m.hybrid;
+  document.getElementById('i-angle').textContent   = m.angle;
+  document.getElementById('i-dipole').textContent  = m.dipole;
+  document.getElementById('i-geo').textContent     = m.geo;
+  document.getElementById('i-fact').textContent    = m.fact;
+  document.getElementById('info-card').classList.add('visible');
 }
 
-// ── STYLE & ROTATION ───────────────────────────
-function updateStyle() {
-    if (!viewer || !currentModel) return;
-    const s = document.getElementById('style-sel').value;
-    const c = document.getElementById('color-sel').value;
-    let cfg = {};
-    if      (s === 'sphere')  cfg = { sphere:  { scale: 0.35, colorscheme: c } };
-    else if (s === 'line')    cfg = { line:    { colorscheme: c } };
-    else if (s === 'cartoon') cfg = { cartoon: { color: 'spectrum' } };
-    else                      cfg = { stick:   { radius: 0.18, colorscheme: c } };
-    currentModel.setStyle({}, cfg);
-    viewer.render();
+/* ═══════════════════════════════════════════════════════
+   3D STYLE & ROTATION
+═══════════════════════════════════════════════════════ */
+function applyStyle() {
+  if (!viewer || !currentModel) return;
+  const s = document.getElementById('style-sel').value;
+  const c = document.getElementById('color-sel').value;
+  let cfg = {};
+  if      (s === 'sphere') cfg = { sphere: { scale: 0.35, colorscheme: c } };
+  else if (s === 'line')   cfg = { line:   { colorscheme: c } };
+  else                     cfg = { stick:  { radius: 0.18, colorscheme: c } };
+  currentModel.setStyle({}, cfg);
+  viewer.render();
 }
+function updateStyle() { applyStyle(); }
 
 function toggleRot() {
-    isRotating = document.getElementById('rot-tog').checked;
-    if (!viewer) return;
-    isRotating ? viewer.animate({ loop: 'forward', step: 0.5 }) : viewer.stopAnimate();
+  isRotating = document.getElementById('rot-tog').checked;
+  if (!viewer) return;
+  isRotating ? viewer.animate({ loop: 'forward', step: 0.5 }) : viewer.stopAnimate();
 }
-
 function resetView() { if (viewer) { viewer.zoomTo(); viewer.render(); } }
 function doZoom(f)   { if (viewer) viewer.zoom(f, 500); }
 
-// ── UI HELPERS ─────────────────────────────────
-function showLoader(show, txt) {
-    document.getElementById('loader').classList.toggle('hidden', !show);
-    if (txt) document.getElementById('loader-txt').textContent = txt;
+/* ═══════════════════════════════════════════════════════
+   UI HELPERS
+═══════════════════════════════════════════════════════ */
+function showLoader(show, mol, txt) {
+  const el  = document.getElementById('loader');
+  const molEl = document.getElementById('loader-mol');
+  const txtEl = document.getElementById('loader-txt');
+  el.classList.toggle('hidden', !show);
+  if (mol) molEl.textContent = mol;
+  if (txt) txtEl.textContent = txt;
 }
 
 function showError(msg) {
-    const el = document.getElementById('err-box');
-    msg ? (el.textContent = msg, el.classList.add('visible'))
-        : (el.textContent = '',  el.classList.remove('visible'));
+  const el = document.getElementById('err-box');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+function clearError() {
+  const el = document.getElementById('err-box');
+  el.textContent = '';
+  el.classList.remove('show');
 }
 
-document.getElementById('mol-input').addEventListener('keypress', e => {
+/* TOAST */
+let toastTimer = null;
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (type ? ` ${type}` : '') + ' show';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.classList.remove('show'); }, 2800);
+}
+
+/* COPY to clipboard */
+async function copyText(text, label) {
+  try {
+    await navigator.clipboard.writeText(text);
+    showToast(`${label} copied!`, 'success');
+  } catch { showToast('Copy failed', 'error'); }
+}
+
+/* MODAL */
+function openModal()  { document.getElementById('modal-overlay').classList.add('open'); }
+function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
+function handleOverlayClick(e) { if (e.target === document.getElementById('modal-overlay')) closeModal(); }
+
+/* keypress listener needs DOM ready */
+window.addEventListener('load', () => {
+  document.getElementById('mol-input').addEventListener('keypress', e => {
     if (e.key === 'Enter') loadBySearch();
+  });
 });
 </script>
 </body>
