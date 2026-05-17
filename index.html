@@ -3,27 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ChemSphere Pro Optimized</title>
+<title>ChemSphere Pro</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.5.3/3Dmol-min.js"></script>
+<script src="https://3Dmol.org/build/3Dmol-min.js"></script>
 
 <style>
 
 :root{
 --bg:#04060f;
---surface:#080d1a;
---surface2:#0d1428;
---border:rgba(100,160,255,0.1);
---accent:#3b7fff;
---accent2:#00d4aa;
---text:#e8f0ff;
---text-muted:#6b80a8;
---mono:'Space Mono', monospace;
---sans:'Outfit', sans-serif;
+--surface:#0b1220;
+--surface2:#111827;
+--accent:#3b82f6;
+--accent2:#14b8a6;
+--text:#e5e7eb;
+--muted:#94a3b8;
+--border:rgba(255,255,255,0.06);
 }
 
 *{
@@ -33,137 +31,164 @@ box-sizing:border-box;
 }
 
 html,body{
+width:100%;
 height:100%;
+overflow-x:hidden;
 background:var(--bg);
+font-family:'Outfit',sans-serif;
 color:var(--text);
-font-family:var(--sans);
-overflow:hidden;
+}
+
+body{
+display:flex;
+flex-direction:column;
 }
 
 header{
-height:58px;
+height:70px;
 display:flex;
 align-items:center;
-justify-content:space-between;
-padding:12px 24px;
+padding:0 18px;
 border-bottom:1px solid var(--border);
-background:#080d1a;
+background:#08101d;
 }
 
 .logo{
 display:flex;
 align-items:center;
-gap:12px;
+gap:14px;
 }
 
-.logo-mark{
-width:38px;
-height:38px;
-border-radius:10px;
+.logo-box{
+width:48px;
+height:48px;
+border-radius:14px;
+background:linear-gradient(135deg,#3b82f6,#14b8a6);
 display:flex;
 align-items:center;
 justify-content:center;
-background:linear-gradient(135deg,var(--accent),var(--accent2));
-font-weight:700;
-font-size:12px;
-}
-
-.logo h1{
+font-weight:800;
 font-size:18px;
 }
 
+.logo h1{
+font-size:28px;
+font-weight:700;
+}
+
+.logo p{
+font-size:13px;
+color:var(--muted);
+}
+
 .app{
+flex:1;
 display:flex;
-height:calc(100vh - 58px);
+flex-direction:column;
 }
 
 .sidebar{
-width:330px;
-background:#080d1a;
-border-right:1px solid var(--border);
-overflow-y:auto;
-}
-
-.block{
-padding:18px;
+width:100%;
+background:#08101d;
 border-bottom:1px solid var(--border);
+padding:20px;
 }
 
-.label{
-font-size:10px;
-font-family:var(--mono);
-letter-spacing:2px;
-margin-bottom:12px;
-color:var(--text-muted);
+.section-title{
+font-size:11px;
+letter-spacing:4px;
 text-transform:uppercase;
+color:var(--muted);
+margin-bottom:14px;
 }
 
 .search-row{
 display:flex;
-gap:8px;
+gap:12px;
+margin-bottom:18px;
 }
 
 .search{
 flex:1;
-padding:10px 14px;
-border-radius:10px;
+padding:16px;
+border-radius:16px;
 border:1px solid var(--border);
 background:var(--surface2);
 color:white;
+font-size:18px;
 outline:none;
 }
 
+.search:focus{
+border-color:var(--accent);
+}
+
 .btn{
-padding:10px 16px;
+padding:16px 24px;
 border:none;
-border-radius:10px;
+border-radius:16px;
 background:var(--accent);
 color:white;
-font-weight:600;
+font-weight:700;
+font-size:18px;
 cursor:pointer;
+}
+
+.error{
+display:none;
+padding:16px;
+border-radius:16px;
+background:rgba(255,0,0,0.15);
+color:#ff9a9a;
+margin-bottom:18px;
+font-size:15px;
 }
 
 .grid{
 display:grid;
-grid-template-columns:1fr 1fr;
-gap:8px;
+grid-template-columns:repeat(2,1fr);
+gap:14px;
 }
 
 .card{
-padding:12px;
-border-radius:10px;
-background:var(--surface2);
+background:var(--surface);
 border:1px solid var(--border);
+border-radius:18px;
+padding:18px;
 cursor:pointer;
 transition:0.2s;
 }
 
 .card:hover{
-border-color:var(--accent);
 transform:translateY(-2px);
+border-color:var(--accent);
 }
 
 .formula{
-font-family:var(--mono);
-font-size:13px;
+font-size:34px;
+font-weight:700;
 color:var(--accent2);
-margin-bottom:4px;
+margin-bottom:8px;
 }
 
 .name{
-font-size:11px;
-color:var(--text-muted);
+font-size:18px;
+color:var(--muted);
 }
 
 .viewer-wrap{
-flex:1;
 position:relative;
-background:#04060f;
+flex:1;
+background:#020617;
+min-height:75vh;
+height:75vh;
+overflow:hidden;
 }
 
 #viewer{
 width:100%;
 height:100%;
+min-height:75vh;
 }
 
 .loader{
@@ -172,10 +197,9 @@ inset:0;
 display:flex;
 align-items:center;
 justify-content:center;
-background:rgba(0,0,0,0.8);
+background:rgba(0,0,0,0.75);
 z-index:10;
-font-family:var(--mono);
-font-size:12px;
+font-size:18px;
 }
 
 .loader.hidden{
@@ -184,102 +208,103 @@ display:none;
 
 .info{
 position:absolute;
-top:18px;
-left:18px;
-width:280px;
-padding:16px;
-border-radius:14px;
-background:rgba(8,13,26,0.92);
+left:16px;
+bottom:16px;
+right:16px;
+background:rgba(11,18,32,0.92);
+backdrop-filter:blur(14px);
 border:1px solid var(--border);
-backdrop-filter:blur(10px);
+border-radius:24px;
+padding:22px;
+z-index:5;
 }
 
 .info h2{
-font-size:18px;
-margin-bottom:4px;
+font-size:42px;
+margin-bottom:10px;
 }
 
 .info-formula{
-font-family:var(--mono);
+font-size:30px;
+font-weight:700;
 color:var(--accent2);
-margin-bottom:14px;
+margin-bottom:20px;
 }
 
-.info-grid{
+.stats{
 display:grid;
-grid-template-columns:1fr 1fr;
-gap:10px;
+grid-template-columns:repeat(2,1fr);
+gap:16px;
 }
 
 .stat{
-background:var(--surface2);
-padding:10px;
-border-radius:10px;
+background:rgba(255,255,255,0.03);
+padding:18px;
+border-radius:18px;
 }
 
 .stat-label{
-font-size:8px;
-font-family:var(--mono);
-letter-spacing:1px;
-color:var(--text-muted);
-margin-bottom:4px;
+font-size:12px;
+letter-spacing:2px;
+text-transform:uppercase;
+color:var(--muted);
+margin-bottom:10px;
 }
 
 .stat-value{
-font-size:13px;
-}
-
-.err{
-margin-top:10px;
-padding:10px;
-border-radius:10px;
-background:rgba(255,0,0,0.1);
-color:#ff8080;
-font-size:12px;
-display:none;
+font-size:28px;
+font-weight:700;
 }
 
 .ctrl{
 position:absolute;
-bottom:18px;
-right:18px;
+right:16px;
+bottom:260px;
 display:flex;
 flex-direction:column;
-gap:8px;
+gap:14px;
+z-index:5;
 }
 
 .ctrl button{
-width:40px;
-height:40px;
+width:64px;
+height:64px;
+border-radius:20px;
 border:none;
-border-radius:10px;
-background:#0d1428;
-border:1px solid var(--border);
+background:#0f172a;
 color:white;
+font-size:28px;
 cursor:pointer;
-font-size:16px;
+border:1px solid var(--border);
 }
 
-@media(max-width:760px){
-
-html,body{
-overflow:auto;
-}
+@media(min-width:900px){
 
 .app{
-flex-direction:column;
-height:auto;
+flex-direction:row;
 }
 
 .sidebar{
-width:100%;
-border-right:none;
-border-bottom:1px solid var(--border);
+width:360px;
+height:100%;
+overflow-y:auto;
+border-right:1px solid var(--border);
+border-bottom:none;
 }
 
 .viewer-wrap{
-height:72vh;
-min-height:320px;
+height:100%;
+min-height:100%;
+}
+
+.info{
+width:340px;
+right:auto;
+bottom:18px;
+}
+
+.ctrl{
+bottom:18px;
 }
 
 }
@@ -290,36 +315,47 @@ min-height:320px;
 <body>
 
 <header>
+
 <div class="logo">
-<div class="logo-mark">CS</div>
+
+<div class="logo-box">
+CS
+</div>
+
 <div>
 <h1>ChemSphere Pro</h1>
+<p>Class 11 & NEET Molecular Viewer</p>
 </div>
+
 </div>
+
 </header>
 
 <div class="app">
 
 <div class="sidebar">
 
-<div class="block">
-
-<div class="label">
+<div class="section-title">
 Search Molecule
 </div>
 
 <div class="search-row">
-<input id="searchInput" class="search" placeholder="Methane, Benzene...">
-<button class="btn" onclick="searchMolecule()">View</button>
+
+<input
+id="searchInput"
+class="search"
+placeholder="Paracetamol, Benzene..."
+>
+
+<button class="btn" onclick="searchMolecule()">
+View
+</button>
+
 </div>
 
-<div class="err" id="errorBox"></div>
+<div class="error" id="errorBox"></div>
 
-</div>
-
-<div class="block">
-
-<div class="label">
+<div class="section-title">
 Quick Load
 </div>
 
@@ -327,25 +363,25 @@ Quick Load
 
 </div>
 
-</div>
-
 <div class="viewer-wrap">
-
-<div class="loader hidden" id="loader">
-Loading Molecule...
-</div>
 
 <div id="viewer"></div>
 
+<div class="loader hidden" id="loader">
+Loading molecule...
+</div>
+
 <div class="info">
 
-<h2 id="molName">Methane</h2>
+<h2 id="molName">
+Methane
+</h2>
 
 <div class="info-formula" id="molFormula">
 CH₄
 </div>
 
-<div class="info-grid">
+<div class="stats">
 
 <div class="stat">
 <div class="stat-label">Geometry</div>
@@ -443,23 +479,28 @@ dipole:"0 D"
 
 let viewer;
 let currentModel;
-
-/* MOBILE PERFORMANCE OPTIMIZATION */
 let isRotating = window.innerWidth > 768;
 
 window.onload = () => {
 
-const el = document.getElementById("viewer");
+if(typeof $3Dmol === "undefined"){
 
-/* GPU OPTIMIZATION */
-viewer = $3Dmol.createViewer(el,{
-backgroundColor:"#04060f",
+showError("3Dmol failed to load. Refresh page.");
+
+return;
+
+}
+
+viewer = $3Dmol.createViewer("viewer",{
+backgroundColor:"#020617",
 antialias:false
 });
 
 renderGrid();
 
+setTimeout(()=>{
 loadMolecule("CH4");
+},500);
 
 };
 
@@ -494,6 +535,7 @@ loadMolecule(val);
 async function loadMolecule(query){
 
 showLoader(true);
+
 showError(null);
 
 try{
@@ -503,22 +545,56 @@ const cidRes = await fetch(
 );
 
 if(!cidRes.ok){
-throw new Error("Molecule not found.");
+
+throw new Error(
+"Could not fetch molecule data."
+);
+
 }
 
 const cidData = await cidRes.json();
 
-const cid = cidData.IdentifierList.CIDs[0];
+if(
+!cidData.IdentifierList ||
+!cidData.IdentifierList.CIDs ||
+cidData.IdentifierList.CIDs.length === 0
+){
+
+throw new Error(
+"No molecule found. Try another name."
+);
+
+}
+
+const cid =
+cidData.IdentifierList.CIDs[0];
 
 const sdfRes = await fetch(
 `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${cid}/SDF?record_type=3d`
 );
 
+if(!sdfRes.ok){
+
+throw new Error(
+"3D structure unavailable."
+);
+
+}
+
 const sdf = await sdfRes.text();
+
+if(!sdf || sdf.length < 10){
+
+throw new Error(
+"Invalid molecule structure."
+);
+
+}
 
 viewer.clear();
 
-currentModel = viewer.addModel(sdf,"sdf");
+currentModel =
+viewer.addModel(sdf,"sdf");
 
 currentModel.setStyle({},{
 stick:{
@@ -531,7 +607,6 @@ viewer.zoomTo();
 
 viewer.render();
 
-/* LIGHTWEIGHT ROTATION */
 if(isRotating){
 
 viewer.spin("y",0.05);
@@ -547,7 +622,11 @@ fillInfo(meta);
 
 }else{
 
-document.getElementById("molName").textContent = query;
+document.getElementById("molName").textContent =
+query;
+
+document.getElementById("molFormula").textContent =
+"Custom Molecule";
 
 }
 
@@ -563,23 +642,30 @@ showLoader(false);
 
 function fillInfo(m){
 
-document.getElementById("molName").textContent = m.name;
+document.getElementById("molName").textContent =
+m.name;
 
-document.getElementById("molFormula").innerHTML = m.formula;
+document.getElementById("molFormula").innerHTML =
+m.formula;
 
-document.getElementById("molGeo").textContent = m.geo;
+document.getElementById("molGeo").textContent =
+m.geo;
 
-document.getElementById("molHybrid").textContent = m.hybrid;
+document.getElementById("molHybrid").textContent =
+m.hybrid;
 
-document.getElementById("molAngle").textContent = m.angle;
+document.getElementById("molAngle").textContent =
+m.angle;
 
-document.getElementById("molDipole").textContent = m.dipole;
+document.getElementById("molDipole").textContent =
+m.dipole;
 
 }
 
 function resetView(){
 
 viewer.zoomTo();
+
 viewer.render();
 
 }
@@ -605,7 +691,8 @@ document.getElementById("loader")
 
 function showError(msg){
 
-const el = document.getElementById("errorBox");
+const el =
+document.getElementById("errorBox");
 
 if(msg){
 
