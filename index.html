@@ -477,7 +477,7 @@ window.addEventListener('load', () => {
     }
 
     renderGrid('vsepr');
-    setTimeout(() => loadByKey('CH4'), 800);
+    setTimeout(() => loadByKey('CH4'), 1200);
 
     // Resize viewer on window resize
     window.addEventListener('resize', () => { if (viewer) viewer.resize(); });
@@ -539,6 +539,35 @@ function loadBySearch() {
     fetchAndRender(val, null);
 }
 
+// ── PUBCHEM FETCH HELPER ───────────────────────
+async function pubchemFetch(url) {
+    const res = await fetch(url, {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' },
+        mode: 'cors'
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res;
+}
+
+// ── RESOLVE CID (tries name, then formula) ────
+async function resolveCID(query) {
+    const base = 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound';
+    // Try by name first
+    try {
+        const res = await pubchemFetch(`${base}/name/${encodeURIComponent(query)}/cids/JSON`);
+        const data = await res.json();
+        if (data.IdentifierList?.CIDs?.length) return data.IdentifierList.CIDs[0];
+    } catch(e) {}
+    // Try by formula
+    try {
+        const res = await pubchemFetch(`${base}/formula/${encodeURIComponent(query)}/cids/JSON`);
+        const data = await res.json();
+        if (data.IdentifierList?.CIDs?.length) return data.IdentifierList.CIDs[0];
+    } catch(e) {}
+    throw new Error(`"${query}" not found. Try the full English name (e.g. "water", "methane", "benzene").`);
+}
+
 // ── MAIN FETCH ─────────────────────────────────
 async function fetchAndRender(query, meta) {
     showLoader(true, 'RESOLVING MOLECULE...');
@@ -547,13 +576,7 @@ async function fetchAndRender(query, meta) {
 
     try {
         // 1. Resolve CID
-        const cidRes = await fetch(`https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/${encodeURIComponent(query)}/cids/JSON`);
-        const cidData = await cidRes.json();
-        // PubChem returns 200 with a Fault object when not found
-        if (cidData.Fault || !cidData.IdentifierList || !cidData.IdentifierList.CIDs || cidData.IdentifierList.CIDs.length === 0) {
-            throw new Error(`"${query}" not found on PubChem. Try the full name (e.g. "methane" not "CH4").`);
-        }
-        currentCID = cidData.IdentifierList.CIDs[0];
+        currentCID = await resolveCID(query);
 
         // 2. Render according to current mode
         if      (currentMode === '3d')    await render3D(currentCID);
@@ -591,16 +614,16 @@ async function render3D(cid) {
 
     let sdf = null;
 
-    // Try 3D conformer
+    // Try 3D conformer first, then 2D SDF as fallback
+    const base = `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${cid}`;
     try {
-        const r = await fetch(`https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${cid}/SDF?record_type=3d`);
+        const r = await fetch(`${base}/SDF?record_type=3d`, { mode: 'cors' });
         if (r.ok) { const txt = await r.text(); if (txt && txt.length > 50) sdf = txt; }
     } catch(e) {}
 
-    // Fallback: 2D SDF (some molecules have no 3D conformer)
     if (!sdf) {
         try {
-            const r = await fetch(`https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${cid}/SDF`);
+            const r = await fetch(`${base}/SDF`, { mode: 'cors' });
             if (r.ok) sdf = await r.text();
         } catch(e) {}
     }
@@ -638,7 +661,7 @@ async function loadProps(cid) {
     document.getElementById('props-title').textContent = document.getElementById('i-name').textContent || `CID ${cid}`;
 
     try {
-        const res = await fetch(`https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${cid}/property/${PROPS.join(',')}/JSON`);
+        const res = await fetch(`https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${cid}/property/${PROPS.join(',')}/JSON`, { mode: 'cors' });
         if (!res.ok) throw new Error();
         const p = (await res.json()).PropertyTable.Properties[0];
 
@@ -656,7 +679,7 @@ async function loadProps(cid) {
 // ── LIVE META ──────────────────────────────────
 async function fetchLiveMeta(cid, fallback) {
     try {
-        const res = await fetch(`https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${cid}/property/MolecularFormula,MolecularWeight,IUPACName/JSON`);
+        const res = await fetch(`https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${cid}/property/MolecularFormula,MolecularWeight,IUPACName/JSON`, { mode: 'cors' });
         const p = (await res.json()).PropertyTable.Properties[0];
         const fmt = (p.MolecularFormula||'').replace(/([0-9]+)/g,'<sub>$1</sub>');
         fillInfo({ name: p.IUPACName||fallback, formula: fmt, weight: p.MolecularWeight, hybrid:'—', angle:'—', dipole:'—', geo:'Apply VSEPR theory based on electron pairs around central atom.', fact:`PubChem CID: ${cid}. Check NCERT for chapter-specific exam details.` });
