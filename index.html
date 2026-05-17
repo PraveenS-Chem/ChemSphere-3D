@@ -450,6 +450,8 @@ let isRotating = true;
 let currentCat = 'vsepr';
 let selectedKey = null;
 let currentCID = null;
+let currentQuery = null; // track last searched name for Cactus
+let currentMeta = null;
 let currentMode = '3d';
 let dmolReady = false;
 
@@ -459,9 +461,9 @@ window.addEventListener('load', () => {
     const libEl = document.getElementById('lib-status');
     if (typeof $3Dmol !== 'undefined') {
         dmolReady = true;
-        libEl.innerHTML = '<span class="lib-ok">✓ 3Dmol.js (official)</span><span class="lib-ok">✓ PubChem API</span>';
+        libEl.innerHTML = '<span class="lib-ok">✓ 3Dmol.js (official)</span><span class="lib-ok">✓ NCI Cactus API</span>';
     } else {
-        libEl.innerHTML = '<span class="lib-fail">✗ 3Dmol failed → 2D fallback active</span><span class="lib-ok">✓ PubChem API</span>';
+        libEl.innerHTML = '<span class="lib-fail">✗ 3Dmol failed → 2D fallback active</span><span class="lib-ok">✓ NCI Cactus API</span>';
     }
 
     // Init 3Dmol viewer
@@ -514,9 +516,9 @@ function switchMode(mode, btn) {
     document.getElementById('ctrl-block').style.display  = mode === '3d'    ? 'block' : 'none';
     document.getElementById('v-ctrl').style.display      = mode === '3d'    ? 'flex'  : 'none';
 
-    if (currentCID) {
-        if (mode === '2d')    load2D(currentCID);
-        if (mode === 'props') loadProps(currentCID);
+    if (currentQuery) {
+        if (mode === '2d')    load2D(currentQuery);
+        if (mode === 'props') loadProps(currentQuery, currentMeta);
     }
 }
 
@@ -539,33 +541,17 @@ function loadBySearch() {
     fetchAndRender(val, null);
 }
 
-// ── PUBCHEM FETCH HELPER ───────────────────────
-async function pubchemFetch(url) {
-    const res = await fetch(url, {
-        method: 'GET',
-        headers: { 'Accept': 'application/json' },
-        mode: 'cors'
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return res;
-}
+// ── NCI CACTUS — single reliable helper ────────
+// Cactus accepts any name/formula and returns data directly. No API key, full CORS support.
+const CACTUS = 'https://cactus.nci.nih.gov/chemical/structure';
 
-// ── RESOLVE CID (tries name, then formula) ────
-async function resolveCID(query) {
-    const base = 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound';
-    // Try by name first
-    try {
-        const res = await pubchemFetch(`${base}/name/${encodeURIComponent(query)}/cids/JSON`);
-        const data = await res.json();
-        if (data.IdentifierList?.CIDs?.length) return data.IdentifierList.CIDs[0];
-    } catch(e) {}
-    // Try by formula
-    try {
-        const res = await pubchemFetch(`${base}/formula/${encodeURIComponent(query)}/cids/JSON`);
-        const data = await res.json();
-        if (data.IdentifierList?.CIDs?.length) return data.IdentifierList.CIDs[0];
-    } catch(e) {}
-    throw new Error(`"${query}" not found. Try the full English name (e.g. "water", "methane", "benzene").`);
+async function cactusGet(nameOrFormula, representation) {
+    const url = `${CACTUS}/${encodeURIComponent(nameOrFormula)}/${representation}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Cactus ${res.status}`);
+    const text = await res.text();
+    if (!text || text.includes('Page not found') || text.trim() === '') throw new Error('empty');
+    return text.trim();
 }
 
 // ── MAIN FETCH ─────────────────────────────────
@@ -573,62 +559,48 @@ async function fetchAndRender(query, meta) {
     showLoader(true, 'RESOLVING MOLECULE...');
     showError(null);
     document.getElementById('empty-st').style.display = 'none';
+    currentCID = null;
+    currentQuery = query;
+    currentMeta = meta;
 
     try {
-        // 1. Resolve CID
-        currentCID = await resolveCID(query);
+        // Verify molecule exists on Cactus by fetching its IUPAC name
+        const iupac = await cactusGet(query, 'iupac_name').catch(() => query);
 
-        // 2. Render according to current mode
-        if      (currentMode === '3d')    await render3D(currentCID);
-        else if (currentMode === '2d')    await load2D(currentCID);
-        else if (currentMode === 'props') await loadProps(currentCID);
+        // Render according to mode
+        if      (currentMode === '3d')    await render3D(query);
+        else if (currentMode === '2d')    await load2D(query);
+        else if (currentMode === 'props') await loadProps(query, meta);
 
-        // 3. Info card
+        // Info card
         if (meta) fillInfo(meta);
-        else await fetchLiveMeta(currentCID, query);
+        else await fetchLiveMeta(query, iupac);
 
-        // 4. Badge
-        document.getElementById('badge-lbl').textContent = meta ? meta.name : query;
+        // Badge
+        document.getElementById('badge-lbl').textContent = meta ? meta.name : (iupac || query);
         document.getElementById('v-badge').classList.add('show');
 
     } catch(err) {
-        showError(err.message);
+        showError(`"${query}" not found. Try a common English name like "water", "caffeine", "aspirin".`);
         document.getElementById('empty-st').style.display = 'flex';
     } finally {
         showLoader(false);
     }
 }
 
-// ── 3D RENDER ──────────────────────────────────
-async function render3D(cid) {
+// ── 3D RENDER via Cactus SDF ───────────────────
+async function render3D(query) {
     if (!dmolReady || !viewer) {
-        // Auto-switch to 2D if 3Dmol not available
-        showError('3D library unavailable — switched to 2D view.');
-        currentCID = cid;
+        showError('3D library unavailable — showing 2D instead.');
         switchMode('2d', document.getElementById('tab-2d'));
-        await load2D(cid);
+        await load2D(query);
         return;
     }
 
-    showLoader(true, 'LOADING 3D COORDINATES...');
+    showLoader(true, 'LOADING 3D STRUCTURE...');
 
-    let sdf = null;
-
-    // Try 3D conformer first, then 2D SDF as fallback
-    const base = `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${cid}`;
-    try {
-        const r = await fetch(`${base}/SDF?record_type=3d`, { mode: 'cors' });
-        if (r.ok) { const txt = await r.text(); if (txt && txt.length > 50) sdf = txt; }
-    } catch(e) {}
-
-    if (!sdf) {
-        try {
-            const r = await fetch(`${base}/SDF`, { mode: 'cors' });
-            if (r.ok) sdf = await r.text();
-        } catch(e) {}
-    }
-
-    if (!sdf) throw new Error('No structural data available for this molecule.');
+    // Cactus returns a 3D SDF directly from a name — no CID needed
+    const sdf = await cactusGet(query, 'SDF?get3d=true');
 
     viewer.stopAnimate();
     viewer.clear();
@@ -640,51 +612,66 @@ async function render3D(cid) {
     if (isRotating) viewer.animate({ loop: 'forward', step: 0.5 });
 }
 
-// ── 2D IMAGE ───────────────────────────────────
-async function load2D(cid) {
-    const url = `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${cid}/PNG?record_type=2d&image_size=400x300`;
-    document.getElementById('img-2d').src = url;
-    document.getElementById('img-2d').style.display = 'block';
-    document.getElementById('img-2d-lbl').textContent = `CID ${cid} · 2D Structure · PubChem`;
+// ── 2D IMAGE via Cactus ────────────────────────
+async function load2D(query) {
+    // Cactus serves a 2D PNG directly by name
+    const url = `${CACTUS}/${encodeURIComponent(query)}/image`;
+    const img = document.getElementById('img-2d');
+    img.src = url;
+    img.style.display = 'block';
+    document.getElementById('img-2d-lbl').textContent = `${query} · 2D Structure · NCI Cactus`;
 }
 
-// ── PROPERTIES ─────────────────────────────────
-async function loadProps(cid) {
-    const PROPS = ['MolecularFormula','MolecularWeight','XLogP','ExactMass','TPSA','HBondDonorCount','HBondAcceptorCount','RotatableBondCount','HeavyAtomCount','Charge'];
-    const LABELS = {
-        MolecularFormula:'Molecular Formula', MolecularWeight:'Molecular Weight (g/mol)',
-        XLogP:'XLogP (Lipophilicity)', ExactMass:'Exact Mass (Da)', TPSA:'TPSA (Ų)',
-        HBondDonorCount:'H-Bond Donors', HBondAcceptorCount:'H-Bond Acceptors',
-        RotatableBondCount:'Rotatable Bonds', HeavyAtomCount:'Heavy Atoms', Charge:'Formal Charge'
-    };
+// ── PROPERTIES via Cactus ──────────────────────
+async function loadProps(query, meta) {
+    const title = meta ? meta.name : query;
+    document.getElementById('props-title').textContent = title;
 
-    document.getElementById('props-title').textContent = document.getElementById('i-name').textContent || `CID ${cid}`;
+    // Fetch individual properties from Cactus in parallel
+    const fields = [
+        { label: 'Molecular Formula',   key: 'formula' },
+        { label: 'Molecular Weight',    key: 'mw' },
+        { label: 'IUPAC Name',          key: 'iupac_name' },
+        { label: 'InChI Key',           key: 'stdinchikey' },
+        { label: 'SMILES',              key: 'smiles' },
+        { label: 'LogP (est.)',         key: 'xlogp2' },
+        { label: 'H-Bond Donors',       key: 'h_bond_donor_count' },
+        { label: 'H-Bond Acceptors',    key: 'h_bond_acceptor_count' },
+        { label: 'Rotatable Bonds',     key: 'rotatable_bond_count' },
+        { label: 'Heavy Atom Count',    key: 'heavy_atom_count' },
+    ];
 
-    try {
-        const res = await fetch(`https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${cid}/property/${PROPS.join(',')}/JSON`, { mode: 'cors' });
-        if (!res.ok) throw new Error();
-        const p = (await res.json()).PropertyTable.Properties[0];
+    const results = await Promise.allSettled(
+        fields.map(f => cactusGet(query, f.key))
+    );
 
-        document.getElementById('props-grid').innerHTML = PROPS.map(k => `
-            <div class="prop-card">
-                <div class="prop-lbl">${LABELS[k]}</div>
-                <div class="prop-val">${p[k] !== undefined ? p[k] : '—'}</div>
-            </div>
-        `).join('');
-    } catch {
-        document.getElementById('props-grid').innerHTML = '<div style="color:var(--text-muted);font-size:12px;font-family:var(--mono);padding:8px">Could not load properties from PubChem.</div>';
-    }
+    document.getElementById('props-grid').innerHTML = fields.map((f, i) => {
+        const val = results[i].status === 'fulfilled' ? results[i].value : '—';
+        return `<div class="prop-card">
+            <div class="prop-lbl">${f.label}</div>
+            <div class="prop-val" style="font-size:${val.length > 20 ? '10px' : '15px'}">${val}</div>
+        </div>`;
+    }).join('');
 }
 
-// ── LIVE META ──────────────────────────────────
-async function fetchLiveMeta(cid, fallback) {
+// ── LIVE META via Cactus ───────────────────────
+async function fetchLiveMeta(query, iupac) {
     try {
-        const res = await fetch(`https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${cid}/property/MolecularFormula,MolecularWeight,IUPACName/JSON`, { mode: 'cors' });
-        const p = (await res.json()).PropertyTable.Properties[0];
-        const fmt = (p.MolecularFormula||'').replace(/([0-9]+)/g,'<sub>$1</sub>');
-        fillInfo({ name: p.IUPACName||fallback, formula: fmt, weight: p.MolecularWeight, hybrid:'—', angle:'—', dipole:'—', geo:'Apply VSEPR theory based on electron pairs around central atom.', fact:`PubChem CID: ${cid}. Check NCERT for chapter-specific exam details.` });
+        const [formula, mw] = await Promise.all([
+            cactusGet(query, 'formula').catch(() => '—'),
+            cactusGet(query, 'mw').catch(() => '—'),
+        ]);
+        const fmt = formula.replace(/([0-9]+)/g, '<sub>$1</sub>');
+        fillInfo({
+            name: iupac || query,
+            formula: fmt,
+            weight: mw,
+            hybrid: '—', angle: '—', dipole: '—',
+            geo: 'Apply VSEPR theory based on electron pairs around the central atom.',
+            fact: `Search powered by NCI Cactus. Check NCERT for exam-specific details.`
+        });
     } catch {
-        fillInfo({ name:fallback, formula:'—', weight:'—', hybrid:'—', angle:'—', dipole:'—', geo:'—', fact:'—' });
+        fillInfo({ name: query, formula:'—', weight:'—', hybrid:'—', angle:'—', dipole:'—', geo:'—', fact:'—' });
     }
 }
 
