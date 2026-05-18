@@ -38,7 +38,7 @@ header{
   position:fixed;top:0;left:0;right:0;z-index:300;
   height:var(--HH);display:flex;align-items:center;
   justify-content:space-between;padding:0 14px;gap:10px;
-  background:#060810;
+  background:rgba(6,8,16,.97);backdrop-filter:blur(20px);
   border-bottom:1px solid var(--bd);
 }
 .logo{display:flex;align-items:center;gap:9px;text-decoration:none;flex-shrink:0}
@@ -93,7 +93,7 @@ header{
   width:var(--SW);flex-shrink:0;
   display:flex;flex-direction:column;
   border-right:1px solid var(--bd);
-  background:#0a0e1a;
+  background:rgba(10,14,26,.97);
   overflow-y:auto;overflow-x:hidden;
 }
 .sb::-webkit-scrollbar{width:3px}
@@ -181,39 +181,30 @@ header{
 
 /* ─── VIEWER ─────────────────────────────────────────── */
 .vw{flex:1;position:relative;background:var(--bg);overflow:hidden;min-width:0}
-/* p3d fills the whole viewer area */
-#p3d{position:absolute;inset:0;display:block;overflow:hidden}
-/* c3d: let 3Dmol control canvas sizing - do NOT set 100% here, 
-   3Dmol appends its own canvas and we resize it via viewer.resize() */
-#c3d{position:absolute;inset:0;width:100%;height:100%}
+#p3d{position:absolute;inset:0;display:block}
+#c3d{width:100%;height:100%;display:block}
 
-#p2d{display:none;position:absolute;inset:0;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:var(--bg);padding:16px}
+#p2d{display:none;position:absolute;inset:0;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:var(--bg)}
 #p2d.on{display:flex}
-/* 2D image frame — much bigger now */
-.f2d{
-  display:none;background:#fff;border-radius:14px;padding:20px;
-  border:1px solid var(--bhi);box-shadow:0 16px 56px rgba(0,0,0,.7);
-  max-width:min(520px,90vw);width:100%;
-}
+.f2d{display:none;background:#fff;border-radius:12px;padding:14px;border:1px solid var(--bhi);box-shadow:0 12px 48px rgba(0,0,0,.65);max-width:min(340px,80vw)}
 .f2d.rdy{display:block}
-#i2d{max-width:100%;height:auto;max-height:55vh;display:block;margin:0 auto}
-.l2d{font-family:var(--fn);font-size:11px;color:var(--mu);text-align:center}
-.sp2{width:34px;height:34px;border:2px solid rgba(74,143,255,.15);border-top-color:var(--acc);border-radius:50%;animation:spin .8s linear infinite}
+#i2d{max-width:100%;max-height:260px;display:block}
+.l2d{font-family:var(--fn);font-size:9px;color:var(--mu)}
+.sp2{width:28px;height:28px;border:2px solid rgba(74,143,255,.15);border-top-color:var(--acc);border-radius:50%;animation:spin .8s linear infinite}
 
-/* Properties panel — bigger text, bigger cards */
-#ppr{display:none;position:absolute;inset:0;flex-direction:column;gap:14px;overflow-y:auto;padding:24px 20px}
+#ppr{display:none;position:absolute;inset:0;flex-direction:column;gap:11px;overflow-y:auto;padding:20px 16px}
 #ppr.on{display:flex}
-.prt{font-size:22px;font-weight:800;color:#fff;text-transform:capitalize}
-.prs{font-size:10px;color:var(--di);font-family:var(--fn);margin-top:3px}
-.prg{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
-.prc{background:var(--s1);border:1px solid var(--bd);border-radius:11px;padding:15px}
-.prcl{font-size:9px;font-family:var(--fn);letter-spacing:1.5px;text-transform:uppercase;color:var(--mu);margin-bottom:6px}
-.prcv{font-size:16px;font-weight:600;color:var(--tx);word-break:break-all;line-height:1.4}
-.cpy{display:inline-block;margin-top:6px;font-size:10px;font-family:var(--fn);color:var(--tea);border:none;background:none;padding:0;opacity:.7;transition:opacity .15s}
+.prt{font-size:17px;font-weight:800;color:#fff;text-transform:capitalize}
+.prs{font-size:9px;color:var(--di);font-family:var(--fn);margin-top:2px}
+.prg{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:7px}
+.prc{background:var(--s1);border:1px solid var(--bd);border-radius:9px;padding:11px}
+.prcl{font-size:8px;font-family:var(--fn);letter-spacing:1.5px;text-transform:uppercase;color:var(--di);margin-bottom:4px}
+.prcv{font-size:13px;font-weight:600;color:var(--tx);word-break:break-all}
+.cpy{display:inline-block;margin-top:4px;font-size:9px;font-family:var(--fn);color:var(--tea);border:none;background:none;padding:0;opacity:.7;transition:opacity .15s}
 .cpy:hover{opacity:1}
 
 /* loader */
-.ldr{position:absolute;inset:0;z-index:30;background:rgba(6,8,16,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;transition:opacity .3s}
+.ldr{position:absolute;inset:0;z-index:30;background:rgba(6,8,16,.88);backdrop-filter:blur(8px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;transition:opacity .3s}
 .ldr.h{opacity:0;pointer-events:none}
 .spn{width:34px;height:34px;border:2px solid rgba(74,143,255,.15);border-top-color:var(--acc);border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -226,14 +217,14 @@ header{
 .et{font-family:var(--fn);font-size:9px;color:var(--di);letter-spacing:1px}
 
 /* molecule badge */
-.bdg{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:10;background:rgba(10,14,26,.95);border:1px solid var(--bhi);border-radius:20px;padding:5px 13px;display:none;gap:6px;align-items:center;font-family:var(--fn);font-size:10px;color:var(--mu);white-space:nowrap}
+.bdg{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:10;background:rgba(10,14,26,.92);backdrop-filter:blur(12px);border:1px solid var(--bhi);border-radius:20px;padding:5px 13px;display:none;gap:6px;align-items:center;font-family:var(--fn);font-size:10px;color:var(--mu);white-space:nowrap}
 .bdg.v{display:flex}
 .dot{width:6px;height:6px;border-radius:50%;background:var(--tea);animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
 /* viewer ctrl buttons */
 .vc{position:absolute;bottom:14px;right:14px;z-index:10;display:flex;flex-direction:column;gap:5px}
-.vb{width:32px;height:32px;border-radius:7px;border:1px solid var(--bhi);background:rgba(10,14,26,.95);color:var(--mu);font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.vb{width:32px;height:32px;border-radius:7px;border:1px solid var(--bhi);background:rgba(10,14,26,.9);backdrop-filter:blur(8px);color:var(--mu);font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .15s}
 .vb:hover{border-color:var(--acc);color:var(--acc)}
 .libst{position:absolute;bottom:14px;left:14px;z-index:10;font-family:var(--fn);font-size:8px;display:flex;flex-direction:column;gap:3px}
 .lok{color:var(--tea)}.lfl{color:#ff7070}
@@ -241,7 +232,7 @@ header{
 /* ─── BOTTOM TAB BAR (mobile) ────────────────────────── */
 .btbar{
   display:none;position:fixed;bottom:0;left:0;right:0;z-index:300;
-  height:var(--BH);background:#060810;
+  height:var(--BH);background:rgba(6,8,16,.97);backdrop-filter:blur(20px);
   border-top:1px solid var(--bd);padding-bottom:env(safe-area-inset-bottom);
 }
 .bti{display:flex;height:100%}
@@ -254,22 +245,13 @@ header{
 .bt span{font-family:var(--fn);font-size:9px}
 
 /* ─── DRAWER OVERLAY ─────────────────────────────────── */
-/* IMPORTANT: NO backdrop-filter on this element ever.
-   backdrop-filter creates an isolated GPU compositing layer on Android Chrome
-   that visually bleeds OVER siblings with higher z-index, making the sidebar
-   content appear blurred and untappable even at z-index:250. Plain bg only. */
-.dovl{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.75);touch-action:none}
+.dovl{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.6);backdrop-filter:blur(4px)}
 .dovl.v{display:block}
-
-/* Sidebar must sit above overlay AND have its own non-composited bg */
-@media (max-width:767px){
-  .sb{isolation:isolate}   /* force new stacking ctx independent of overlay */
-}
 
 /* ─── TOAST ──────────────────────────────────────────── */
 .tst{
   position:fixed;bottom:70px;left:50%;transform:translateX(-50%) translateY(60px);z-index:500;
-  background:rgba(10,14,26,.98);border:1px solid var(--bhi);
+  background:rgba(10,14,26,.97);backdrop-filter:blur(16px);border:1px solid var(--bhi);
   border-radius:9px;padding:9px 16px;font-family:var(--fn);font-size:11px;color:var(--tx);
   transition:transform .28s cubic-bezier(.34,1.56,.64,1),opacity .28s;opacity:0;pointer-events:none;white-space:nowrap;
 }
@@ -278,7 +260,7 @@ header{
 .tst.k{border-color:rgba(0,229,180,.3);color:var(--tea)}
 
 /* ─── UPGRADE MODAL ──────────────────────────────────── */
-.movl{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.82);display:none;align-items:center;justify-content:center;padding:16px}
+.movl{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.75);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;padding:16px}
 .movl.v{display:flex}
 .modal{background:var(--s1);border:1px solid var(--bhi);border-radius:14px;padding:26px;max-width:450px;width:100%;box-shadow:0 20px 70px rgba(0,0,0,.7);position:relative;animation:mi .28s cubic-bezier(.34,1.56,.64,1);max-height:92dvh;overflow-y:auto}
 @keyframes mi{from{transform:scale(.93) translateY(16px);opacity:0}}
@@ -297,90 +279,45 @@ header{
 .pf li::before{content:'✓ ';color:var(--tea);font-weight:700}
 .bjn{width:100%;padding:11px;border:none;border-radius:9px;font-size:13px;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--acc),var(--tea));box-shadow:0 4px 16px rgba(74,143,255,.25);transition:opacity .2s}
 .bjn:hover{opacity:.88}
-.bjn.done{background:linear-gradient(135deg,#1a4a1a,#0a5a3a);cursor:default}
 .mnt{font-size:8px;font-family:var(--fn);color:var(--di);text-align:center;margin-top:8px}
-/* Google Form wrapper */
-#gf-wrap{border-radius:10px;overflow:hidden;border:1px solid var(--bhi);margin-bottom:10px}
 
 /* ─── RESPONSIVE ─────────────────────────────────────── */
 @media (max-width:767px){
+  /* header: hide desktop tabs, show hamburger */
   .dtabs{display:none}
   .fbdg{display:none}
-  .hmb{display:none} /* no hamburger needed - bottom tab handles it */
+  .hmb{display:flex}
+
+  /* viewer area leaves room for bottom bar */
   .app{bottom:var(--BH)}
-  /* Sidebar completely hidden on mobile - mol-screen replaces it */
-  .sb{display:none}
-  .dovl{display:none!important}
+
+  /* sidebar becomes a left drawer */
+  .sb{
+    position:fixed;top:var(--HH);left:0;bottom:var(--BH);z-index:250;
+    width:min(290px,88vw);
+    transform:translateX(-100%);
+    transition:transform .26s cubic-bezier(.4,0,.2,1);
+    border-right:1px solid var(--bhi);
+  }
+  .sb.o{transform:translateX(0)}
+
+  /* show bottom tab bar */
   .btbar{display:block}
-  #ppr{padding:14px 12px}
-  .prg{grid-template-columns:1fr 1fr}
-  .prt{font-size:18px}
-  .prcv{font-size:14px!important}
-  .f2d{padding:12px;max-width:95vw}
-  #i2d{max-height:42vh}
+
+  /* panels inside viewer */
+  #ppr{padding:14px 11px}
+  .prg{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
   .bdg{top:8px;font-size:9px}
+
+  /* modal */
   .plans{grid-template-columns:1fr}
   .modal{padding:20px 16px}
   .tst{bottom:calc(var(--BH) + 8px)}
-  .gf-wrap iframe{height:340px}
 }
 @media (min-width:768px){
   .btbar,.hmb,.dovl{display:none!important}
-  #mol-screen{display:none!important}
-  .sb{transform:none!important;position:relative;width:var(--SW)}
+  .sb{transform:none!important;position:relative}
 }
-
-/* ─── MOBILE MOLECULE SCREEN ─────────────────────────── */
-/* This is a completely separate page-level panel.
-   It lives OUTSIDE the viewer div so WebGL never touches it.
-   No z-index battle. No GPU compositing bleed. Just a normal div. */
-#mol-screen{
-  display:none;
-  position:fixed;
-  top:var(--HH);left:0;right:0;bottom:var(--BH);
-  background:#0a0e1a;
-  overflow-y:auto;overflow-x:hidden;
-  z-index:50; /* only needs to be above .app z-index:1 */
-  flex-direction:column;
-}
-#mol-screen.v{ display:flex }
-.ms-search{ padding:14px 14px 10px; border-bottom:1px solid var(--bd) }
-.ms-srw{ position:relative }
-.ms-input{
-  width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:9px;
-  padding:10px 70px 10px 12px;font-size:14px;font-family:var(--fs);color:var(--tx);outline:none;
-}
-.ms-input:focus{ border-color:var(--acc) }
-.ms-go{
-  position:absolute;right:5px;top:50%;transform:translateY(-50%);
-  background:var(--acc);border:none;border-radius:6px;
-  padding:6px 12px;color:#fff;font-size:12px;font-weight:700;
-}
-.ms-err{
-  background:rgba(255,60,60,.06);border:1px solid rgba(255,60,60,.2);
-  border-radius:7px;padding:8px 11px;font-size:11px;color:#ff7070;
-  display:none;margin-top:8px;font-family:var(--fn);line-height:1.5;
-}
-.ms-err.v{ display:block }
-.ms-cats{ display:flex;gap:6px;flex-wrap:wrap;padding:12px 14px;border-bottom:1px solid var(--bd) }
-.ms-cat{
-  font-size:11px;font-family:var(--fn);padding:6px 14px;border-radius:6px;
-  border:1px solid var(--bd);color:var(--mu);background:transparent;
-}
-.ms-cat.on{ border-color:var(--acc);color:var(--acc);background:rgba(74,143,255,.08) }
-.ms-grid-wrap{ padding:12px 14px }
-.ms-label{ font-family:var(--fn);font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--di);margin-bottom:10px }
-.ms-grid{ display:grid;grid-template-columns:1fr 1fr;gap:8px }
-.ms-card{
-  background:var(--s2);border:1px solid var(--bd);border-radius:10px;
-  padding:12px;transition:border-color .15s;
-}
-.ms-card.sel{ border-color:var(--tea) }
-.ms-card:active{ border-color:var(--acc) }
-.ms-cf{ font-family:var(--fn);font-size:13px;font-weight:700;color:var(--tea);margin-bottom:3px }
-.ms-cn{ font-size:12px;color:var(--mu) }
-.ms-cs{ font-size:9px;font-family:var(--fn);color:var(--di);margin-top:4px }
-
 </style>
 </head>
 <body>
@@ -548,32 +485,6 @@ header{
   </div>
 </div>
 
-<!-- ─── MOBILE MOLECULE SCREEN ───────────────────────────────── -->
-<!-- Completely separate from .app div. WebGL is inside .app, this is outside.
-     No GPU compositing battle. No z-index tricks needed. Just works. -->
-<div id="mol-screen">
-  <!-- Search -->
-  <div class="ms-search">
-    <div class="ms-srw">
-      <input class="ms-input" id="ms-in" placeholder="Search: caffeine, aspirin, benzene…" autocomplete="off">
-      <button class="ms-go" onclick="msSearch()">Go →</button>
-    </div>
-    <div class="ms-err" id="ms-err"></div>
-  </div>
-  <!-- Categories -->
-  <div class="ms-cats">
-    <button class="ms-cat on" data-cat="vsepr"     onclick="msCat('vsepr',this)">VSEPR</button>
-    <button class="ms-cat"    data-cat="organic"   onclick="msCat('organic',this)">Organic</button>
-    <button class="ms-cat"    data-cat="biomol"    onclick="msCat('biomol',this)">Bio</button>
-    <button class="ms-cat"    data-cat="inorganic" onclick="msCat('inorganic',this)">Inorganic</button>
-  </div>
-  <!-- Molecule grid -->
-  <div class="ms-grid-wrap">
-    <div class="ms-label">Quick Load</div>
-    <div class="ms-grid" id="ms-grid"></div>
-  </div>
-</div>
-
 <!-- ─── BOTTOM TAB BAR (mobile only) ───────────────────────── -->
 <div class="btbar">
   <div class="bti">
@@ -630,15 +541,7 @@ header{
         </ul>
       </div>
     </div>
-    <!-- Google Form embed. Replace the src with YOUR form's embed URL:
-         Google Forms → Send → Embed → copy src from the <iframe> tag shown -->
-    <div id="gf-wrap" style="display:none;margin-bottom:8px">
-      <iframe id="gf-frame"
-        src="https://docs.google.com/forms/d/e/PASTE_YOUR_FORM_ID_HERE/viewform?embedded=true"
-        width="100%" height="400" frameborder="0" marginheight="0" marginwidth="0"
-        style="border-radius:8px;background:#fff;display:block">Loading form…</iframe>
-    </div>
-    <button class="bjn" id="bjn-main" onclick="showGForm()">Join Pro Waitlist →</button>
+    <button class="bjn" onclick="toast('Waitlist joined! We will notify you.','k');closeMod()">Join Pro Waitlist →</button>
     <div class="mnt">No credit card · Made for Indian students 🇮🇳</div>
   </div>
 </div>
@@ -697,158 +600,63 @@ const CACTUS = 'https://cactus.nci.nih.gov/chemical/structure';
 window.addEventListener('load', () => {
   const ls = document.getElementById('libst');
 
-  // Render grid immediately — no 3Dmol dependency
+  // 3Dmol init
+  if (typeof $3Dmol !== 'undefined') {
+    dmol = true;
+    ls.innerHTML = '<span class="lok">✓ 3Dmol.js ready</span><span class="lok">✓ NCI Cactus API</span>';
+    try {
+      viewer = $3Dmol.createViewer(document.getElementById('c3d'), { backgroundColor: '#060810' });
+      viewer.resize();
+    } catch(e) { dmol = false; console.warn('3Dmol init:', e); }
+  } else {
+    ls.innerHTML = '<span class="lfl">✗ 3Dmol failed — 2D fallback</span><span class="lok">✓ NCI Cactus API</span>';
+  }
+
+  // Render initial grid
   renderGrid('vsepr');
 
-  // Keyboard shortcuts
+  // Resize listener
+  window.addEventListener('resize', () => { if (viewer) viewer.resize(); });
+
+  // Keyboard: Cmd/Ctrl+K → focus search
   document.addEventListener('keydown', e => {
     if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); document.getElementById('mol-in').focus(); }
     if (e.key === 'Escape') { closeMod(); closeDrawer(); }
   });
 
-  // Grid click via event delegation
+  // Grid click — event delegation (safe, no inline onclick)
   document.getElementById('mg').addEventListener('click', e => {
     const card = e.target.closest('.mc');
     if (card) pickMol(card.dataset.key);
   });
 
-  // Search enter key (desktop sidebar + mobile screen)
+  // Search enter key
   document.getElementById('mol-in').addEventListener('keypress', e => {
     if (e.key === 'Enter') doSearch();
   });
-  document.getElementById('ms-in').addEventListener('keypress', e => {
-    if (e.key === 'Enter') msSearch();
-  });
 
-  // Hide loader at start
+  // Auto-load methane after libs settle
+  // Hide loader initially
   document.getElementById('ldr').classList.add('h');
-
-  // ── 3Dmol init ──────────────────────────────────────────────────────────
-  // ROOT CAUSE of Chrome black screen: Chrome does not assign layout size to
-  // position:absolute elements synchronously during load. We must:
-  //  1. Manually set px width/height on the container from its parent
-  //  2. Create the viewer AFTER the browser has completed a paint cycle
-  //  3. After model render, call resize() + render() in the next rAF
-  if (typeof $3Dmol !== 'undefined') {
-    dmol = true;
-    ls.innerHTML = '<span class="lok">✓ 3Dmol.js ready</span><span class="lok">✓ NCI Cactus API</span>';
-
-    // Wait for full layout paint (double rAF ensures past first render)
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      const vw  = document.getElementById('vw');
-      const c3d = document.getElementById('c3d');
-
-      // Stamp explicit px so WebGL context gets real dimensions not 0×0
-      const W = vw.clientWidth  || vw.offsetWidth  || window.innerWidth  - 300;
-      const H = vw.clientHeight || vw.offsetHeight || window.innerHeight - 56;
-      c3d.style.width  = W + 'px';
-      c3d.style.height = H + 'px';
-
-      try {
-        viewer = $3Dmol.createViewer(c3d, {
-          backgroundColor: '#060810',
-          antialias: true,
-        });
-        // Let CSS take over sizing after context is created
-        requestAnimationFrame(() => {
-          c3d.style.width  = '';
-          c3d.style.height = '';
-          viewer.resize();
-          setTimeout(() => pickMol('vsepr-ch4'), 100);
-        });
-      } catch(e) {
-        console.error('3Dmol createViewer failed:', e);
-        dmol = false;
-        ls.innerHTML = '<span class="lfl">✗ 3Dmol error: ' + e.message + '</span>';
-        setTimeout(() => pickMol('vsepr-ch4'), 100);
-      }
-    }));
-
-  } else {
-    ls.innerHTML = '<span class="lfl">✗ 3Dmol.js not loaded</span><span class="lok">✓ NCI Cactus API</span>';
-    setTimeout(() => pickMol('vsepr-ch4'), 100);
-  }
-
-  // Keep viewer sized on window resize
-  window.addEventListener('resize', () => {
-    if (!viewer) return;
-    requestAnimationFrame(() => { viewer.resize(); viewer.render(); });
-  });
+  setTimeout(() => pickMol('vsepr-ch4'), 1400);
 });
 
 /* ════════════════════════════════════════
-   MOBILE MOLECULE SCREEN
-   Lives outside .app entirely — WebGL canvas inside .app can never
-   affect it. No z-index needed, no GPU compositing issues.
+   DRAWER (mobile sidebar)
 ════════════════════════════════════════ */
-let molScreenOpen = false;
-
-function openMolScreen() {
-  molScreenOpen = true;
-  document.getElementById('mol-screen').classList.add('v');
-  // Pause 3D to save battery, not for z-index reasons
-  if (viewer) viewer.stopAnimate();
-  // Sync the mobile grid with current selection
-  msRenderGrid(curCat);
-  // Sync category buttons
-  document.querySelectorAll('.ms-cat').forEach(b => {
-    b.classList.toggle('on', b.dataset.cat === curCat);
-  });
-  // Update bottom tab
-  document.getElementById('bmol').classList.add('on');
-}
-
-function closeMolScreen() {
-  molScreenOpen = false;
-  document.getElementById('mol-screen').classList.remove('v');
-  document.getElementById('bmol').classList.remove('on');
-  // Resume 3D
-  if (viewer && rotating && curMode === '3d') viewer.animate({ loop:'forward', step:0.5 });
-}
-
 function togDrawer() {
-  molScreenOpen ? closeMolScreen() : openMolScreen();
+  const open = document.getElementById('sb').classList.toggle('o');
+  document.getElementById('dovl').classList.toggle('v', open);
+  document.getElementById('hmb').classList.toggle('o', open);
+  const bm = document.getElementById('bmol');
+  if (bm) bm.classList.toggle('on', open);
 }
-function closeDrawer() { closeMolScreen(); }
-
-function msCat(cat, btn) {
-  curCat = cat;
-  document.querySelectorAll('.ms-cat').forEach(b => b.classList.remove('on'));
-  btn.classList.add('on');
-  // Also sync desktop sidebar tabs
-  document.querySelectorAll('.ctb').forEach(b => b.classList.toggle('on', b.dataset.cat === cat));
-  msRenderGrid(cat);
-}
-
-function msRenderGrid(cat) {
-  const mols = DB[cat] || [];
-  document.getElementById('ms-grid').innerHTML = mols.map(m =>
-    `<div class="ms-card${m.key === selKey ? ' sel':''}" data-key="${m.key}" onclick="msPick('${m.key}')">
-      <div class="ms-cf">${m.f}</div>
-      <div class="ms-cn">${m.n}</div>
-      <div class="ms-cs">${m.s}</div>
-    </div>`
-  ).join('');
-}
-
-function msPick(key) {
-  selKey = key;
-  msRenderGrid(curCat);
-  renderGrid(curCat); // keep desktop grid in sync
-  closeMolScreen();
-  let meta = null;
-  for (const arr of Object.values(DB)) { meta = arr.find(m => m.key === key); if (meta) break; }
-  go(meta ? meta.pname : key, meta);
-}
-
-function msSearch() {
-  const val = document.getElementById('ms-in').value.trim();
-  if (!val) return;
-  selKey = null;
-  document.getElementById('ms-err').classList.remove('v');
-  closeMolScreen();
-  clearErr();
-  go(val, null);
+function closeDrawer() {
+  document.getElementById('sb').classList.remove('o');
+  document.getElementById('dovl').classList.remove('v');
+  document.getElementById('hmb').classList.remove('o');
+  const bm = document.getElementById('bmol');
+  if (bm) bm.classList.remove('on');
 }
 
 /* ════════════════════════════════════════
@@ -902,8 +710,8 @@ function setMode(mode) {
   document.getElementById('s3d').style.display = mode === '3d' ? 'block' : 'none';
   document.getElementById('vc').style.display  = mode === '3d' ? 'flex'  : 'none';
 
-  // Close mol-screen on mobile when switching modes
-  if (window.innerWidth < 768) closeMolScreen();
+  // Close drawer on mobile after mode switch
+  if (window.innerWidth < 768) closeDrawer();
 
   // Reload current molecule for new mode
   if (curQ) {
@@ -918,12 +726,15 @@ function setMode(mode) {
 function pickMol(key) {
   selKey = key;
   renderGrid(curCat);
+
+  // Find meta in any category
   let meta = null;
   for (const arr of Object.values(DB)) {
     meta = arr.find(m => m.key === key);
     if (meta) break;
   }
-  if (window.innerWidth < 768) closeMolScreen();
+
+  if (window.innerWidth < 768) closeDrawer();
   go(meta ? meta.pname : key, meta);
 }
 
@@ -933,7 +744,7 @@ function doSearch() {
   selKey = null;
   renderGrid(curCat);
   clearErr();
-  if (window.innerWidth < 768) closeMolScreen();
+  if (window.innerWidth < 768) closeDrawer();
   go(val, null);
 }
 
@@ -1003,20 +814,14 @@ async function do3D(query, tk) {
   showLoad(true, query, 'LOADING 3D STRUCTURE…');
   const sdf = await cactus(query, 'SDF?get3d=true');
   if (tk !== token) return;
-
   viewer.stopAnimate();
   viewer.clear();
   model = viewer.addModel(sdf, 'sdf');
   applyStyle();
   viewer.zoomTo();
   viewer.render();
-
-  // Chrome: canvas stays black unless we resize+render in next paint cycle
-  requestAnimationFrame(() => {
-    viewer.resize();
-    viewer.render();
-    if (rotating) viewer.animate({ loop: 'forward', step: 0.5 });
-  });
+  viewer.resize();
+  if (rotating) viewer.animate({ loop: 'forward', step: 0.5 });
 }
 
 /* ════════════════════════════════════════
@@ -1061,14 +866,12 @@ async function loadProps(query, meta) {
 
   document.getElementById('prg').innerHTML = fields.map((f, i) => {
     const val      = results[i].status === 'fulfilled' ? results[i].value : '—';
-    const small    = val.length > 25;
-    const tiny     = val.length > 40;
-    const fs       = tiny ? '11px' : small ? '13px' : '16px';
+    const small    = val.length > 20;
     const copyable = ['SMILES','InChIKey','IUPAC Name'].includes(f.label) && val !== '—';
     const safe     = val.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
     return `<div class="prc">
       <div class="prcl">${f.label}</div>
-      <div class="prcv" style="font-size:${fs}">${val}</div>
+      <div class="prcv" style="font-size:${small?'10px':'13px'}">${val}</div>
       ${copyable ? `<button class="cpy" onclick="doCopy('${safe}','${f.label}')">⎘ Copy</button>` : ''}
     </div>`;
   }).join('');
@@ -1157,19 +960,6 @@ async function doCopy(text, label) {
 }
 function openMod()  { document.getElementById('movl').classList.add('v'); }
 function closeMod() { document.getElementById('movl').classList.remove('v'); }
-
-/* Google Form — show iframe on button click */
-function showGForm() {
-  const wrap = document.getElementById('gf-wrap');
-  const btn  = document.getElementById('bjn-main');
-  if (wrap.style.display === 'none' || wrap.style.display === '') {
-    wrap.style.display = 'block';
-    btn.textContent    = '✓ Form is open below — fill & submit!';
-    btn.classList.add('done');
-    // Scroll modal to show form
-    setTimeout(() => wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
-  }
-}
 </script>
 </body>
 </html>
