@@ -93,7 +93,7 @@ header{
   width:var(--SW);flex-shrink:0;
   display:flex;flex-direction:column;
   border-right:1px solid var(--bd);
-  background:rgba(10,14,26,.97);
+  background:#0a0e1a;
   overflow-y:auto;overflow-x:hidden;
 }
 .sb::-webkit-scrollbar{width:3px}
@@ -233,7 +233,7 @@ header{
 
 /* viewer ctrl buttons */
 .vc{position:absolute;bottom:14px;right:14px;z-index:10;display:flex;flex-direction:column;gap:5px}
-.vb{width:32px;height:32px;border-radius:7px;border:1px solid var(--bhi);background:rgba(10,14,26,.9);backdrop-filter:blur(8px);color:var(--mu);font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.vb{width:32px;height:32px;border-radius:7px;border:1px solid var(--bhi);background:rgba(10,14,26,.95);color:var(--mu);font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .15s}
 .vb:hover{border-color:var(--acc);color:var(--acc)}
 .libst{position:absolute;bottom:14px;left:14px;z-index:10;font-family:var(--fn);font-size:8px;display:flex;flex-direction:column;gap:3px}
 .lok{color:var(--tea)}.lfl{color:#ff7070}
@@ -269,7 +269,7 @@ header{
 /* ─── TOAST ──────────────────────────────────────────── */
 .tst{
   position:fixed;bottom:70px;left:50%;transform:translateX(-50%) translateY(60px);z-index:500;
-  background:rgba(10,14,26,.97);backdrop-filter:blur(16px);border:1px solid var(--bhi);
+  background:rgba(10,14,26,.98);border:1px solid var(--bhi);
   border-radius:9px;padding:9px 16px;font-family:var(--fn);font-size:11px;color:var(--tx);
   transition:transform .28s cubic-bezier(.34,1.56,.64,1),opacity .28s;opacity:0;pointer-events:none;white-space:nowrap;
 }
@@ -278,7 +278,7 @@ header{
 .tst.k{border-color:rgba(0,229,180,.3);color:var(--tea)}
 
 /* ─── UPGRADE MODAL ──────────────────────────────────── */
-.movl{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.75);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;padding:16px}
+.movl{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.82);display:none;align-items:center;justify-content:center;padding:16px}
 .movl.v{display:flex}
 .modal{background:var(--s1);border:1px solid var(--bhi);border-radius:14px;padding:26px;max-width:450px;width:100%;box-shadow:0 20px 70px rgba(0,0,0,.7);position:relative;animation:mi .28s cubic-bezier(.34,1.56,.64,1);max-height:92dvh;overflow-y:auto}
 @keyframes mi{from{transform:scale(.93) translateY(16px);opacity:0}}
@@ -308,34 +308,46 @@ header{
   .fbdg{display:none}
   .hmb{display:flex}
   .app{bottom:var(--BH)}
+
+  /* MOBILE DRAWER — full screen width, fully opaque solid bg.
+     WebGL canvas gets GPU-promoted and paints over children regardless of
+     z-index. The only reliable fix is:
+     1. Full 100vw width so no viewer bleeds through the side
+     2. Solid opaque background (no rgba, no transparency)
+     3. z-index high enough above the overlay (200) and viewer (1)
+     4. Pause/hide the 3D viewer while drawer is open (done in JS) */
   .sb{
-    position:fixed;top:var(--HH);left:0;bottom:var(--BH);z-index:250;
-    width:min(290px,88vw);
+    position:fixed;
+    top:var(--HH);left:0;right:0;bottom:var(--BH);
+    width:100vw;
+    z-index:500;
+    background:#0a0e1a;
     transform:translateX(-100%);
-    transition:transform .26s cubic-bezier(.4,0,.2,1);
-    border-right:1px solid var(--bhi);
-    isolation:isolate;
+    transition:transform .25s cubic-bezier(.4,0,.2,1);
+    border-right:none;
+    will-change:transform;
   }
   .sb.o{transform:translateX(0)}
+
+  /* Hide overlay — not needed when drawer is full screen */
+  .dovl{display:none!important}
+
   .btbar{display:block}
-  /* props panel on mobile */
   #ppr{padding:14px 12px}
   .prg{grid-template-columns:1fr 1fr}
   .prt{font-size:18px}
   .prcv{font-size:14px!important}
-  /* 2D on mobile */
   .f2d{padding:12px;max-width:95vw}
   #i2d{max-height:42vh}
   .bdg{top:8px;font-size:9px}
   .plans{grid-template-columns:1fr}
   .modal{padding:20px 16px}
   .tst{bottom:calc(var(--BH) + 8px)}
-  /* Google Form in modal on mobile */
   .gf-wrap iframe{height:340px}
 }
 @media (min-width:768px){
   .btbar,.hmb,.dovl{display:none!important}
-  .sb{transform:none!important;position:relative}
+  .sb{transform:none!important;position:relative;width:var(--SW)}
 }
 </style>
 </head>
@@ -705,20 +717,36 @@ window.addEventListener('load', () => {
 
 /* ════════════════════════════════════════
    DRAWER (mobile sidebar)
+   WebGL canvases get GPU-promoted and can paint over CSS siblings
+   regardless of z-index. We pause animation + hide the 3D panel
+   while the drawer is open so nothing bleeds through.
 ════════════════════════════════════════ */
 function togDrawer() {
-  const open = document.getElementById('sb').classList.toggle('o');
-  document.getElementById('dovl').classList.toggle('v', open);
+  const sb   = document.getElementById('sb');
+  const open = sb.classList.toggle('o');
   document.getElementById('hmb').classList.toggle('o', open);
   const bm = document.getElementById('bmol');
   if (bm) bm.classList.toggle('on', open);
+
+  if (open) {
+    // Pause & hide 3D viewer while drawer is shown
+    if (viewer) viewer.stopAnimate();
+    document.getElementById('p3d').style.visibility = 'hidden';
+  } else {
+    // Restore viewer when drawer closes
+    document.getElementById('p3d').style.visibility = 'visible';
+    if (viewer && rotating) viewer.animate({ loop: 'forward', step: 0.5 });
+  }
 }
+
 function closeDrawer() {
   document.getElementById('sb').classList.remove('o');
-  document.getElementById('dovl').classList.remove('v');
   document.getElementById('hmb').classList.remove('o');
   const bm = document.getElementById('bmol');
   if (bm) bm.classList.remove('on');
+  // Restore viewer
+  document.getElementById('p3d').style.visibility = 'visible';
+  if (viewer && rotating) viewer.animate({ loop: 'forward', step: 0.5 });
 }
 
 /* ════════════════════════════════════════
