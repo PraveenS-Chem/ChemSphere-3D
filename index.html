@@ -2,1058 +2,964 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ChemSphere Pro — 3D Molecular Visualizer for NEET & JEE</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>ChemSphere Pro — NEET & JEE 3D Molecular Visualizer</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script src="https://3dmol.csb.pitt.edu/build/3Dmol-min.js"></script>
 <style>
+/* ─── TOKENS ─────────────────────────────────────────── */
 :root {
-  --bg: #060810;
-  --surface: #0a0e1a;
-  --surface2: #0f1525;
-  --surface3: #141c30;
-  --border: rgba(99,155,255,0.09);
-  --border-hi: rgba(99,155,255,0.25);
-  --accent: #4a8fff;
-  --accent2: #00e5b4;
-  --accent3: #ff6b35;
-  --accent4: #c084fc;
-  --text: #dde8ff;
-  --text-muted: #5a6e96;
-  --text-dim: #2e3d5c;
-  --mono: 'JetBrains Mono', monospace;
-  --sans: 'Syne', sans-serif;
-  --sidebar-w: 320px;
-  --header-h: 56px;
-  --radius: 10px;
-  --shadow: 0 8px 32px rgba(0,0,0,0.5);
+  --bg:#060810; --s1:#0a0e1a; --s2:#0f1525; --s3:#141c30;
+  --bd:rgba(99,155,255,.09); --bhi:rgba(99,155,255,.28);
+  --acc:#4a8fff; --tea:#00e5b4; --org:#ff6b35;
+  --tx:#dde8ff; --mu:#5a6e96; --di:#2e3d5c;
+  --fn:'JetBrains Mono',monospace; --fs:'Syne',sans-serif;
+  --HH:56px;   /* header height */
+  --BH:58px;   /* bottom bar height on mobile */
+  --SW:300px;  /* sidebar width desktop */
 }
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-html, body {
-  height: 100%; background: var(--bg);
-  color: var(--text); font-family: var(--sans);
-  overflow: hidden;
-}
-
-/* Ambient glow bg */
-body::before {
-  content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+/* ─── RESET ──────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{height:100%;-webkit-text-size-adjust:100%}
+body{height:100%;min-height:100dvh;background:var(--bg);color:var(--tx);font-family:var(--fs);overflow:hidden}
+button{cursor:pointer;font-family:var(--fs)}
+select{cursor:pointer}
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   background:
-    radial-gradient(ellipse 55% 45% at 8% 15%, rgba(74,143,255,0.06) 0%, transparent 70%),
-    radial-gradient(ellipse 40% 35% at 92% 85%, rgba(0,229,180,0.04) 0%, transparent 65%),
-    radial-gradient(ellipse 30% 30% at 50% 50%, rgba(192,132,252,0.02) 0%, transparent 70%);
+    radial-gradient(ellipse 55% 45% at 8% 18%,rgba(74,143,255,.06) 0%,transparent 70%),
+    radial-gradient(ellipse 40% 35% at 92% 82%,rgba(0,229,180,.04) 0%,transparent 65%);
 }
 
-/* ── HEADER ── */
-header {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  height: var(--header-h); display: flex; align-items: center;
-  justify-content: space-between; padding: 0 20px;
-  background: rgba(6,8,16,0.92); backdrop-filter: blur(24px);
-  border-bottom: 1px solid var(--border);
+/* ─── HEADER ─────────────────────────────────────────── */
+header{
+  position:fixed;top:0;left:0;right:0;z-index:300;
+  height:var(--HH);display:flex;align-items:center;
+  justify-content:space-between;padding:0 14px;gap:10px;
+  background:rgba(6,8,16,.97);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--bd);
 }
+.logo{display:flex;align-items:center;gap:9px;text-decoration:none;flex-shrink:0}
+.lm{
+  width:30px;height:30px;border-radius:7px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--acc),var(--tea));
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--fn);font-size:10px;font-weight:700;color:#fff;
+  box-shadow:0 0 16px rgba(74,143,255,.4);
+}
+.lt h1{
+  font-size:13px;font-weight:800;line-height:1;
+  background:linear-gradient(90deg,#fff,var(--tea));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.lt p{font-size:8px;color:var(--mu);font-family:var(--fn);margin-top:2px}
 
-.logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
-.logo-mark {
-  width: 34px; height: 34px; border-radius: 8px;
-  background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--mono); font-size: 11px; font-weight: 700; color: #fff;
-  box-shadow: 0 0 20px rgba(74,143,255,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
-  flex-shrink: 0;
+/* desktop view-mode tabs */
+.dtabs{display:flex;gap:4px;flex:1;justify-content:center}
+.dtab{
+  font-family:var(--fn);font-size:9px;padding:5px 12px;
+  border-radius:20px;border:1px solid var(--bd);
+  color:var(--mu);background:transparent;transition:all .15s;white-space:nowrap;
 }
-.logo-info h1 {
-  font-size: 15px; font-weight: 800; letter-spacing: -0.3px; line-height: 1;
-  background: linear-gradient(90deg, #fff 0%, var(--accent2) 100%);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-}
-.logo-info p { font-size: 9px; color: var(--text-muted); font-family: var(--mono); margin-top: 2px; }
+.dtab:hover{border-color:var(--bhi);color:var(--tx)}
+.dtab.on{border-color:var(--tea);color:var(--tea);background:rgba(0,229,180,.06)}
 
-.header-center { display: flex; align-items: center; gap: 6px; }
-.nav-pill {
-  font-family: var(--mono); font-size: 9px; letter-spacing: 0.5px; padding: 5px 12px;
-  border-radius: 20px; border: 1px solid var(--border); color: var(--text-muted);
-  background: transparent; cursor: pointer; transition: all .15s;
+.hr{display:flex;align-items:center;gap:7px;flex-shrink:0}
+.fbdg{font-size:9px;font-family:var(--fn);padding:3px 8px;border-radius:5px;color:var(--tea);border:1px solid rgba(0,229,180,.3);background:rgba(0,229,180,.05)}
+.bupg{
+  font-size:11px;font-weight:700;padding:6px 12px;border-radius:7px;border:none;
+  background:linear-gradient(135deg,var(--acc),var(--tea));color:#fff;
+  box-shadow:0 3px 12px rgba(74,143,255,.3);transition:opacity .2s;white-space:nowrap;
 }
-.nav-pill:hover { border-color: var(--border-hi); color: var(--text); }
-.nav-pill.active { border-color: var(--accent2); color: var(--accent2); background: rgba(0,229,180,0.06); }
+.bupg:hover{opacity:.85}
+/* hamburger — mobile only */
+.hmb{
+  display:none;width:34px;height:34px;border-radius:7px;
+  border:1px solid var(--bhi);background:transparent;
+  flex-direction:column;align-items:center;justify-content:center;gap:4px;
+}
+.hmb em{display:block;width:15px;height:1.5px;background:var(--mu);border-radius:2px;transition:all .22s;font-style:normal}
+.hmb.o em:nth-child(1){transform:translateY(5.5px) rotate(45deg);background:var(--tea)}
+.hmb.o em:nth-child(2){opacity:0}
+.hmb.o em:nth-child(3){transform:translateY(-5.5px) rotate(-45deg);background:var(--tea)}
 
-.header-right { display: flex; align-items: center; gap: 8px; }
-.hint-tag {
-  font-size: 9px; font-family: var(--mono); color: var(--text-dim);
-  border: 1px solid var(--border); padding: 4px 10px; border-radius: 20px;
-  display: none;
-}
-.btn-upgrade {
-  font-family: var(--sans); font-size: 11px; font-weight: 700;
-  padding: 7px 14px; border-radius: 8px; border: none; cursor: pointer;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  color: #fff; transition: opacity .2s, transform .1s;
-  box-shadow: 0 4px 14px rgba(74,143,255,0.25);
-}
-.btn-upgrade:hover { opacity: 0.88; }
-.btn-upgrade:active { transform: scale(0.97); }
-.free-badge {
-  font-size: 9px; font-family: var(--mono); font-weight: 700; letter-spacing: 0.5px;
-  padding: 3px 8px; border-radius: 5px; color: var(--accent2);
-  border: 1px solid rgba(0,229,180,0.3); background: rgba(0,229,180,0.05);
-}
+/* ─── LAYOUT ─────────────────────────────────────────── */
+.app{position:fixed;top:var(--HH);left:0;right:0;bottom:0;display:flex;z-index:1}
 
-/* ── LAYOUT ── */
-.app-body {
-  display: flex; position: relative; z-index: 1;
-  height: calc(100vh - var(--header-h)); margin-top: var(--header-h);
+/* ─── SIDEBAR ────────────────────────────────────────── */
+.sb{
+  width:var(--SW);flex-shrink:0;
+  display:flex;flex-direction:column;
+  border-right:1px solid var(--bd);
+  background:rgba(10,14,26,.97);
+  overflow-y:auto;overflow-x:hidden;
 }
+.sb::-webkit-scrollbar{width:3px}
+.sb::-webkit-scrollbar-thumb{background:var(--bhi);border-radius:2px}
 
-/* ── SIDEBAR ── */
-.sidebar {
-  width: var(--sidebar-w); flex-shrink: 0; display: flex; flex-direction: column;
-  border-right: 1px solid var(--border); background: rgba(10,14,26,0.9);
-  overflow-y: auto; overflow-x: hidden;
+/* sidebar section */
+.ss{padding:12px 13px;border-bottom:1px solid var(--bd)}
+.sl{
+  font-family:var(--fn);font-size:8px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--di);margin-bottom:8px;display:flex;align-items:center;gap:6px;
 }
-.sidebar::-webkit-scrollbar { width: 3px; }
-.sidebar::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 2px; }
+.sl::after{content:'';flex:1;height:1px;background:var(--bd)}
 
-.s-block { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+/* search */
+.srw{position:relative}
+.si{
+  width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:9px;
+  padding:9px 68px 9px 11px;font-size:12px;font-family:var(--fs);color:var(--tx);outline:none;
+  transition:border-color .2s,box-shadow .2s;
+}
+.si::placeholder{color:var(--di)}
+.si:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(74,143,255,.1)}
+.bgo{
+  position:absolute;right:5px;top:50%;transform:translateY(-50%);
+  background:var(--acc);border:none;border-radius:6px;
+  padding:5px 10px;color:#fff;font-size:11px;font-weight:700;transition:background .2s;
+}
+.bgo:hover{background:#6aaeff}
+.eb{
+  background:rgba(255,60,60,.05);border:1px solid rgba(255,60,60,.18);
+  border-radius:7px;padding:8px 11px;font-size:10px;color:#ff7070;
+  display:none;line-height:1.5;margin-top:7px;font-family:var(--fn);
+}
+.eb.v{display:block}
 
-.s-label {
-  font-family: var(--mono); font-size: 8px; letter-spacing: 2px;
-  text-transform: uppercase; color: var(--text-dim);
-  margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
+/* category tabs */
+.ctbs{display:flex;gap:4px;flex-wrap:wrap}
+.ctb{
+  font-size:9px;font-family:var(--fn);padding:4px 9px;border-radius:5px;
+  border:1px solid var(--bd);color:var(--mu);background:transparent;transition:all .15s;
 }
-.s-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-.s-label .count { color: var(--accent2); margin-left: auto; font-size: 9px; }
+.ctb:hover{border-color:var(--bhi);color:var(--tx)}
+.ctb.on{border-color:var(--acc);color:var(--acc);background:rgba(74,143,255,.07)}
 
-/* Search */
-.search-wrap { position: relative; }
-.search-input {
-  width: 100%; background: var(--surface2); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 9px 80px 9px 12px;
-  font-size: 12px; font-family: var(--sans); color: var(--text); outline: none;
-  transition: border-color .2s, box-shadow .2s;
+/* molecule grid */
+.mg{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.mc{
+  background:var(--s2);border:1px solid var(--bd);border-radius:9px;
+  padding:9px 10px;transition:all .18s;
 }
-.search-input::placeholder { color: var(--text-dim); }
-.search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(74,143,255,0.1); }
-.btn-search {
-  position: absolute; right: 5px; top: 50%; transform: translateY(-50%);
-  background: var(--accent); border: none; border-radius: 7px;
-  padding: 5px 11px; color: #fff; font-size: 11px; font-family: var(--sans);
-  font-weight: 700; cursor: pointer; transition: background .2s;
-}
-.btn-search:hover { background: #6aaeff; }
-.err-box {
-  background: rgba(255,60,60,0.05); border: 1px solid rgba(255,60,60,0.18);
-  border-radius: 8px; padding: 9px 12px; font-size: 11px; color: #ff7070;
-  display: none; line-height: 1.5; margin-top: 8px; font-family: var(--mono);
-}
-.err-box.show { display: block; }
+.mc:hover{border-color:var(--acc);transform:translateY(-1px);box-shadow:0 4px 14px rgba(74,143,255,.12)}
+.mc.sel{border-color:var(--tea);box-shadow:0 0 0 1px rgba(0,229,180,.3)}
+.mcf{font-family:var(--fn);font-size:11px;font-weight:700;color:var(--tea);margin-bottom:2px}
+.mcn{font-size:10px;color:var(--mu);line-height:1.3}
+.mcs{font-size:8px;font-family:var(--fn);color:var(--di);margin-top:3px}
 
-/* Category tabs */
-.cat-tabs { display: flex; gap: 5px; flex-wrap: wrap; }
-.cat-tab {
-  font-size: 9px; font-family: var(--mono); padding: 4px 10px; border-radius: 5px;
-  border: 1px solid var(--border); color: var(--text-muted); cursor: pointer;
-  transition: all .15s; background: transparent; display: flex; align-items: center; gap: 5px;
-}
-.cat-tab:hover { border-color: var(--border-hi); color: var(--text); }
-.cat-tab.active { border-color: var(--accent); color: var(--accent); background: rgba(74,143,255,0.07); }
-.cat-tab .n { font-size: 8px; opacity: 0.6; }
+/* 3D settings */
+.cr{display:flex;align-items:center;justify-content:space-between;padding:5px 0}
+.cr+.cr{border-top:1px solid var(--bd)}
+.cl{font-size:10px;color:var(--mu);font-family:var(--fn)}
+.cs{background:var(--s3);border:1px solid var(--bd);border-radius:6px;padding:4px 7px;font-size:10px;font-family:var(--fn);color:var(--tx);outline:none}
+.tog{position:relative;display:inline-block;width:32px;height:17px}
+.tog input{opacity:0;width:0;height:0}
+.tsl{position:absolute;inset:0;background:var(--s3);border:1px solid var(--bd);border-radius:17px;transition:all .2s}
+.tsl::before{content:'';position:absolute;width:11px;height:11px;left:2px;top:2px;background:var(--di);border-radius:50%;transition:all .2s}
+.tog input:checked+.tsl{background:rgba(0,229,180,.15);border-color:var(--tea)}
+.tog input:checked+.tsl::before{transform:translateX(15px);background:var(--tea)}
 
-/* Molecule grid */
-.mol-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-.mol-card {
-  background: var(--surface2); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 10px; cursor: pointer; transition: all .18s;
-  position: relative; overflow: hidden;
-}
-.mol-card::before {
-  content: ''; position: absolute; inset: 0; opacity: 0;
-  background: linear-gradient(135deg, rgba(74,143,255,0.05), transparent);
-  transition: opacity .18s;
-}
-.mol-card:hover { border-color: var(--accent); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(74,143,255,0.12); }
-.mol-card:hover::before { opacity: 1; }
-.mol-card.selected { border-color: var(--accent2); box-shadow: 0 0 0 1px rgba(0,229,180,0.4), 0 4px 18px rgba(0,229,180,0.1); }
-.mc-formula { font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--accent2); margin-bottom: 2px; }
-.mc-name { font-size: 10px; color: var(--text-muted); line-height: 1.3; }
-.mc-shape { font-size: 8px; font-family: var(--mono); color: var(--text-dim); margin-top: 4px; }
+/* info card */
+.ic{display:none;flex-direction:column;gap:8px}
+.ic.v{display:flex}
+.inn{font-size:14px;font-weight:700;color:#fff;line-height:1.2;text-transform:capitalize}
+.inf{font-family:var(--fn);font-size:10px;color:var(--acc);margin-top:2px}
+.idv{height:1px;background:var(--bd)}
+.igr{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.ist{background:var(--s2);border:1px solid var(--bd);border-radius:7px;padding:8px}
+.istl{font-size:8px;font-family:var(--fn);letter-spacing:1.5px;text-transform:uppercase;color:var(--di);margin-bottom:3px}
+.istv{font-size:12px;font-weight:600;color:var(--tx)}
+.geo{background:rgba(0,229,180,.04);border:1px solid rgba(0,229,180,.18);border-radius:8px;padding:9px}
+.geol{font-size:8px;font-family:var(--fn);letter-spacing:1.5px;text-transform:uppercase;color:rgba(0,229,180,.5);margin-bottom:3px}
+.geov{font-size:11px;font-weight:600;color:var(--tea);line-height:1.5}
+.fct{background:rgba(255,107,53,.04);border:1px solid rgba(255,107,53,.15);border-radius:8px;padding:9px}
+.fctl{font-size:8px;font-family:var(--fn);letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,107,53,.55);margin-bottom:3px}
+.fctv{font-size:10px;color:var(--mu);line-height:1.65}
 
-/* 3D Settings */
-.ctrl-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; }
-.ctrl-row + .ctrl-row { border-top: 1px solid var(--border); }
-.ctrl-label { font-size: 11px; color: var(--text-muted); font-family: var(--mono); font-size: 10px; }
-.ctrl-select {
-  background: var(--surface3); border: 1px solid var(--border); border-radius: 6px;
-  padding: 4px 8px; font-size: 10px; font-family: var(--mono); color: var(--text); outline: none; cursor: pointer;
-}
-.ctrl-select:focus { border-color: var(--accent); }
+/* ─── VIEWER ─────────────────────────────────────────── */
+.vw{flex:1;position:relative;background:var(--bg);overflow:hidden;min-width:0}
+#p3d{position:absolute;inset:0;display:block}
+#c3d{width:100%;height:100%;display:block}
 
-/* Toggle */
-.toggle { position: relative; display: inline-block; width: 32px; height: 17px; }
-.toggle input { opacity: 0; width: 0; height: 0; }
-.toggle-sl {
-  position: absolute; inset: 0; background: var(--surface3); border: 1px solid var(--border);
-  border-radius: 17px; cursor: pointer; transition: all .2s;
-}
-.toggle-sl::before {
-  content: ''; position: absolute; width: 11px; height: 11px; left: 2px; top: 2px;
-  background: var(--text-dim); border-radius: 50%; transition: all .2s;
-}
-.toggle input:checked + .toggle-sl { background: rgba(0,229,180,0.15); border-color: var(--accent2); }
-.toggle input:checked + .toggle-sl::before { transform: translateX(15px); background: var(--accent2); }
+#p2d{display:none;position:absolute;inset:0;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:var(--bg)}
+#p2d.on{display:flex}
+.f2d{display:none;background:#fff;border-radius:12px;padding:14px;border:1px solid var(--bhi);box-shadow:0 12px 48px rgba(0,0,0,.65);max-width:min(340px,80vw)}
+.f2d.rdy{display:block}
+#i2d{max-width:100%;max-height:260px;display:block}
+.l2d{font-family:var(--fn);font-size:9px;color:var(--mu)}
+.sp2{width:28px;height:28px;border:2px solid rgba(74,143,255,.15);border-top-color:var(--acc);border-radius:50%;animation:spin .8s linear infinite}
 
-/* Info card */
-.info-card { display: none; flex-direction: column; gap: 10px; }
-.info-card.visible { display: flex; }
-.info-name { font-size: 14px; font-weight: 700; color: #fff; line-height: 1.2; text-transform: capitalize; }
-.info-formula { font-family: var(--mono); font-size: 11px; color: var(--accent); margin-top: 2px; }
-.info-divider { height: 1px; background: var(--border); }
-.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
-.istat { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 9px; }
-.istat-lbl { font-size: 8px; font-family: var(--mono); letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 3px; }
-.istat-val { font-size: 12px; font-weight: 600; color: var(--text); }
-.geo-card { background: rgba(0,229,180,0.04); border: 1px solid rgba(0,229,180,0.18); border-radius: 8px; padding: 10px; }
-.geo-card .geo-lbl { font-size: 8px; font-family: var(--mono); letter-spacing: 1.5px; text-transform: uppercase; color: rgba(0,229,180,0.5); margin-bottom: 4px; }
-.geo-card .geo-val { font-size: 11px; font-weight: 600; color: var(--accent2); line-height: 1.5; }
-.fact-card { background: rgba(255,107,53,0.04); border: 1px solid rgba(255,107,53,0.15); border-radius: 8px; padding: 10px; }
-.fact-card .fact-lbl { font-size: 8px; font-family: var(--mono); letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,107,53,0.55); margin-bottom: 4px; }
-.fact-card .fact-val { font-size: 10px; color: var(--text-muted); line-height: 1.65; }
+#ppr{display:none;position:absolute;inset:0;flex-direction:column;gap:11px;overflow-y:auto;padding:20px 16px}
+#ppr.on{display:flex}
+.prt{font-size:17px;font-weight:800;color:#fff;text-transform:capitalize}
+.prs{font-size:9px;color:var(--di);font-family:var(--fn);margin-top:2px}
+.prg{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:7px}
+.prc{background:var(--s1);border:1px solid var(--bd);border-radius:9px;padding:11px}
+.prcl{font-size:8px;font-family:var(--fn);letter-spacing:1.5px;text-transform:uppercase;color:var(--di);margin-bottom:4px}
+.prcv{font-size:13px;font-weight:600;color:var(--tx);word-break:break-all}
+.cpy{display:inline-block;margin-top:4px;font-size:9px;font-family:var(--fn);color:var(--tea);border:none;background:none;padding:0;opacity:.7;transition:opacity .15s}
+.cpy:hover{opacity:1}
 
-/* ── VIEWER ── */
-.viewer-wrap { flex: 1; position: relative; background: var(--bg); overflow: hidden; }
-#panel-3d { width: 100%; height: 100%; position: absolute; inset: 0; display: block; }
-#container-3d { width: 100%; height: 100%; display: block; }
+/* loader */
+.ldr{position:absolute;inset:0;z-index:30;background:rgba(6,8,16,.88);backdrop-filter:blur(8px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;transition:opacity .3s}
+.ldr.h{opacity:0;pointer-events:none}
+.spn{width:34px;height:34px;border:2px solid rgba(74,143,255,.15);border-top-color:var(--acc);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.lmol{font-family:var(--fn);font-size:11px;color:var(--tea)}
+.ltx{font-family:var(--fn);font-size:9px;color:var(--mu);letter-spacing:1.5px}
 
-#panel-2d {
-  display: none; position: absolute; inset: 0;
-  align-items: center; justify-content: center;
-  background: var(--bg); flex-direction: column; gap: 16px;
-}
-#panel-2d.active { display: flex; }
-.img2d-frame {
-  max-width: 60%; max-height: 62%;
-  border: 1px solid var(--border-hi); border-radius: 14px;
-  background: #fff; padding: 20px;
-  box-shadow: 0 16px 60px rgba(0,0,0,0.7);
-  display: none; position: relative;
-}
-.img2d-frame.loaded { display: block; }
-#img-2d { max-width: 100%; max-height: 100%; display: block; }
-.img2d-lbl { font-family: var(--mono); font-size: 10px; color: var(--text-muted); }
-.img2d-spinner { width: 32px; height: 32px; border: 2px solid rgba(74,143,255,0.15); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
+/* empty */
+.emp{position:absolute;inset:0;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+.ei{font-size:52px;opacity:.07}
+.et{font-family:var(--fn);font-size:9px;color:var(--di);letter-spacing:1px}
 
-#panel-props {
-  display: none; position: absolute; inset: 0;
-  padding: 28px; overflow-y: auto; flex-direction: column; gap: 14px;
-}
-#panel-props.active { display: flex; }
-.props-header { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
-.props-title { font-size: 18px; font-weight: 800; color: #fff; text-transform: capitalize; }
-.props-mol-formula { font-family: var(--mono); font-size: 11px; color: var(--accent); }
-.props-sub { font-size: 9px; color: var(--text-dim); font-family: var(--mono); }
-.props-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 9px; }
-.prop-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 13px; }
-.prop-lbl { font-size: 8px; font-family: var(--mono); letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 5px; }
-.prop-val { font-size: 14px; font-weight: 600; color: var(--text); word-break: break-all; }
-.prop-copy {
-  display: inline-block; margin-top: 5px; font-size: 9px; font-family: var(--mono);
-  color: var(--accent2); cursor: pointer; opacity: 0.7; transition: opacity .15s; border: none; background: none; padding: 0;
-}
-.prop-copy:hover { opacity: 1; }
+/* molecule badge */
+.bdg{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:10;background:rgba(10,14,26,.92);backdrop-filter:blur(12px);border:1px solid var(--bhi);border-radius:20px;padding:5px 13px;display:none;gap:6px;align-items:center;font-family:var(--fn);font-size:10px;color:var(--mu);white-space:nowrap}
+.bdg.v{display:flex}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--tea);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
-/* Loader */
-.loader {
-  position: absolute; inset: 0; z-index: 30;
-  background: rgba(6,8,16,0.88); backdrop-filter: blur(10px);
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
-  transition: opacity .3s, pointer-events .3s;
-}
-.loader.hidden { opacity: 0; pointer-events: none; }
-.spinner { width: 36px; height: 36px; border: 2px solid rgba(74,143,255,0.15); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
-.loader-txt { font-family: var(--mono); font-size: 9px; color: var(--text-muted); letter-spacing: 1.5px; }
-.loader-mol { font-family: var(--mono); font-size: 11px; color: var(--accent2); }
+/* viewer ctrl buttons */
+.vc{position:absolute;bottom:14px;right:14px;z-index:10;display:flex;flex-direction:column;gap:5px}
+.vb{width:32px;height:32px;border-radius:7px;border:1px solid var(--bhi);background:rgba(10,14,26,.9);backdrop-filter:blur(8px);color:var(--mu);font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.vb:hover{border-color:var(--acc);color:var(--acc)}
+.libst{position:absolute;bottom:14px;left:14px;z-index:10;font-family:var(--fn);font-size:8px;display:flex;flex-direction:column;gap:3px}
+.lok{color:var(--tea)}.lfl{color:#ff7070}
 
-/* Empty state */
-.empty-state {
-  position: absolute; inset: 0; z-index: 5;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+/* ─── BOTTOM TAB BAR (mobile) ────────────────────────── */
+.btbar{
+  display:none;position:fixed;bottom:0;left:0;right:0;z-index:300;
+  height:var(--BH);background:rgba(6,8,16,.97);backdrop-filter:blur(20px);
+  border-top:1px solid var(--bd);padding-bottom:env(safe-area-inset-bottom);
 }
-.empty-icon { font-size: 56px; opacity: 0.07; }
-.empty-text { font-family: var(--mono); font-size: 10px; color: var(--text-dim); letter-spacing: 1px; }
-.empty-sub { font-size: 10px; color: var(--text-dim); opacity: 0.6; }
+.bti{display:flex;height:100%}
+.bt{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  border:none;background:transparent;color:var(--mu);transition:color .15s;padding:0;
+}
+.bt.on{color:var(--tea)}
+.bt svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.bt span{font-family:var(--fn);font-size:9px}
 
-/* Molecule badge */
-.mol-badge {
-  position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
-  z-index: 10; background: rgba(10,14,26,0.88); backdrop-filter: blur(12px);
-  border: 1px solid var(--border-hi); border-radius: 20px; padding: 6px 14px;
-  display: none; gap: 7px; align-items: center; font-family: var(--mono); font-size: 10px; color: var(--text-muted);
-  white-space: nowrap;
-}
-.mol-badge.show { display: flex; }
-.badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent2); animation: pulse 2s infinite; }
-@keyframes pulse { 0%,100%{opacity:1}50%{opacity:.3} }
+/* ─── DRAWER OVERLAY ─────────────────────────────────── */
+.dovl{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.6);backdrop-filter:blur(4px)}
+.dovl.v{display:block}
 
-/* Viewer controls */
-.viewer-ctrl {
-  position: absolute; bottom: 16px; right: 16px; z-index: 10;
-  display: flex; flex-direction: column; gap: 5px;
+/* ─── TOAST ──────────────────────────────────────────── */
+.tst{
+  position:fixed;bottom:70px;left:50%;transform:translateX(-50%) translateY(60px);z-index:500;
+  background:rgba(10,14,26,.97);backdrop-filter:blur(16px);border:1px solid var(--bhi);
+  border-radius:9px;padding:9px 16px;font-family:var(--fn);font-size:11px;color:var(--tx);
+  transition:transform .28s cubic-bezier(.34,1.56,.64,1),opacity .28s;opacity:0;pointer-events:none;white-space:nowrap;
 }
-.vbtn {
-  width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border-hi);
-  background: rgba(10,14,26,0.9); backdrop-filter: blur(10px);
-  color: var(--text-muted); font-size: 14px; cursor: pointer;
-  display: flex; align-items: center; justify-content: center; transition: all .15s;
-}
-.vbtn:hover { border-color: var(--accent); color: var(--accent); background: rgba(74,143,255,0.1); }
+.tst.v{transform:translateX(-50%) translateY(0);opacity:1}
+.tst.e{border-color:rgba(255,60,60,.3);color:#ff7070}
+.tst.k{border-color:rgba(0,229,180,.3);color:var(--tea)}
 
-/* Status corner */
-.status-corner {
-  position: absolute; bottom: 16px; left: 16px; z-index: 10;
-  font-family: var(--mono); font-size: 8px; display: flex; flex-direction: column; gap: 3px;
-}
-.s-ok { color: var(--accent2); }
-.s-fail { color: #ff7070; }
+/* ─── UPGRADE MODAL ──────────────────────────────────── */
+.movl{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.75);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;padding:16px}
+.movl.v{display:flex}
+.modal{background:var(--s1);border:1px solid var(--bhi);border-radius:14px;padding:26px;max-width:450px;width:100%;box-shadow:0 20px 70px rgba(0,0,0,.7);position:relative;animation:mi .28s cubic-bezier(.34,1.56,.64,1);max-height:92dvh;overflow-y:auto}
+@keyframes mi{from{transform:scale(.93) translateY(16px);opacity:0}}
+.mcl{position:absolute;top:13px;right:13px;width:26px;height:26px;border:1px solid var(--bd);border-radius:5px;background:transparent;color:var(--mu);font-size:13px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.mcl:hover{border-color:var(--bhi);color:var(--tx)}
+.mbdg{display:inline-block;font-size:8px;font-family:var(--fn);font-weight:700;letter-spacing:1px;padding:3px 9px;border-radius:4px;margin-bottom:11px;background:linear-gradient(90deg,var(--acc),var(--tea));color:#fff}
+.modal h2{font-size:20px;font-weight:800;color:#fff;margin-bottom:5px}
+.modal p{font-size:11px;color:var(--mu);line-height:1.7;margin-bottom:14px}
+.plans{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.plan{border:1px solid var(--bd);border-radius:9px;padding:13px;background:var(--s2)}
+.plan.ft{border-color:var(--tea);background:rgba(0,229,180,.04)}
+.pn{font-size:11px;font-weight:700;color:#fff;margin-bottom:3px}
+.pp{font-family:var(--fn);font-size:17px;font-weight:700;color:var(--tea)}
+.pp s{font-size:9px;color:var(--mu);font-weight:400;text-decoration:none}
+.pf{font-size:9px;color:var(--mu);margin-top:7px;line-height:1.7;list-style:none}
+.pf li::before{content:'✓ ';color:var(--tea);font-weight:700}
+.bjn{width:100%;padding:11px;border:none;border-radius:9px;font-size:13px;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--acc),var(--tea));box-shadow:0 4px 16px rgba(74,143,255,.25);transition:opacity .2s}
+.bjn:hover{opacity:.88}
+.mnt{font-size:8px;font-family:var(--fn);color:var(--di);text-align:center;margin-top:8px}
 
-/* ── TOAST ── */
-.toast {
-  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
-  z-index: 200; background: rgba(10,14,26,0.95); backdrop-filter: blur(16px);
-  border: 1px solid var(--border-hi); border-radius: 10px;
-  padding: 10px 18px; font-family: var(--mono); font-size: 11px; color: var(--text);
-  transition: transform .3s cubic-bezier(.34,1.56,.64,1), opacity .3s;
-  opacity: 0; pointer-events: none; white-space: nowrap;
-}
-.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-.toast.error { border-color: rgba(255,60,60,0.3); color: #ff7070; }
-.toast.success { border-color: rgba(0,229,180,0.3); color: var(--accent2); }
+/* ─── RESPONSIVE ─────────────────────────────────────── */
+@media (max-width:767px){
+  /* header: hide desktop tabs, show hamburger */
+  .dtabs{display:none}
+  .fbdg{display:none}
+  .hmb{display:flex}
 
-/* ── UPGRADE MODAL ── */
-.modal-overlay {
-  position: fixed; inset: 0; z-index: 300;
-  background: rgba(0,0,0,0.75); backdrop-filter: blur(10px);
-  display: none; align-items: center; justify-content: center;
-}
-.modal-overlay.open { display: flex; }
-.modal {
-  background: var(--surface); border: 1px solid var(--border-hi);
-  border-radius: 16px; padding: 36px; max-width: 480px; width: 90%;
-  box-shadow: 0 24px 80px rgba(0,0,0,0.7); position: relative;
-  animation: modalIn .3s cubic-bezier(.34,1.56,.64,1);
-}
-@keyframes modalIn { from { transform: scale(0.92) translateY(20px); opacity: 0; } }
-.modal-close {
-  position: absolute; top: 16px; right: 16px; width: 28px; height: 28px;
-  border: 1px solid var(--border); border-radius: 6px; background: transparent;
-  color: var(--text-muted); cursor: pointer; font-size: 14px;
-  display: flex; align-items: center; justify-content: center; transition: all .15s;
-}
-.modal-close:hover { border-color: var(--border-hi); color: var(--text); }
-.modal-badge {
-  display: inline-block; font-size: 9px; font-family: var(--mono); font-weight: 700;
-  letter-spacing: 1px; padding: 3px 10px; border-radius: 5px; margin-bottom: 14px;
-  background: linear-gradient(90deg, var(--accent), var(--accent2));
-  color: #fff;
-}
-.modal h2 { font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 6px; }
-.modal p { font-size: 12px; color: var(--text-muted); line-height: 1.7; margin-bottom: 20px; }
-.plan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-.plan-card {
-  border: 1px solid var(--border); border-radius: 10px; padding: 16px; cursor: pointer;
-  transition: all .2s; background: var(--surface2);
-}
-.plan-card.featured {
-  border-color: var(--accent2); background: rgba(0,229,180,0.04);
-  box-shadow: 0 0 0 1px rgba(0,229,180,0.2);
-}
-.plan-name { font-size: 12px; font-weight: 700; color: #fff; margin-bottom: 4px; }
-.plan-price { font-family: var(--mono); font-size: 18px; font-weight: 700; color: var(--accent2); }
-.plan-price span { font-size: 10px; color: var(--text-muted); font-weight: 400; }
-.plan-feat { font-size: 10px; color: var(--text-muted); margin-top: 8px; line-height: 1.6; }
-.plan-feat li { list-style: none; padding: 0; margin: 0; }
-.plan-feat li::before { content: '✓ '; color: var(--accent2); font-weight: 700; }
-.btn-join {
-  width: 100%; padding: 12px; border: none; border-radius: 10px; cursor: pointer;
-  font-family: var(--sans); font-size: 13px; font-weight: 700; color: #fff;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  box-shadow: 0 4px 18px rgba(74,143,255,0.25); transition: opacity .2s;
-}
-.btn-join:hover { opacity: 0.88; }
-.modal-note { font-size: 9px; font-family: var(--mono); color: var(--text-dim); text-align: center; margin-top: 10px; }
+  /* viewer area leaves room for bottom bar */
+  .app{bottom:var(--BH)}
 
-/* ── KEYBOARD SHORTCUT HINT ── */
-kbd {
-  font-family: var(--mono); font-size: 8px; padding: 2px 5px;
-  border: 1px solid var(--border); border-radius: 3px; color: var(--text-dim); background: var(--surface2);
-}
+  /* sidebar becomes a left drawer */
+  .sb{
+    position:fixed;top:var(--HH);left:0;bottom:var(--BH);z-index:250;
+    width:min(290px,88vw);
+    transform:translateX(-100%);
+    transition:transform .26s cubic-bezier(.4,0,.2,1);
+    border-right:1px solid var(--bhi);
+  }
+  .sb.o{transform:translateX(0)}
 
-/* ── RESPONSIVE ── */
-@media (max-width: 768px) {
-  html, body { overflow: auto; }
-  .app-body { flex-direction: column; height: auto; }
-  .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border); max-height: 70vh; }
-  .viewer-wrap { height: 70vw; min-height: 300px; }
-  .header-center { display: none; }
-  .hint-tag { display: none; }
-  .plan-grid { grid-template-columns: 1fr; }
-  .mol-badge { font-size: 9px; }
+  /* show bottom tab bar */
+  .btbar{display:block}
+
+  /* panels inside viewer */
+  #ppr{padding:14px 11px}
+  .prg{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+  .bdg{top:8px;font-size:9px}
+
+  /* modal */
+  .plans{grid-template-columns:1fr}
+  .modal{padding:20px 16px}
+  .tst{bottom:calc(var(--BH) + 8px)}
 }
-@media (min-width: 768px) {
-  .hint-tag { display: block; }
+@media (min-width:768px){
+  .btbar,.hmb,.dovl{display:none!important}
+  .sb{transform:none!important;position:relative}
 }
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
+<!-- ─── HEADER ─────────────────────────────────────────────── -->
 <header>
   <a class="logo" href="#">
-    <div class="logo-mark">CS</div>
-    <div class="logo-info">
-      <h1>ChemSphere Pro</h1>
-      <p>NEET · JEE · Class 11 · 12 Molecular Visualizer</p>
-    </div>
+    <div class="lm">CS</div>
+    <div class="lt"><h1>ChemSphere Pro</h1><p>NEET · JEE · Class 11 &amp; 12</p></div>
   </a>
-  <div class="header-center">
-    <button class="nav-pill active" id="nav-3d" onclick="switchMode('3d',this)">3D Model</button>
-    <button class="nav-pill" id="nav-2d" onclick="switchMode('2d',this)">2D Structure</button>
-    <button class="nav-pill" id="nav-props" onclick="switchMode('props',this)">Properties</button>
+
+  <div class="dtabs">
+    <button class="dtab on"  id="d3d"    onclick="setMode('3d')">3D Model</button>
+    <button class="dtab"     id="d2d"    onclick="setMode('2d')">2D Structure</button>
+    <button class="dtab"     id="dpr"    onclick="setMode('props')">Properties</button>
   </div>
-  <div class="header-right">
-    <span class="hint-tag">⟳ Drag · Scroll zoom · <kbd>⌘K</kbd> search</span>
-    <span class="free-badge">FREE</span>
-    <button class="btn-upgrade" onclick="openModal()">Upgrade →</button>
+
+  <div class="hr">
+    <span class="fbdg">FREE</span>
+    <button class="bupg" onclick="openMod()">Upgrade →</button>
+    <button class="hmb" id="hmb" onclick="togDrawer()" aria-label="Molecules">
+      <em></em><em></em><em></em>
+    </button>
   </div>
 </header>
 
-<!-- APP -->
-<div class="app-body">
+<!-- drawer backdrop -->
+<div class="dovl" id="dovl" onclick="closeDrawer()"></div>
+
+<!-- ─── MAIN APP ────────────────────────────────────────────── -->
+<div class="app">
 
   <!-- SIDEBAR -->
-  <aside class="sidebar">
+  <aside class="sb" id="sb">
 
     <!-- Search -->
-    <div class="s-block">
-      <div class="s-label">Search Any Molecule</div>
-      <div class="search-wrap">
-        <input class="search-input" id="mol-input" placeholder="caffeine, aspirin, glucose, benzene…" autocomplete="off">
-        <button class="btn-search" onclick="loadBySearch()">Go →</button>
+    <div class="ss">
+      <div class="sl">Search Any Molecule</div>
+      <div class="srw">
+        <input class="si" id="mol-in" placeholder="caffeine, aspirin, benzene…" autocomplete="off">
+        <button class="bgo" onclick="doSearch()">Go →</button>
       </div>
-      <div class="err-box" id="err-box"></div>
+      <div class="eb" id="eb"></div>
     </div>
 
-    <!-- Category -->
-    <div class="s-block">
-      <div class="s-label">Chapter</div>
-      <div class="cat-tabs" id="cat-tabs">
-        <button class="cat-tab active" data-cat="vsepr" onclick="filterCat('vsepr',this)">VSEPR <span class="n">8</span></button>
-        <button class="cat-tab" data-cat="organic" onclick="filterCat('organic',this)">Organic <span class="n">5</span></button>
-        <button class="cat-tab" data-cat="biomol" onclick="filterCat('biomol',this)">Bio <span class="n">4</span></button>
-        <button class="cat-tab" data-cat="inorganic" onclick="filterCat('inorganic',this)">Inorganic <span class="n">4</span></button>
+    <!-- Chapter categories -->
+    <div class="ss">
+      <div class="sl">Chapter</div>
+      <div class="ctbs" id="ctbs">
+        <button class="ctb on" data-cat="vsepr"     onclick="pickCat('vsepr',this)">VSEPR</button>
+        <button class="ctb"    data-cat="organic"   onclick="pickCat('organic',this)">Organic</button>
+        <button class="ctb"    data-cat="biomol"    onclick="pickCat('biomol',this)">Bio</button>
+        <button class="ctb"    data-cat="inorganic" onclick="pickCat('inorganic',this)">Inorganic</button>
       </div>
     </div>
 
-    <!-- Grid -->
-    <div class="s-block">
-      <div class="s-label">Quick Load</div>
-      <div class="mol-grid" id="mol-grid"></div>
+    <!-- Molecule grid -->
+    <div class="ss">
+      <div class="sl">Quick Load</div>
+      <div class="mg" id="mg"></div>
     </div>
 
-    <!-- 3D Controls -->
-    <div class="s-block" id="ctrl-block">
-      <div class="s-label">3D Settings</div>
-      <div class="ctrl-row">
-        <span class="ctrl-label">Model Style</span>
-        <select class="ctrl-select" id="style-sel" onchange="updateStyle()">
+    <!-- 3D Settings -->
+    <div class="ss" id="s3d">
+      <div class="sl">3D Settings</div>
+      <div class="cr">
+        <span class="cl">Model Style</span>
+        <select class="cs" id="sty" onchange="applyStyle()">
           <option value="stick">Stick</option>
           <option value="sphere">Spacefill</option>
           <option value="line">Wireframe</option>
         </select>
       </div>
-      <div class="ctrl-row">
-        <span class="ctrl-label">Color Scheme</span>
-        <select class="ctrl-select" id="color-sel" onchange="updateStyle()">
+      <div class="cr">
+        <span class="cl">Color Scheme</span>
+        <select class="cs" id="col" onchange="applyStyle()">
           <option value="Jmol">Jmol (CPK)</option>
           <option value="ssPyMol">PyMol</option>
           <option value="rasmol">RasMol</option>
         </select>
       </div>
-      <div class="ctrl-row">
-        <span class="ctrl-label">Auto-Rotate</span>
-        <label class="toggle">
-          <input type="checkbox" id="rot-tog" checked onchange="toggleRot()">
-          <span class="toggle-sl"></span>
+      <div class="cr">
+        <span class="cl">Auto-Rotate</span>
+        <label class="tog">
+          <input type="checkbox" id="rot" checked onchange="togRot()">
+          <span class="tsl"></span>
         </label>
       </div>
     </div>
 
-    <!-- Info Card -->
-    <div class="s-block">
-      <div class="s-label">Molecule Info</div>
-      <div class="info-card" id="info-card">
+    <!-- Molecule Info -->
+    <div class="ss">
+      <div class="sl">Molecule Info</div>
+      <div class="ic" id="ic">
         <div>
-          <div class="info-name" id="i-name">—</div>
-          <div class="info-formula" id="i-formula">—</div>
+          <div class="inn" id="i-nm">—</div>
+          <div class="inf" id="i-fm">—</div>
         </div>
-        <div class="info-divider"></div>
-        <div class="info-grid">
-          <div class="istat"><div class="istat-lbl">Mol. Weight</div><div class="istat-val" id="i-wt">—</div></div>
-          <div class="istat"><div class="istat-lbl">Hybridization</div><div class="istat-val" id="i-hyb">—</div></div>
-          <div class="istat"><div class="istat-lbl">Bond Angle</div><div class="istat-val" id="i-angle">—</div></div>
-          <div class="istat"><div class="istat-lbl">Dipole Moment</div><div class="istat-val" id="i-dipole">—</div></div>
+        <div class="idv"></div>
+        <div class="igr">
+          <div class="ist"><div class="istl">Mol. Weight</div><div class="istv" id="i-wt">—</div></div>
+          <div class="ist"><div class="istl">Hybridization</div><div class="istv" id="i-hy">—</div></div>
+          <div class="ist"><div class="istl">Bond Angle</div><div class="istv" id="i-an">—</div></div>
+          <div class="ist"><div class="istl">Dipole Moment</div><div class="istv" id="i-dp">—</div></div>
         </div>
-        <div class="geo-card">
-          <div class="geo-lbl">VSEPR Geometry</div>
-          <div class="geo-val" id="i-geo">—</div>
+        <div class="geo">
+          <div class="geol">VSEPR Geometry</div>
+          <div class="geov" id="i-go">—</div>
         </div>
-        <div class="fact-card">
-          <div class="fact-lbl">⚡ NEET / JEE Fact</div>
-          <div class="fact-val" id="i-fact">—</div>
+        <div class="fct">
+          <div class="fctl">⚡ NEET / JEE Fact</div>
+          <div class="fctv" id="i-fc">—</div>
         </div>
       </div>
     </div>
 
   </aside>
 
-  <!-- VIEWER AREA -->
-  <div class="viewer-wrap">
+  <!-- VIEWER -->
+  <div class="vw" id="vw">
 
     <!-- Loader -->
-    <div class="loader hidden" id="loader">
-      <div class="spinner"></div>
-      <div class="loader-mol" id="loader-mol"></div>
-      <div class="loader-txt" id="loader-txt">FETCHING DATA…</div>
+    <div class="ldr" id="ldr">
+      <div class="spn"></div>
+      <div class="lmol" id="lmol"></div>
+      <div class="ltx"  id="ltx">LOADING…</div>
     </div>
 
     <!-- Empty state -->
-    <div class="empty-state" id="empty-st">
-      <div class="empty-icon">⬡</div>
-      <div class="empty-text">SELECT OR SEARCH A MOLECULE</div>
-      <div class="empty-sub">Methane loading…</div>
+    <div class="emp" id="emp">
+      <div class="ei">⬡</div>
+      <div class="et">SELECT A MOLECULE TO BEGIN</div>
     </div>
 
     <!-- 3D panel -->
-    <div id="panel-3d"><div id="container-3d"></div></div>
+    <div id="p3d"><div id="c3d"></div></div>
 
     <!-- 2D panel -->
-    <div id="panel-2d">
-      <div class="img2d-spinner" id="img2d-spinner"></div>
-      <div class="img2d-frame" id="img2d-frame">
-        <img id="img-2d" src="" alt="">
-      </div>
-      <div class="img2d-lbl" id="img2d-lbl">2D Structure — NCI Cactus</div>
+    <div id="p2d">
+      <div class="sp2" id="sp2"></div>
+      <div class="f2d" id="f2d"><img id="i2d" src="" alt="2D structure"></div>
+      <div class="l2d" id="l2d">2D Structure — NCI Cactus</div>
     </div>
 
     <!-- Properties panel -->
-    <div id="panel-props">
+    <div id="ppr">
       <div>
-        <div class="props-header">
-          <div class="props-title" id="props-title">Properties</div>
-          <div class="props-mol-formula" id="props-formula"></div>
-        </div>
-        <div class="props-sub">Live data · NCI Cactus API</div>
+        <div class="prt" id="prt">Properties</div>
+        <div class="prs">Live data · NCI Cactus API</div>
       </div>
-      <div class="props-grid" id="props-grid"></div>
+      <div class="prg" id="prg"></div>
     </div>
 
-    <!-- Molecule badge -->
-    <div class="mol-badge" id="mol-badge">
-      <span class="badge-dot"></span>
-      <span id="badge-name">—</span>
+    <!-- Molecule name badge -->
+    <div class="bdg" id="bdg"><span class="dot"></span><span id="bnm">—</span></div>
+
+    <!-- 3D Viewer control buttons -->
+    <div class="vc" id="vc">
+      <button class="vb" onclick="resetV()" title="Reset">⌖</button>
+      <button class="vb" onclick="zoomV(1.3)" title="Zoom in">+</button>
+      <button class="vb" onclick="zoomV(0.7)" title="Zoom out">−</button>
     </div>
 
-    <!-- Viewer controls (3D only) -->
-    <div class="viewer-ctrl" id="v-ctrl">
-      <button class="vbtn" onclick="resetView()" title="Reset view">⌖</button>
-      <button class="vbtn" onclick="doZoom(1.3)" title="Zoom in">+</button>
-      <button class="vbtn" onclick="doZoom(0.7)" title="Zoom out">−</button>
-    </div>
+    <div class="libst" id="libst"></div>
+  </div>
+</div>
 
-    <!-- Library status -->
-    <div class="status-corner" id="status-corner"></div>
+<!-- ─── BOTTOM TAB BAR (mobile only) ───────────────────────── -->
+<div class="btbar">
+  <div class="bti">
+    <button class="bt on" id="b3d" onclick="setMode('3d')">
+      <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      <span>3D</span>
+    </button>
+    <button class="bt" id="b2d" onclick="setMode('2d')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/><path d="M4.9 4.9l2.1 2.1m9 9 2.1 2.1M4.9 19.1l2.1-2.1m9-9 2.1-2.1"/></svg>
+      <span>2D</span>
+    </button>
+    <button class="bt" id="bpr" onclick="setMode('props')">
+      <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
+      <span>Props</span>
+    </button>
+    <button class="bt" id="bmol" onclick="togDrawer()">
+      <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      <span>Molecules</span>
+    </button>
   </div>
 </div>
 
 <!-- TOAST -->
-<div class="toast" id="toast"></div>
+<div class="tst" id="tst"></div>
 
 <!-- UPGRADE MODAL -->
-<div class="modal-overlay" id="modal-overlay" onclick="handleOverlayClick(event)">
+<div class="movl" id="movl" onclick="if(event.target===this)closeMod()">
   <div class="modal">
-    <button class="modal-close" onclick="closeModal()">✕</button>
-    <div class="modal-badge">CHEMSPHERE PRO</div>
+    <button class="mcl" onclick="closeMod()">✕</button>
+    <div class="mbdg">CHEMSPHERE PRO</div>
     <h2>Unlock Everything</h2>
-    <p>Free version gives you 21 hand-picked NEET/JEE molecules. Pro unlocks 500+ molecules, 3D protein structures, quiz mode, offline access, and AI-powered molecular explanations.</p>
-    <div class="plan-grid">
-      <div class="plan-card">
-        <div class="plan-name">Free</div>
-        <div class="plan-price">₹0 <span>/ forever</span></div>
-        <ul class="plan-feat">
+    <p>Free gives you 21 curated NEET/JEE molecules. Pro unlocks 500+ structures, quiz mode, offline access, AI molecular assistant and much more.</p>
+    <div class="plans">
+      <div class="plan">
+        <div class="pn">Free</div>
+        <div class="pp">₹0 <s>/ forever</s></div>
+        <ul class="pf">
           <li>21 NEET/JEE molecules</li>
           <li>3D · 2D · Properties</li>
-          <li>VSEPR facts & geometry</li>
-          <li>NCI Cactus search</li>
+          <li>VSEPR facts</li>
+          <li>Cactus search</li>
         </ul>
       </div>
-      <div class="plan-card featured">
-        <div class="plan-name">Pro</div>
-        <div class="plan-price">₹199 <span>/ month</span></div>
-        <ul class="plan-feat">
+      <div class="plan ft">
+        <div class="pn">Pro</div>
+        <div class="pp">₹199 <s>/ month</s></div>
+        <ul class="pf">
           <li>500+ molecules</li>
-          <li>Protein 3D structures</li>
-          <li>Quiz & flashcard mode</li>
+          <li>Protein 3D viewer</li>
+          <li>Quiz &amp; flashcards</li>
           <li>Offline access</li>
-          <li>AI molecular assistant</li>
+          <li>AI assistant</li>
           <li>Export structures</li>
         </ul>
       </div>
     </div>
-    <button class="btn-join" onclick="showToast('Coming soon — notify me list opened!','success'); closeModal();">Join Pro Waitlist →</button>
-    <div class="modal-note">No credit card required · Cancel anytime · Made for Indian students 🇮🇳</div>
+    <button class="bjn" onclick="toast('Waitlist joined! We will notify you.','k');closeMod()">Join Pro Waitlist →</button>
+    <div class="mnt">No credit card · Made for Indian students 🇮🇳</div>
   </div>
 </div>
 
 <script>
-/* ═══════════════════════════════════════════════════════
-   MOLECULE DATABASE — curated for NEET / JEE
-═══════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════
+   MOLECULE DATABASE
+   Key = used for DB lookup + grid
+   pname = sent to NCI Cactus API (plain English)
+════════════════════════════════════════ */
 const DB = {
   vsepr: [
-    { key:'H2O',   pname:'water',                    formula:'H₂O',   name:'Water',                   shape:'Bent',               weight:'18.02',  hybrid:'sp³',   angle:'104.5°',   dipole:'1.85 D', geo:'Bent / V-Shape — 2 lone pairs on O reduce angle below 109.5°', fact:'Bond angle 104.5° (not 109.5°) due to lone pair–bond pair repulsion. Most common NEET VSEPR question.' },
-    { key:'CO2',   pname:'carbon dioxide',            formula:'CO₂',   name:'Carbon Dioxide',          shape:'Linear',             weight:'44.01',  hybrid:'sp',    angle:'180°',     dipole:'0 D',    geo:'Linear — symmetric 2 C=O bonds, no lone pairs on C', fact:'ZERO net dipole despite polar C=O bonds. Symmetry causes cancellation — classic NEET trap!' },
-    { key:'BF3',   pname:'boron trifluoride',         formula:'BF₃',   name:'Boron Trifluoride',       shape:'Trigonal Planar',    weight:'67.81',  hybrid:'sp²',   angle:'120°',     dipole:'0 D',    geo:'Trigonal Planar — sp², empty p-orbital on B (Lewis acid)', fact:'BF₃ is a strong Lewis acid. Its empty p-orbital accepts lone pairs. Dipole = 0 (symmetric).' },
-    { key:'CH4',   pname:'methane',                   formula:'CH₄',   name:'Methane',                 shape:'Tetrahedral',        weight:'16.04',  hybrid:'sp³',   angle:'109.5°',   dipole:'0 D',    geo:'Tetrahedral — perfect symmetry, all 4 bond pairs equivalent', fact:'All bonds equivalent by symmetry → dipole = 0. The ideal tetrahedral reference molecule.' },
-    { key:'NH3',   pname:'ammonia',                   formula:'NH₃',   name:'Ammonia',                 shape:'Pyramidal',          weight:'17.03',  hybrid:'sp³',   angle:'107°',     dipole:'1.47 D', geo:'Trigonal Pyramidal — 1 lone pair on N lowers angle to 107°', fact:'NH₃ is a Lewis base & Brønsted base. Lone pair on N is key for H-bond donation & nucleophilicity.' },
-    { key:'PCl5',  pname:'phosphorus pentachloride',  formula:'PCl₅',  name:'Phosphorus Pentachloride',shape:'Trig. Bipyramidal',  weight:'208.24', hybrid:'sp³d',  angle:'90°/120°', dipole:'0 D',    geo:'Trigonal Bipyramidal — axial bonds longer than equatorial', fact:'Axial bonds (240 pm) > equatorial bonds (202 pm) — expanded octet on P. JEE Advanced level.' },
-    { key:'SF6',   pname:'sulfur hexafluoride',       formula:'SF₆',   name:'Sulfur Hexafluoride',     shape:'Octahedral',         weight:'146.06', hybrid:'sp³d²', angle:'90°',      dipole:'0 D',    geo:'Octahedral — sp³d², all 90° bond angles, no lone pairs', fact:'SF₆ is a greenhouse gas 23,500× more potent than CO₂. Completely inert due to perfect octahedral symmetry.' },
-    { key:'XeF4',  pname:'xenon tetrafluoride',       formula:'XeF₄',  name:'Xenon Tetrafluoride',     shape:'Square Planar',      weight:'207.28', hybrid:'sp³d²', angle:'90°',      dipole:'0 D',    geo:'Square Planar — 2 lone pairs sit opposite (trans) each other', fact:'6 electron pairs (sp³d²) but 2 lone pairs cancel → Square Planar NOT octahedral. Key JEE distinction.' },
+    {key:'vsepr-h2o',  pname:'water',                    f:'H₂O',   n:'Water',                   s:'Bent',              w:'18.02', h:'sp³',   a:'104.5°', d:'1.85 D', g:'Bent / V-Shape — 2 lone pairs on O reduce bond angle below 109.5°',      x:'Bond angle 104.5° (not 109.5°) due to lone pair–bond pair repulsion. Most common NEET VSEPR question.'},
+    {key:'vsepr-co2',  pname:'carbon dioxide',            f:'CO₂',   n:'Carbon Dioxide',          s:'Linear',            w:'44.01', h:'sp',    a:'180°',   d:'0 D',    g:'Linear — symmetric, 2 C=O bonds, no lone pairs on C',                    x:'ZERO net dipole despite polar C=O bonds — symmetry causes cancellation. Classic NEET trap!'},
+    {key:'vsepr-bf3',  pname:'boron trifluoride',         f:'BF₃',   n:'Boron Trifluoride',       s:'Trigonal Planar',   w:'67.81', h:'sp²',   a:'120°',   d:'0 D',    g:'Trigonal Planar — sp², empty p-orbital on B (Lewis acid)',                x:'BF₃ is a strong Lewis acid. Its empty p-orbital accepts lone pairs. Dipole = 0 (symmetric).'},
+    {key:'vsepr-ch4',  pname:'methane',                   f:'CH₄',   n:'Methane',                 s:'Tetrahedral',       w:'16.04', h:'sp³',   a:'109.5°', d:'0 D',    g:'Tetrahedral — perfect symmetry, all 4 bond pairs equivalent',             x:'All bonds equivalent by symmetry → dipole = 0. The ideal tetrahedral reference molecule.'},
+    {key:'vsepr-nh3',  pname:'ammonia',                   f:'NH₃',   n:'Ammonia',                 s:'Pyramidal',         w:'17.03', h:'sp³',   a:'107°',   d:'1.47 D', g:'Trigonal Pyramidal — 1 lone pair on N lowers angle to 107°',              x:'NH₃ is a Lewis base & Brønsted base. Lone pair on N is key for H-bond donation & nucleophilicity.'},
+    {key:'vsepr-pcl5', pname:'phosphorus pentachloride',  f:'PCl₅',  n:'PCl₅',                    s:'Trig. Bipyramidal', w:'208.2', h:'sp³d',  a:'90°/120°',d:'0 D',   g:'Trigonal Bipyramidal — axial bonds longer than equatorial',               x:'Axial bonds (240 pm) > equatorial bonds (202 pm). Expanded octet on P. JEE Advanced level.'},
+    {key:'vsepr-sf6',  pname:'sulfur hexafluoride',       f:'SF₆',   n:'Sulfur Hexafluoride',     s:'Octahedral',        w:'146.1', h:'sp³d²', a:'90°',    d:'0 D',    g:'Octahedral — sp³d², all 90° bond angles, no lone pairs',                 x:'SF₆ is a greenhouse gas 23,500× more potent than CO₂. Inert due to perfect octahedral symmetry.'},
+    {key:'vsepr-xef4', pname:'xenon tetrafluoride',       f:'XeF₄',  n:'Xenon Tetrafluoride',     s:'Square Planar',     w:'207.3', h:'sp³d²', a:'90°',    d:'0 D',    g:'Square Planar — 2 lone pairs sit opposite (trans) each other',            x:'6 electron pairs (sp³d²) but 2 lone pairs cancel → Square Planar. Key JEE distinction.'},
   ],
   organic: [
-    { key:'C6H6',        pname:'benzene',      formula:'C₆H₆',    name:'Benzene',       shape:'Hexagonal',       weight:'78.11',  hybrid:'sp²', angle:'120°',   dipole:'0 D',    geo:'Planar hexagonal ring — resonance stabilized, delocalized π electrons', fact:'6 equivalent C-C bonds via resonance. Aromatic by Hückel's rule (4n+2, n=1). Dipole = 0.' },
-    { key:'ethanol',     pname:'ethanol',      formula:'C₂H₅OH',  name:'Ethanol',       shape:'Tetrahedral C',   weight:'46.07',  hybrid:'sp³', angle:'109.5°', dipole:'1.69 D', geo:'Tetrahedral C atoms; bent O (H-bond donor, –OH group)', fact:'–OH forms H-bonds with water → fully miscible. Bp (78°C) >> propane (–42°C) despite similar MW.' },
-    { key:'acetone',     pname:'acetone',      formula:'C₃H₆O',   name:'Acetone',       shape:'Trigonal Planar', weight:'58.08',  hybrid:'sp²', angle:'~120°',  dipole:'2.91 D', geo:'Trigonal planar at carbonyl C (sp²) — C=O double bond', fact:'Ketone (propanone). Most polar common solvent without H-bond donation. Used in nail polish remover.' },
-    { key:'acetic acid', pname:'acetic acid',  formula:'CH₃COOH', name:'Acetic Acid',   shape:'Planar',          weight:'60.05',  hybrid:'sp²', angle:'~120°',  dipole:'1.74 D', geo:'Planar –COOH group; sp² carbonyl carbon with resonance', fact:'Forms H-bonded DIMERS in nonpolar solvents → apparent MW ~120 g/mol. Classic JEE concept.' },
-    { key:'formaldehyde',pname:'formaldehyde', formula:'CH₂O',    name:'Formaldehyde',  shape:'Trigonal Planar', weight:'30.03',  hybrid:'sp²', angle:'~120°',  dipole:'2.33 D', geo:'Trigonal planar (sp²) — simplest aldehyde, C=O double bond', fact:'Formalin (37% aq. solution) = preservative. Reacts with NaHSO₃ to form bisulfite addition product.' },
+    {key:'org-benz',   pname:'benzene',      f:'C₆H₆',    n:'Benzene',      s:'Hexagonal',       w:'78.11', h:'sp²', a:'120°',   d:'0 D',    g:'Planar hexagonal ring — resonance stabilized, delocalized π electrons', x:'6 equivalent C-C bonds via resonance. Aromatic (Hückel: 4n+2, n=1). Dipole = 0.'},
+    {key:'org-etoh',   pname:'ethanol',      f:'C₂H₅OH',  n:'Ethanol',      s:'Tetrahedral C',   w:'46.07', h:'sp³', a:'109.5°', d:'1.69 D', g:'Tetrahedral C atoms; bent O (H-bond donor, –OH group)',                x:'–OH forms H-bonds → fully miscible in water. Bp 78°C >> propane –42°C, similar MW.'},
+    {key:'org-acet',   pname:'acetone',      f:'C₃H₆O',   n:'Acetone',      s:'Trigonal Planar', w:'58.08', h:'sp²', a:'~120°',  d:'2.91 D', g:'Trigonal planar at carbonyl C (sp²) — C=O double bond',                x:'Ketone (propanone). Most polar common solvent without H-bond donation. Nail polish remover.'},
+    {key:'org-acac',   pname:'acetic acid',  f:'CH₃COOH', n:'Acetic Acid',  s:'Planar –COOH',    w:'60.05', h:'sp²', a:'~120°',  d:'1.74 D', g:'Planar –COOH group; sp² carbonyl carbon with resonance',               x:'Forms H-bonded DIMERS in nonpolar solvents → apparent MW ~120 g/mol. Classic JEE concept.'},
+    {key:'org-form',   pname:'formaldehyde', f:'CH₂O',    n:'Formaldehyde', s:'Trigonal Planar', w:'30.03', h:'sp²', a:'~120°',  d:'2.33 D', g:'Trigonal planar (sp²) — simplest aldehyde, C=O double bond',           x:'Formalin (37% aq.) = preservative. Reacts with NaHSO₃ → bisulfite addition product.'},
   ],
   biomol: [
-    { key:'glucose',     pname:'glucose',      formula:'C₆H₁₂O₆', name:'Glucose',       shape:'Pyranose Ring',   weight:'180.16', hybrid:'sp³', angle:'109.5°', dipole:'—', geo:'Pyranose ring — 6-membered; chair conformation, all sp³ C', fact:'α-glucose (36%) and β-glucose (64%) in solution — mutarotation occurs. D-glucose is dextrorotatory.' },
-    { key:'adenine',     pname:'adenine',      formula:'C₅H₅N₅',  name:'Adenine',       shape:'Planar Bicyclic', weight:'135.13', hybrid:'sp²', angle:'~120°',  dipole:'—', geo:'Planar purine — bicyclic aromatic (sp² N and C atoms)', fact:'Pairs with Thymine via 2 H-bonds in DNA; Uracil in RNA. Component of ATP (adenosine triphosphate).' },
-    { key:'cholesterol', pname:'cholesterol',  formula:'C₂₇H₄₆O', name:'Cholesterol',   shape:'Steroid Core',    weight:'386.65', hybrid:'sp³', angle:'109.5°', dipole:'—', geo:'Four fused rings (steroid skeleton) — mostly sp³ carbons', fact:'Precursor to Vitamin D, bile acids & steroid hormones. Transported in blood by LDL ("bad" cholesterol).' },
-    { key:'alanine',     pname:'alanine',      formula:'C₃H₇NO₂', name:'Alanine',       shape:'Tetrahedral',     weight:'89.09',  hybrid:'sp³', angle:'109.5°', dipole:'—', geo:'Tetrahedral α-carbon (sp³) — simplest chiral amino acid', fact:'Simplest chiral (L-configuration) amino acid. R-group = –CH₃. Non-essential amino acid.' },
+    {key:'bio-gluc',   pname:'glucose',      f:'C₆H₁₂O₆', n:'Glucose',     s:'Pyranose Ring',   w:'180.2', h:'sp³', a:'109.5°', d:'—', g:'Pyranose ring — 6-membered; chair conformation, all sp³ C',               x:'α-glucose (36%) and β-glucose (64%) in solution — mutarotation. D-glucose is dextrorotatory.'},
+    {key:'bio-aden',   pname:'adenine',      f:'C₅H₅N₅',  n:'Adenine',     s:'Planar Bicyclic', w:'135.1', h:'sp²', a:'~120°',  d:'—', g:'Planar purine — bicyclic aromatic (sp² N and C atoms)',                    x:'Pairs with Thymine via 2 H-bonds in DNA; Uracil in RNA. Component of ATP.'},
+    {key:'bio-chol',   pname:'cholesterol',  f:'C₂₇H₄₆O', n:'Cholesterol', s:'Steroid Core',    w:'386.7', h:'sp³', a:'109.5°', d:'—', g:'Four fused rings (steroid skeleton) — mostly sp³ carbons',                 x:'Precursor to Vitamin D, bile acids & steroid hormones. Transported by LDL (bad cholesterol).'},
+    {key:'bio-alan',   pname:'alanine',      f:'C₃H₇NO₂', n:'Alanine',     s:'Tetrahedral',     w:'89.09', h:'sp³', a:'109.5°', d:'—', g:'Tetrahedral α-carbon (sp³) — simplest chiral amino acid',                  x:'Simplest chiral (L-config) amino acid. R-group = –CH₃. Non-essential amino acid.'},
   ],
   inorganic: [
-    { key:'H2SO4',           pname:'sulfuric acid',    formula:'H₂SO₄',  name:'Sulfuric Acid',    shape:'Tetrahedral',     weight:'98.08',  hybrid:'sp³',   angle:'109.5°', dipole:'—', geo:'Tetrahedral around S — sp³, two S=O and two S–OH bonds', fact:'Conc. H₂SO₄ = strong dehydrating & oxidizing agent. ALWAYS add acid to water (not the reverse!).' },
-    { key:'HNO3',            pname:'nitric acid',      formula:'HNO₃',   name:'Nitric Acid',      shape:'Trigonal Planar', weight:'63.01',  hybrid:'sp²',   angle:'~120°',  dipole:'—', geo:'Trigonal planar around N (sp²) — resonance in NO₃⁻', fact:'HNO₃ + conc. HCl (1:3 ratio) = Aqua Regia — dissolves gold & platinum. Brown ring test for NO₃⁻.' },
-    { key:'ammonia',         pname:'ammonia',          formula:'NH₃',    name:'Ammonia',          shape:'Pyramidal',        weight:'17.03',  hybrid:'sp³',   angle:'107°',   dipole:'1.47 D', geo:'Trigonal Pyramidal — 1 lone pair on N', fact:'Haber Process: N₂ + 3H₂ ⇌ 2NH₃ (Fe catalyst, ~500°C, ~200 atm). Reversible reaction — Le Chatelier.' },
-    { key:'phosphoric acid', pname:'phosphoric acid',  formula:'H₃PO₄',  name:'Phosphoric Acid',  shape:'Tetrahedral',     weight:'98.0',   hybrid:'sp³',   angle:'~109.5°',dipole:'—', geo:'Tetrahedral around P — sp³ hybridized phosphorus', fact:'Triprotic acid (Ka1 >> Ka2 >> Ka3). Phosphodiester bonds in DNA/RNA backbone — crucial for life.' },
+    {key:'in-h2so4',   pname:'sulfuric acid',    f:'H₂SO₄',  n:'Sulfuric Acid',    s:'Tetrahedral',     w:'98.08', h:'sp³',   a:'109.5°', d:'—', g:'Tetrahedral around S — sp³, two S=O and two S–OH bonds',      x:'Conc. H₂SO₄ = strong dehydrating & oxidising agent. ALWAYS add acid to water!'},
+    {key:'in-hno3',    pname:'nitric acid',      f:'HNO₃',   n:'Nitric Acid',      s:'Trigonal Planar', w:'63.01', h:'sp²',   a:'~120°',  d:'—', g:'Trigonal planar around N (sp²) — resonance in NO₃⁻',             x:'HNO₃ + conc. HCl (1:3) = Aqua Regia — dissolves gold & platinum. Brown ring test for NO₃⁻.'},
+    {key:'in-nh3',     pname:'ammonia',          f:'NH₃',    n:'Ammonia',          s:'Pyramidal',        w:'17.03', h:'sp³',   a:'107°',   d:'1.47 D', g:'Trigonal Pyramidal — 1 lone pair on N',                    x:'Haber Process: N₂ + 3H₂ ⇌ 2NH₃ (Fe catalyst, ~500°C, ~200 atm). Le Chatelier principle.'},
+    {key:'in-h3po4',   pname:'phosphoric acid',  f:'H₃PO₄',  n:'Phosphoric Acid',  s:'Tetrahedral',     w:'98.0',  h:'sp³',   a:'~109.5°',d:'—', g:'Tetrahedral around P — sp³ hybridised phosphorus',               x:'Triprotic acid (Ka1>>Ka2>>Ka3). Phosphodiester bonds in DNA/RNA backbone.'},
   ]
 };
 
-/* ═══════════════════════════════════════════════════════
+/* ════════════════════════════════════════
    STATE
-═══════════════════════════════════════════════════════ */
-let viewer       = null;
-let currentModel = null;
-let isRotating   = true;
-let currentCat   = 'vsepr';
-let selectedKey  = null;
-let currentQuery = null;
-let currentMeta  = null;
-let currentMode  = '3d';
-let dmolReady    = false;
-let renderToken  = 0;  // cancellation token for race conditions
-
+════════════════════════════════════════ */
+let viewer = null, model = null;
+let rotating = true;
+let curCat = 'vsepr', selKey = null;
+let curQ = null, curMeta = null, curMode = '3d';
+let dmol = false, token = 0;
 const CACTUS = 'https://cactus.nci.nih.gov/chemical/structure';
 
-/* ═══════════════════════════════════════════════════════
+/* ════════════════════════════════════════
    INIT
-═══════════════════════════════════════════════════════ */
+════════════════════════════════════════ */
 window.addEventListener('load', () => {
-  // Library check
-  const corner = document.getElementById('status-corner');
+  const ls = document.getElementById('libst');
+
+  // 3Dmol init
   if (typeof $3Dmol !== 'undefined') {
-    dmolReady = true;
-    corner.innerHTML = '<span class="s-ok">✓ 3Dmol.js ready</span><span class="s-ok">✓ NCI Cactus API</span>';
-  } else {
-    corner.innerHTML = '<span class="s-fail">✗ 3Dmol failed — 2D fallback</span><span class="s-ok">✓ NCI Cactus API</span>';
-  }
-
-  // Init viewer
-  if (dmolReady) {
+    dmol = true;
+    ls.innerHTML = '<span class="lok">✓ 3Dmol.js ready</span><span class="lok">✓ NCI Cactus API</span>';
     try {
-      viewer = $3Dmol.createViewer(document.getElementById('container-3d'), { backgroundColor: '#060810' });
+      viewer = $3Dmol.createViewer(document.getElementById('c3d'), { backgroundColor: '#060810' });
       viewer.resize();
-    } catch(e) { dmolReady = false; console.warn('3Dmol init:', e); }
+    } catch(e) { dmol = false; console.warn('3Dmol init:', e); }
+  } else {
+    ls.innerHTML = '<span class="lfl">✗ 3Dmol failed — 2D fallback</span><span class="lok">✓ NCI Cactus API</span>';
   }
 
+  // Render initial grid
   renderGrid('vsepr');
+
+  // Resize listener
   window.addEventListener('resize', () => { if (viewer) viewer.resize(); });
 
-  // Keyboard shortcut: Cmd/Ctrl+K → focus search
+  // Keyboard: Cmd/Ctrl+K → focus search
   document.addEventListener('keydown', e => {
-    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-      e.preventDefault();
-      document.getElementById('mol-input').focus();
-      document.getElementById('mol-input').select();
-    }
-    if (e.key === 'Escape') closeModal();
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); document.getElementById('mol-in').focus(); }
+    if (e.key === 'Escape') { closeMod(); closeDrawer(); }
   });
 
-  // Event delegation for mol-grid (fixes XSS-prone inline onclick)
-  document.getElementById('mol-grid').addEventListener('click', e => {
-    const card = e.target.closest('.mol-card');
-    if (card) loadByKey(card.dataset.key);
+  // Grid click — event delegation (safe, no inline onclick)
+  document.getElementById('mg').addEventListener('click', e => {
+    const card = e.target.closest('.mc');
+    if (card) pickMol(card.dataset.key);
+  });
+
+  // Search enter key
+  document.getElementById('mol-in').addEventListener('keypress', e => {
+    if (e.key === 'Enter') doSearch();
   });
 
   // Auto-load methane after libs settle
-  setTimeout(() => loadByKey('CH4'), 1400);
+  // Hide loader initially
+  document.getElementById('ldr').classList.add('h');
+  setTimeout(() => pickMol('vsepr-ch4'), 1400);
 });
 
-/* ═══════════════════════════════════════════════════════
+/* ════════════════════════════════════════
+   DRAWER (mobile sidebar)
+════════════════════════════════════════ */
+function togDrawer() {
+  const open = document.getElementById('sb').classList.toggle('o');
+  document.getElementById('dovl').classList.toggle('v', open);
+  document.getElementById('hmb').classList.toggle('o', open);
+  const bm = document.getElementById('bmol');
+  if (bm) bm.classList.toggle('on', open);
+}
+function closeDrawer() {
+  document.getElementById('sb').classList.remove('o');
+  document.getElementById('dovl').classList.remove('v');
+  document.getElementById('hmb').classList.remove('o');
+  const bm = document.getElementById('bmol');
+  if (bm) bm.classList.remove('on');
+}
+
+/* ════════════════════════════════════════
    GRID
-═══════════════════════════════════════════════════════ */
-function filterCat(cat, btn) {
-  currentCat = cat;
-  document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
-  btn.classList.add('active');
+════════════════════════════════════════ */
+function pickCat(cat, btn) {
+  curCat = cat;
+  document.querySelectorAll('.ctb').forEach(t => t.classList.remove('on'));
+  btn.classList.add('on');
   renderGrid(cat);
 }
-
 function renderGrid(cat) {
   const mols = DB[cat] || [];
-  document.getElementById('mol-grid').innerHTML = mols.map(m => `
-    <div class="mol-card${m.key === selectedKey ? ' selected' : ''}" data-key="${m.key}">
-      <div class="mc-formula">${m.formula}</div>
-      <div class="mc-name">${m.name}</div>
-      <div class="mc-shape">${m.shape}</div>
-    </div>`).join('');
+  document.getElementById('mg').innerHTML = mols.map(m =>
+    `<div class="mc${m.key === selKey ? ' sel' : ''}" data-key="${m.key}">
+      <div class="mcf">${m.f}</div>
+      <div class="mcn">${m.n}</div>
+      <div class="mcs">${m.s}</div>
+    </div>`
+  ).join('');
 }
 
-/* ═══════════════════════════════════════════════════════
-   VIEW MODE — header nav
-═══════════════════════════════════════════════════════ */
-function switchMode(mode, btn) {
-  currentMode = mode;
-  document.querySelectorAll('.nav-pill').forEach(t => t.classList.remove('active'));
-  btn.classList.add('active');
+/* ════════════════════════════════════════
+   VIEW MODE
+════════════════════════════════════════ */
+function setMode(mode) {
+  curMode = mode;
 
-  document.getElementById('panel-3d').style.display      = mode === '3d'    ? 'block' : 'none';
-  document.getElementById('panel-2d').classList.toggle('active',    mode === '2d');
-  document.getElementById('panel-props').classList.toggle('active', mode === 'props');
-  document.getElementById('ctrl-block').style.display    = mode === '3d'    ? 'block' : 'none';
-  document.getElementById('v-ctrl').style.display        = mode === '3d'    ? 'flex'  : 'none';
+  // Desktop tabs
+  ['d3d','d2d','dpr'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('on');
+  });
+  const dtMap = {'3d':'d3d','2d':'d2d','props':'dpr'};
+  const de = document.getElementById(dtMap[mode]);
+  if (de) de.classList.add('on');
 
-  if (currentQuery) {
-    if (mode === '2d')    load2D(currentQuery);
-    if (mode === 'props') loadProps(currentQuery, currentMeta);
+  // Bottom tabs
+  ['b3d','b2d','bpr'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('on');
+  });
+  const btMap = {'3d':'b3d','2d':'b2d','props':'bpr'};
+  const be = document.getElementById(btMap[mode]);
+  if (be) be.classList.add('on');
+
+  // Panels
+  document.getElementById('p3d').style.display = mode === '3d' ? 'block' : 'none';
+  document.getElementById('p2d').classList.toggle('on', mode === '2d');
+  document.getElementById('ppr').classList.toggle('on', mode === 'props');
+  document.getElementById('s3d').style.display = mode === '3d' ? 'block' : 'none';
+  document.getElementById('vc').style.display  = mode === '3d' ? 'flex'  : 'none';
+
+  // Close drawer on mobile after mode switch
+  if (window.innerWidth < 768) closeDrawer();
+
+  // Reload current molecule for new mode
+  if (curQ) {
+    if (mode === '2d')    load2D(curQ);
+    if (mode === 'props') loadProps(curQ, curMeta);
   }
 }
 
-/* ═══════════════════════════════════════════════════════
-   LOAD BY KEY (grid click)
-═══════════════════════════════════════════════════════ */
-function loadByKey(key) {
-  selectedKey = key;
-  renderGrid(currentCat);
+/* ════════════════════════════════════════
+   LOAD MOLECULES
+════════════════════════════════════════ */
+function pickMol(key) {
+  selKey = key;
+  renderGrid(curCat);
+
+  // Find meta in any category
   let meta = null;
-  for (const mols of Object.values(DB)) {
-    meta = mols.find(m => m.key === key);
+  for (const arr of Object.values(DB)) {
+    meta = arr.find(m => m.key === key);
     if (meta) break;
   }
-  fetchAndRender(meta ? meta.pname : key, meta);
+
+  if (window.innerWidth < 768) closeDrawer();
+  go(meta ? meta.pname : key, meta);
 }
 
-/* ═══════════════════════════════════════════════════════
-   LOAD BY SEARCH
-═══════════════════════════════════════════════════════ */
-function loadBySearch() {
-  const val = document.getElementById('mol-input').value.trim();
+function doSearch() {
+  const val = document.getElementById('mol-in').value.trim();
   if (!val) return;
-  selectedKey = null;
-  renderGrid(currentCat);
-  clearError();
-  fetchAndRender(val, null);
+  selKey = null;
+  renderGrid(curCat);
+  clearErr();
+  if (window.innerWidth < 768) closeDrawer();
+  go(val, null);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('mol-input').addEventListener('keypress', e => {
-    if (e.key === 'Enter') loadBySearch();
-  });
-});
-
-/* ═══════════════════════════════════════════════════════
+/* ════════════════════════════════════════
    NCI CACTUS helper
-═══════════════════════════════════════════════════════ */
-async function cactusGet(name, rep) {
+════════════════════════════════════════ */
+async function cactus(name, rep) {
   const url = `${CACTUS}/${encodeURIComponent(name)}/${rep}`;
   const res = await fetch(url);
-  if (!res.ok) throw new Error(`Cactus ${res.status}`);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const txt = await res.text();
-  if (!txt || txt.includes('Page not found') || txt.trim() === '') throw new Error('not found');
+  if (!txt || txt.includes('Page not found') || !txt.trim()) throw new Error('Not found');
   return txt.trim();
 }
 
-/* ═══════════════════════════════════════════════════════
-   MAIN FETCH & RENDER — with race condition guard
-═══════════════════════════════════════════════════════ */
-async function fetchAndRender(query, meta) {
-  const token = ++renderToken; // each call gets a unique token
+/* ════════════════════════════════════════
+   MAIN ORCHESTRATOR — race-condition safe
+════════════════════════════════════════ */
+async function go(query, meta) {
+  const tk = ++token;   // unique token; stale calls are silently dropped
 
-  showLoader(true, query, 'RESOLVING MOLECULE…');
-  clearError();
-  document.getElementById('empty-st').style.display = 'none';
-  currentQuery = query;
-  currentMeta  = meta;
+  showLoad(true, query, 'RESOLVING MOLECULE…');
+  clearErr();
+  document.getElementById('emp').style.display = 'none';
+  curQ = query;
+  curMeta = meta;
 
   try {
-    // Verify molecule exists; get IUPAC name for badge
-    const iupac = await cactusGet(query, 'iupac_name').catch(() => null);
-    if (token !== renderToken) return; // stale — newer call took over
+    // Verify exists on Cactus & get IUPAC name
+    const iupac = await cactus(query, 'iupac_name').catch(() => null);
+    if (tk !== token) return;
 
     // Render for current mode
-    if      (currentMode === '3d')    await render3D(query, token);
-    else if (currentMode === '2d')    await load2D(query);
-    else if (currentMode === 'props') await loadProps(query, meta);
+    if      (curMode === '3d')    await do3D(query, tk);
+    else if (curMode === '2d')    await load2D(query);
+    else if (curMode === 'props') await loadProps(query, meta);
 
-    if (token !== renderToken) return;
+    if (tk !== token) return;
 
-    // Fill sidebar info
+    // Fill sidebar info card
     if (meta) fillInfo(meta);
-    else      await fetchLiveMeta(query, iupac);
+    else      await liveMeta(query, iupac);
 
-    // Badge
-    const displayName = meta ? meta.name : (iupac || query);
-    document.getElementById('badge-name').textContent = displayName;
-    document.getElementById('mol-badge').classList.add('show');
+    // Update badge
+    document.getElementById('bnm').textContent = meta ? meta.n : (iupac || query);
+    document.getElementById('bdg').classList.add('v');
 
   } catch(err) {
-    if (token !== renderToken) return;
-    showError(`"${query}" not found. Try: water, caffeine, aspirin, benzene.`);
-    document.getElementById('empty-st').style.display = 'flex';
+    if (tk !== token) return;
+    showErr(`"${query}" not found. Try: water, caffeine, aspirin, benzene.`);
+    document.getElementById('emp').style.display = 'flex';
   } finally {
-    if (token === renderToken) showLoader(false);
+    if (tk === token) showLoad(false);
   }
 }
 
-/* ═══════════════════════════════════════════════════════
-   3D RENDER via NCI Cactus SDF
-═══════════════════════════════════════════════════════ */
-async function render3D(query, token) {
-  if (!dmolReady || !viewer) {
-    showToast('3D library unavailable — switching to 2D', 'error');
-    switchMode('2d', document.getElementById('nav-2d'));
+/* ════════════════════════════════════════
+   3D RENDER
+════════════════════════════════════════ */
+async function do3D(query, tk) {
+  if (!dmol || !viewer) {
+    toast('3D unavailable — switching to 2D', 'e');
+    setMode('2d');
     await load2D(query);
     return;
   }
-
-  showLoader(true, query, 'LOADING 3D STRUCTURE…');
-  const sdf = await cactusGet(query, 'SDF?get3d=true');
-  if (token !== renderToken) return;
-
+  showLoad(true, query, 'LOADING 3D STRUCTURE…');
+  const sdf = await cactus(query, 'SDF?get3d=true');
+  if (tk !== token) return;
   viewer.stopAnimate();
   viewer.clear();
-  currentModel = viewer.addModel(sdf, 'sdf');
+  model = viewer.addModel(sdf, 'sdf');
   applyStyle();
   viewer.zoomTo();
   viewer.render();
   viewer.resize();
-  if (isRotating) viewer.animate({ loop: 'forward', step: 0.5 });
+  if (rotating) viewer.animate({ loop: 'forward', step: 0.5 });
 }
 
-/* ═══════════════════════════════════════════════════════
-   2D IMAGE via Cactus — with loading state
-═══════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════
+   2D IMAGE — with loading state
+════════════════════════════════════════ */
 async function load2D(query) {
-  const frame   = document.getElementById('img2d-frame');
-  const spinner = document.getElementById('img2d-spinner');
-  const img     = document.getElementById('img-2d');
-  const lbl     = document.getElementById('img2d-lbl');
-
-  frame.classList.remove('loaded');
-  spinner.style.display = 'block';
-  lbl.textContent = 'Loading 2D structure…';
-
-  const url = `${CACTUS}/${encodeURIComponent(query)}/image`;
-  return new Promise((resolve) => {
-    img.onload = () => {
-      frame.classList.add('loaded');
-      spinner.style.display = 'none';
-      lbl.textContent = `${query} · 2D Structure · NCI Cactus`;
-      resolve();
-    };
-    img.onerror = () => {
-      spinner.style.display = 'none';
-      lbl.textContent = '2D structure unavailable';
-      resolve();
-    };
-    img.src = url;
+  const frame = document.getElementById('f2d');
+  const sp    = document.getElementById('sp2');
+  const img   = document.getElementById('i2d');
+  const lbl   = document.getElementById('l2d');
+  frame.classList.remove('rdy');
+  sp.style.display = 'block';
+  lbl.textContent  = 'Loading 2D structure…';
+  return new Promise(res => {
+    img.onload  = () => { frame.classList.add('rdy'); sp.style.display = 'none'; lbl.textContent = `${query} · 2D · NCI Cactus`; res(); };
+    img.onerror = () => { sp.style.display = 'none'; lbl.textContent = '2D structure unavailable'; res(); };
+    img.src = `${CACTUS}/${encodeURIComponent(query)}/image`;
   });
 }
 
-/* ═══════════════════════════════════════════════════════
-   PROPERTIES via Cactus
-═══════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════
+   PROPERTIES
+════════════════════════════════════════ */
 async function loadProps(query, meta) {
-  const titleEl   = document.getElementById('props-title');
-  const formulaEl = document.getElementById('props-formula');
-  const grid      = document.getElementById('props-grid');
-
-  titleEl.textContent   = meta ? meta.name : query;
-  formulaEl.textContent = '';
-  grid.innerHTML        = '<div style="font-family:var(--mono);font-size:10px;color:var(--text-dim);padding:8px;">Fetching properties…</div>';
+  document.getElementById('prt').textContent = meta ? meta.n : query;
+  document.getElementById('prg').innerHTML   = '<div style="font-family:var(--fn);font-size:10px;color:var(--di);padding:8px">Fetching…</div>';
 
   const fields = [
-    { label:'Molecular Formula',  key:'formula' },
-    { label:'Molecular Weight',   key:'mw' },
-    { label:'IUPAC Name',         key:'iupac_name' },
-    { label:'SMILES',             key:'smiles' },
-    { label:'InChIKey',           key:'stdinchikey' },
-    { label:'LogP (est.)',        key:'xlogp2' },
-    { label:'H-Bond Donors',      key:'h_bond_donor_count' },
-    { label:'H-Bond Acceptors',   key:'h_bond_acceptor_count' },
-    { label:'Rotatable Bonds',    key:'rotatable_bond_count' },
-    { label:'Heavy Atom Count',   key:'heavy_atom_count' },
+    {label:'Molecular Formula',  key:'formula'},
+    {label:'Molecular Weight',   key:'mw'},
+    {label:'IUPAC Name',         key:'iupac_name'},
+    {label:'SMILES',             key:'smiles'},
+    {label:'InChIKey',           key:'stdinchikey'},
+    {label:'LogP (est.)',        key:'xlogp2'},
+    {label:'H-Bond Donors',      key:'h_bond_donor_count'},
+    {label:'H-Bond Acceptors',   key:'h_bond_acceptor_count'},
+    {label:'Rotatable Bonds',    key:'rotatable_bond_count'},
+    {label:'Heavy Atom Count',   key:'heavy_atom_count'},
   ];
 
-  const results = await Promise.allSettled(fields.map(f => cactusGet(query, f.key)));
+  const results = await Promise.allSettled(fields.map(f => cactus(query, f.key)));
 
-  // Update formula badge in header
-  const formulaResult = results[0];
-  if (formulaResult.status === 'fulfilled') {
-    formulaEl.textContent = formulaResult.value;
-  }
-
-  grid.innerHTML = fields.map((f, i) => {
-    const val    = results[i].status === 'fulfilled' ? results[i].value : '—';
-    const copyable = ['SMILES', 'InChIKey', 'IUPAC Name'].includes(f.label) && val !== '—';
-    const small  = val.length > 20;
-    return `<div class="prop-card">
-      <div class="prop-lbl">${f.label}</div>
-      <div class="prop-val" style="font-size:${small ? '10px' : '14px'}">${val}</div>
-      ${copyable ? `<button class="prop-copy" onclick="copyText('${val.replace(/'/g,"\\'")}','${f.label}')">⎘ Copy</button>` : ''}
+  document.getElementById('prg').innerHTML = fields.map((f, i) => {
+    const val      = results[i].status === 'fulfilled' ? results[i].value : '—';
+    const small    = val.length > 20;
+    const copyable = ['SMILES','InChIKey','IUPAC Name'].includes(f.label) && val !== '—';
+    const safe     = val.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    return `<div class="prc">
+      <div class="prcl">${f.label}</div>
+      <div class="prcv" style="font-size:${small?'10px':'13px'}">${val}</div>
+      ${copyable ? `<button class="cpy" onclick="doCopy('${safe}','${f.label}')">⎘ Copy</button>` : ''}
     </div>`;
   }).join('');
 }
 
-/* ═══════════════════════════════════════════════════════
-   LIVE META for searched molecules
-═══════════════════════════════════════════════════════ */
-async function fetchLiveMeta(query, iupac) {
+/* ════════════════════════════════════════
+   LIVE META (for searched molecules)
+════════════════════════════════════════ */
+async function liveMeta(query, iupac) {
   try {
     const [formula, mw] = await Promise.all([
-      cactusGet(query, 'formula').catch(() => '—'),
-      cactusGet(query, 'mw').catch(() => '—'),
+      cactus(query, 'formula').catch(() => '—'),
+      cactus(query, 'mw').catch(() => '—'),
     ]);
-    const fmtFormula = formula.replace(/([0-9]+)/g, '<sub>$1</sub>');
     fillInfo({
-      name:   iupac || query,
-      formula: fmtFormula,
-      weight:  mw,
-      hybrid: '—', angle: '—', dipole: '—',
-      geo:  'Apply VSEPR theory based on number of electron pairs around the central atom.',
-      fact: `Search powered by NCI Cactus. For exam details, refer to NCERT textbook.`
+      n: iupac || query,
+      f: formula.replace(/([0-9]+)/g, '<sub>$1</sub>'),
+      w: mw, h: '—', a: '—', d: '—',
+      g: 'Apply VSEPR theory based on electron pairs around the central atom.',
+      x: 'Search powered by NCI Cactus. For exam details refer to NCERT.',
     });
   } catch {
-    fillInfo({ name:query, formula:'—', weight:'—', hybrid:'—', angle:'—', dipole:'—', geo:'—', fact:'—' });
+    fillInfo({ n: query, f: '—', w: '—', h: '—', a: '—', d: '—', g: '—', x: '—' });
   }
 }
 
-/* ═══════════════════════════════════════════════════════
+/* ════════════════════════════════════════
    FILL INFO CARD
-═══════════════════════════════════════════════════════ */
+════════════════════════════════════════ */
 function fillInfo(m) {
-  document.getElementById('i-name').textContent    = m.name;
-  document.getElementById('i-formula').innerHTML   = m.formula;
-  document.getElementById('i-wt').textContent      = (m.weight && m.weight !== '—') ? (String(m.weight).includes('g/mol') ? m.weight : m.weight + ' g/mol') : '—';
-  document.getElementById('i-hyb').textContent     = m.hybrid;
-  document.getElementById('i-angle').textContent   = m.angle;
-  document.getElementById('i-dipole').textContent  = m.dipole;
-  document.getElementById('i-geo').textContent     = m.geo;
-  document.getElementById('i-fact').textContent    = m.fact;
-  document.getElementById('info-card').classList.add('visible');
+  document.getElementById('i-nm').textContent = m.n;
+  document.getElementById('i-fm').innerHTML   = m.f;
+  document.getElementById('i-wt').textContent = (m.w && m.w !== '—') ? (String(m.w).includes('g/mol') ? m.w : m.w + ' g/mol') : '—';
+  document.getElementById('i-hy').textContent = m.h;
+  document.getElementById('i-an').textContent = m.a;
+  document.getElementById('i-dp').textContent = m.d;
+  document.getElementById('i-go').textContent = m.g;
+  document.getElementById('i-fc').textContent = m.x;
+  document.getElementById('ic').classList.add('v');
 }
 
-/* ═══════════════════════════════════════════════════════
+/* ════════════════════════════════════════
    3D STYLE & ROTATION
-═══════════════════════════════════════════════════════ */
+════════════════════════════════════════ */
 function applyStyle() {
-  if (!viewer || !currentModel) return;
-  const s = document.getElementById('style-sel').value;
-  const c = document.getElementById('color-sel').value;
+  if (!viewer || !model) return;
+  const s = document.getElementById('sty').value;
+  const c = document.getElementById('col').value;
   let cfg = {};
   if      (s === 'sphere') cfg = { sphere: { scale: 0.35, colorscheme: c } };
   else if (s === 'line')   cfg = { line:   { colorscheme: c } };
   else                     cfg = { stick:  { radius: 0.18, colorscheme: c } };
-  currentModel.setStyle({}, cfg);
+  model.setStyle({}, cfg);
   viewer.render();
 }
-function updateStyle() { applyStyle(); }
-
-function toggleRot() {
-  isRotating = document.getElementById('rot-tog').checked;
+function togRot() {
+  rotating = document.getElementById('rot').checked;
   if (!viewer) return;
-  isRotating ? viewer.animate({ loop: 'forward', step: 0.5 }) : viewer.stopAnimate();
+  rotating ? viewer.animate({ loop: 'forward', step: 0.5 }) : viewer.stopAnimate();
 }
-function resetView() { if (viewer) { viewer.zoomTo(); viewer.render(); } }
-function doZoom(f)   { if (viewer) viewer.zoom(f, 500); }
+function resetV()   { if (viewer) { viewer.zoomTo(); viewer.render(); } }
+function zoomV(f)   { if (viewer) viewer.zoom(f, 500); }
 
-/* ═══════════════════════════════════════════════════════
+/* ════════════════════════════════════════
    UI HELPERS
-═══════════════════════════════════════════════════════ */
-function showLoader(show, mol, txt) {
-  const el  = document.getElementById('loader');
-  const molEl = document.getElementById('loader-mol');
-  const txtEl = document.getElementById('loader-txt');
-  el.classList.toggle('hidden', !show);
-  if (mol) molEl.textContent = mol;
-  if (txt) txtEl.textContent = txt;
+════════════════════════════════════════ */
+function showLoad(show, mol, txt) {
+  document.getElementById('ldr').classList.toggle('h', !show);
+  if (mol) document.getElementById('lmol').textContent = mol;
+  if (txt) document.getElementById('ltx').textContent  = txt;
 }
+function showErr(msg) { const e = document.getElementById('eb'); e.textContent = msg; e.classList.add('v'); }
+function clearErr()   { const e = document.getElementById('eb'); e.textContent = '';  e.classList.remove('v'); }
 
-function showError(msg) {
-  const el = document.getElementById('err-box');
-  el.textContent = msg;
-  el.classList.add('show');
-}
-function clearError() {
-  const el = document.getElementById('err-box');
-  el.textContent = '';
-  el.classList.remove('show');
-}
-
-/* TOAST */
-let toastTimer = null;
-function showToast(msg, type = '') {
-  const t = document.getElementById('toast');
+let _tt = null;
+function toast(msg, type = '') {
+  const t = document.getElementById('tst');
   t.textContent = msg;
-  t.className = 'toast' + (type ? ` ${type}` : '') + ' show';
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { t.classList.remove('show'); }, 2800);
+  t.className = 'tst' + (type ? ' ' + type : '') + ' v';
+  clearTimeout(_tt);
+  _tt = setTimeout(() => t.classList.remove('v'), 2800);
 }
-
-/* COPY to clipboard */
-async function copyText(text, label) {
-  try {
-    await navigator.clipboard.writeText(text);
-    showToast(`${label} copied!`, 'success');
-  } catch { showToast('Copy failed', 'error'); }
+async function doCopy(text, label) {
+  try { await navigator.clipboard.writeText(text); toast(label + ' copied!', 'k'); }
+  catch { toast('Copy failed', 'e'); }
 }
-
-/* MODAL */
-function openModal()  { document.getElementById('modal-overlay').classList.add('open'); }
-function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
-function handleOverlayClick(e) { if (e.target === document.getElementById('modal-overlay')) closeModal(); }
-
-/* keypress listener needs DOM ready */
-window.addEventListener('load', () => {
-  document.getElementById('mol-input').addEventListener('keypress', e => {
-    if (e.key === 'Enter') loadBySearch();
-  });
-});
+function openMod()  { document.getElementById('movl').classList.add('v'); }
+function closeMod() { document.getElementById('movl').classList.remove('v'); }
 </script>
 </body>
 </html>
