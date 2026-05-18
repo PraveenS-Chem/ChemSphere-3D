@@ -2,43 +2,48 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>ChemSphere Pro — NEET & JEE 3D Molecular Visualizer</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<!-- jQuery first, then 3Dmol from unpkg (more reliable than 3dmol.csb.pitt.edu) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-<script src="https://3dmol.csb.pitt.edu/build/3Dmol-min.js"></script>
+<script src="https://unpkg.com/3dmol@2.1.0/build/3Dmol-min.js"></script>
 <style>
 /* ─── TOKENS ─────────────────────────────────────────── */
 :root {
   --bg:#060810; --s1:#0a0e1a; --s2:#0f1525; --s3:#141c30;
-  --bd:rgba(99,155,255,.09); --bhi:rgba(99,155,255,.28);
-  --acc:#4a8fff; --tea:#00e5b4; --org:#ff6b35;
+  --bd:rgba(99,155,255,.12); --bhi:rgba(99,155,255,.3);
+  --acc:#4a8fff; --tea:#00e5b4;
   --tx:#dde8ff; --mu:#5a6e96; --di:#2e3d5c;
   --fn:'JetBrains Mono',monospace; --fs:'Syne',sans-serif;
-  --HH:56px;   /* header height */
-  --BH:58px;   /* bottom bar height on mobile */
-  --SW:300px;  /* sidebar width desktop */
+  --HH:56px;
+  --BH:58px;
+  --SW:300px;
 }
 
 /* ─── RESET ──────────────────────────────────────────── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{height:100%;-webkit-text-size-adjust:100%}
-body{height:100%;min-height:100vh;min-height:100dvh;background:var(--bg);color:var(--tx);font-family:var(--fs);overflow:hidden}
+/* NO overflow:hidden on html — let JS control the layout */
+body{
+  height:100%;
+  background:var(--bg);
+  color:var(--tx);
+  font-family:var(--fs);
+  overflow:hidden;
+  position:fixed; /* prevents scroll bounce on iOS/Android */
+  width:100%;
+}
 button{cursor:pointer;font-family:var(--fs)}
 select{cursor:pointer}
-body::before{
-  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
-  background:
-    radial-gradient(ellipse 55% 45% at 8% 18%,rgba(74,143,255,.06) 0%,transparent 70%),
-    radial-gradient(ellipse 40% 35% at 92% 82%,rgba(0,229,180,.04) 0%,transparent 65%);
-}
 
 /* ─── HEADER ─────────────────────────────────────────── */
 header{
   position:fixed;top:0;left:0;right:0;z-index:300;
   height:var(--HH);display:flex;align-items:center;
   justify-content:space-between;padding:0 14px;gap:10px;
-  background:rgba(6,8,16,.97);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);
+  /* NO backdrop-filter — solid bg only, works everywhere */
+  background:#070a14;
   border-bottom:1px solid var(--bd);
 }
 .logo{display:flex;align-items:center;gap:9px;text-decoration:none;flex-shrink:0}
@@ -47,16 +52,15 @@ header{
   background:linear-gradient(135deg,var(--acc),var(--tea));
   display:flex;align-items:center;justify-content:center;
   font-family:var(--fn);font-size:10px;font-weight:700;color:#fff;
-  box-shadow:0 0 16px rgba(74,143,255,.4);
 }
 .lt h1{
   font-size:13px;font-weight:800;line-height:1;
   background:linear-gradient(90deg,#fff,var(--tea));
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
 }
 .lt p{font-size:8px;color:var(--mu);font-family:var(--fn);margin-top:2px}
 
-/* desktop view-mode tabs */
 .dtabs{display:flex;gap:4px;flex:1;justify-content:center}
 .dtab{
   font-family:var(--fn);font-size:9px;padding:5px 12px;
@@ -67,14 +71,13 @@ header{
 .dtab.on{border-color:var(--tea);color:var(--tea);background:rgba(0,229,180,.06)}
 
 .hr{display:flex;align-items:center;gap:7px;flex-shrink:0}
-.fbdg{font-size:9px;font-family:var(--fn);padding:3px 8px;border-radius:5px;color:var(--tea);border:1px solid rgba(0,229,180,.3);background:rgba(0,229,180,.05)}
+.fbdg{font-size:9px;font-family:var(--fn);padding:3px 8px;border-radius:5px;color:var(--tea);border:1px solid rgba(0,229,180,.3);background:rgba(0,229,180,.06)}
 .bupg{
   font-size:11px;font-weight:700;padding:6px 12px;border-radius:7px;border:none;
   background:linear-gradient(135deg,var(--acc),var(--tea));color:#fff;
   box-shadow:0 3px 12px rgba(74,143,255,.3);transition:opacity .2s;white-space:nowrap;
 }
 .bupg:hover{opacity:.85}
-/* hamburger — mobile only */
 .hmb{
   display:none;width:34px;height:34px;border-radius:7px;
   border:1px solid var(--bhi);background:transparent;
@@ -85,21 +88,28 @@ header{
 .hmb.o em:nth-child(2){opacity:0}
 .hmb.o em:nth-child(3){transform:translateY(-5.5px) rotate(-45deg);background:var(--tea)}
 
-/* ─── LAYOUT ─────────────────────────────────────────── */
-.app{position:fixed;top:var(--HH);left:0;right:0;bottom:0;display:flex;z-index:1}
+/* ─── LAYOUT — heights set by JS fitLayout() ────────── */
+/* .app, .sb, .vw all get explicit px height from JS     */
+.app{
+  position:fixed;
+  top:var(--HH);
+  left:0;right:0;
+  display:flex;
+  z-index:1;
+  /* bottom is set by JS */
+}
 
 /* ─── SIDEBAR ────────────────────────────────────────── */
 .sb{
   width:var(--SW);flex-shrink:0;
   display:flex;flex-direction:column;
   border-right:1px solid var(--bd);
-  background:rgba(10,14,26,.97);
+  background:#080c18;
   overflow-y:auto;overflow-x:hidden;
 }
 .sb::-webkit-scrollbar{width:3px}
 .sb::-webkit-scrollbar-thumb{background:var(--bhi);border-radius:2px}
 
-/* sidebar section */
 .ss{padding:12px 13px;border-bottom:1px solid var(--bd)}
 .sl{
   font-family:var(--fn);font-size:8px;letter-spacing:2px;text-transform:uppercase;
@@ -107,29 +117,26 @@ header{
 }
 .sl::after{content:'';flex:1;height:1px;background:var(--bd)}
 
-/* search */
 .srw{position:relative}
 .si{
   width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:9px;
   padding:9px 68px 9px 11px;font-size:12px;font-family:var(--fs);color:var(--tx);outline:none;
-  transition:border-color .2s,box-shadow .2s;
+  transition:border-color .2s;
 }
 .si::placeholder{color:var(--di)}
-.si:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(74,143,255,.1)}
+.si:focus{border-color:var(--acc)}
 .bgo{
   position:absolute;right:5px;top:50%;transform:translateY(-50%);
   background:var(--acc);border:none;border-radius:6px;
-  padding:5px 10px;color:#fff;font-size:11px;font-weight:700;transition:background .2s;
+  padding:5px 10px;color:#fff;font-size:11px;font-weight:700;
 }
-.bgo:hover{background:#6aaeff}
 .eb{
-  background:rgba(255,60,60,.05);border:1px solid rgba(255,60,60,.18);
+  background:rgba(255,60,60,.06);border:1px solid rgba(255,60,60,.2);
   border-radius:7px;padding:8px 11px;font-size:10px;color:#ff7070;
   display:none;line-height:1.5;margin-top:7px;font-family:var(--fn);
 }
 .eb.v{display:block}
 
-/* category tabs */
 .ctbs{display:flex;gap:4px;flex-wrap:wrap}
 .ctb{
   font-size:9px;font-family:var(--fn);padding:4px 9px;border-radius:5px;
@@ -138,19 +145,17 @@ header{
 .ctb:hover{border-color:var(--bhi);color:var(--tx)}
 .ctb.on{border-color:var(--acc);color:var(--acc);background:rgba(74,143,255,.07)}
 
-/* molecule grid */
 .mg{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .mc{
   background:var(--s2);border:1px solid var(--bd);border-radius:9px;
-  padding:9px 10px;transition:all .18s;
+  padding:9px 10px;transition:all .18s;cursor:pointer;
 }
-.mc:hover{border-color:var(--acc);transform:translateY(-1px);box-shadow:0 4px 14px rgba(74,143,255,.12)}
+.mc:hover{border-color:var(--acc);transform:translateY(-1px)}
 .mc.sel{border-color:var(--tea);box-shadow:0 0 0 1px rgba(0,229,180,.3)}
 .mcf{font-family:var(--fn);font-size:11px;font-weight:700;color:var(--tea);margin-bottom:2px}
 .mcn{font-size:10px;color:var(--mu);line-height:1.3}
 .mcs{font-size:8px;font-family:var(--fn);color:var(--di);margin-top:3px}
 
-/* 3D settings */
 .cr{display:flex;align-items:center;justify-content:space-between;padding:5px 0}
 .cr+.cr{border-top:1px solid var(--bd)}
 .cl{font-size:10px;color:var(--mu);font-family:var(--fn)}
@@ -162,7 +167,6 @@ header{
 .tog input:checked+.tsl{background:rgba(0,229,180,.15);border-color:var(--tea)}
 .tog input:checked+.tsl::before{transform:translateX(15px);background:var(--tea)}
 
-/* info card */
 .ic{display:none;flex-direction:column;gap:8px}
 .ic.v{display:flex}
 .inn{font-size:14px;font-weight:700;color:#fff;line-height:1.2;text-transform:capitalize}
@@ -181,12 +185,26 @@ header{
 
 /* ─── VIEWER ─────────────────────────────────────────── */
 .vw{flex:1;position:relative;background:var(--bg);overflow:hidden;min-width:0}
-#p3d{position:absolute;inset:0;display:block;width:100%;height:100%}
-#c3d{position:absolute;inset:0;width:100%!important;height:100%!important;display:block}
+
+/* 
+  THE FIX: #p3d and #c3d must have EXPLICIT pixel dimensions.
+  We set them via JS fitLayout(). DO NOT use inset:0 or height:100% —
+  those fail on mobile Chrome when the parent is a flex child inside fixed.
+*/
+#p3d{
+  position:absolute;
+  top:0;left:0;
+  /* width + height set by fitLayout() */
+}
+#c3d{
+  display:block;
+  background:#060810;
+  /* width + height set by fitLayout() */
+}
 
 #p2d{display:none;position:absolute;inset:0;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:var(--bg)}
 #p2d.on{display:flex}
-.f2d{display:none;background:#fff;border-radius:12px;padding:14px;border:1px solid var(--bhi);box-shadow:0 12px 48px rgba(0,0,0,.65);max-width:min(340px,80vw)}
+.f2d{display:none;background:#fff;border-radius:12px;padding:14px;border:1px solid var(--bhi);box-shadow:0 12px 48px rgba(0,0,0,.7);max-width:min(340px,80vw)}
 .f2d.rdy{display:block}
 #i2d{max-width:100%;max-height:260px;display:block}
 .l2d{font-family:var(--fn);font-size:9px;color:var(--mu)}
@@ -203,37 +221,47 @@ header{
 .cpy{display:inline-block;margin-top:4px;font-size:9px;font-family:var(--fn);color:var(--tea);border:none;background:none;padding:0;opacity:.7;transition:opacity .15s}
 .cpy:hover{opacity:1}
 
-/* loader */
-.ldr{position:absolute;inset:0;z-index:30;background:rgba(6,8,16,.88);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;transition:opacity .3s}
+/* loader — NO backdrop-filter */
+.ldr{
+  position:absolute;inset:0;z-index:30;
+  background:rgba(6,8,16,.92);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
+  transition:opacity .3s;
+}
 .ldr.h{opacity:0;pointer-events:none}
 .spn{width:34px;height:34px;border:2px solid rgba(74,143,255,.15);border-top-color:var(--acc);border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .lmol{font-family:var(--fn);font-size:11px;color:var(--tea)}
 .ltx{font-family:var(--fn);font-size:9px;color:var(--mu);letter-spacing:1.5px}
 
-/* empty */
 .emp{position:absolute;inset:0;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
 .ei{font-size:52px;opacity:.07}
 .et{font-family:var(--fn);font-size:9px;color:var(--di);letter-spacing:1px}
 
-/* molecule badge */
-.bdg{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:10;background:rgba(10,14,26,.92);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border:1px solid var(--bhi);border-radius:20px;padding:5px 13px;display:none;gap:6px;align-items:center;font-family:var(--fn);font-size:10px;color:var(--mu);white-space:nowrap}
+/* molecule badge — NO backdrop-filter */
+.bdg{
+  position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:10;
+  background:#0d1426;
+  border:1px solid var(--bhi);border-radius:20px;padding:5px 13px;
+  display:none;gap:6px;align-items:center;
+  font-family:var(--fn);font-size:10px;color:var(--mu);white-space:nowrap;
+}
 .bdg.v{display:flex}
 .dot{width:6px;height:6px;border-radius:50%;background:var(--tea);animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
-/* viewer ctrl buttons */
+/* viewer ctrl buttons — NO backdrop-filter */
 .vc{position:absolute;bottom:14px;right:14px;z-index:10;display:flex;flex-direction:column;gap:5px}
-.vb{width:32px;height:32px;border-radius:7px;border:1px solid var(--bhi);background:rgba(10,14,26,.9);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);color:var(--mu);font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.vb{width:32px;height:32px;border-radius:7px;border:1px solid var(--bhi);background:#0d1426;color:var(--mu);font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .15s}
 .vb:hover{border-color:var(--acc);color:var(--acc)}
 .libst{position:absolute;bottom:14px;left:14px;z-index:10;font-family:var(--fn);font-size:8px;display:flex;flex-direction:column;gap:3px}
 .lok{color:var(--tea)}.lfl{color:#ff7070}
 
-/* ─── BOTTOM TAB BAR (mobile) ────────────────────────── */
+/* ─── BOTTOM TAB BAR — NO backdrop-filter ────────────── */
 .btbar{
   display:none;position:fixed;bottom:0;left:0;right:0;z-index:300;
-  height:var(--BH);background:rgba(6,8,16,.97);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);
-  border-top:1px solid var(--bd);padding-bottom:env(safe-area-inset-bottom);
+  height:var(--BH);background:#070a14;
+  border-top:1px solid var(--bd);
 }
 .bti{display:flex;height:100%}
 .bt{
@@ -244,14 +272,14 @@ header{
 .bt svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .bt span{font-family:var(--fn);font-size:9px}
 
-/* ─── DRAWER OVERLAY ─────────────────────────────────── */
-.dovl{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.6);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+/* ─── DRAWER OVERLAY — NO backdrop-filter ────────────── */
+.dovl{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.72)}
 .dovl.v{display:block}
 
-/* ─── TOAST ──────────────────────────────────────────── */
+/* ─── TOAST — NO backdrop-filter ─────────────────────── */
 .tst{
   position:fixed;bottom:70px;left:50%;transform:translateX(-50%) translateY(60px);z-index:500;
-  background:rgba(10,14,26,.97);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid var(--bhi);
+  background:#0d1426;border:1px solid var(--bhi);
   border-radius:9px;padding:9px 16px;font-family:var(--fn);font-size:11px;color:var(--tx);
   transition:transform .28s cubic-bezier(.34,1.56,.64,1),opacity .28s;opacity:0;pointer-events:none;white-space:nowrap;
 }
@@ -259,17 +287,31 @@ header{
 .tst.e{border-color:rgba(255,60,60,.3);color:#ff7070}
 .tst.k{border-color:rgba(0,229,180,.3);color:var(--tea)}
 
-/* ─── UPGRADE MODAL ──────────────────────────────────── */
-.movl{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.75);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;padding:16px}
+/* ─── UPGRADE MODAL — NO backdrop-filter ─────────────── */
+.movl{
+  position:fixed;inset:0;z-index:400;
+  background:rgba(4,6,14,.88);
+  display:none;align-items:center;justify-content:center;padding:16px;
+}
 .movl.v{display:flex}
-.modal{background:var(--s1);border:1px solid var(--bhi);border-radius:14px;padding:26px;max-width:450px;width:100%;box-shadow:0 20px 70px rgba(0,0,0,.7);position:relative;animation:mi .28s cubic-bezier(.34,1.56,.64,1);max-height:92dvh;overflow-y:auto}
+.modal{
+  background:#0c1022;border:1px solid var(--bhi);border-radius:14px;
+  padding:26px;max-width:460px;width:100%;
+  box-shadow:0 20px 70px rgba(0,0,0,.8);
+  position:relative;
+  animation:mi .28s cubic-bezier(.34,1.56,.64,1);
+  max-height:90vh;overflow-y:auto;
+}
 @keyframes mi{from{transform:scale(.93) translateY(16px);opacity:0}}
-.mcl{position:absolute;top:13px;right:13px;width:26px;height:26px;border:1px solid var(--bd);border-radius:5px;background:transparent;color:var(--mu);font-size:13px;display:flex;align-items:center;justify-content:center;transition:all .15s}
-.mcl:hover{border-color:var(--bhi);color:var(--tx)}
+.mcl{
+  position:absolute;top:13px;right:13px;width:26px;height:26px;
+  border:1px solid var(--bd);border-radius:5px;background:transparent;
+  color:var(--mu);font-size:13px;display:flex;align-items:center;justify-content:center;
+}
 .mbdg{display:inline-block;font-size:8px;font-family:var(--fn);font-weight:700;letter-spacing:1px;padding:3px 9px;border-radius:4px;margin-bottom:11px;background:linear-gradient(90deg,var(--acc),var(--tea));color:#fff}
 .modal h2{font-size:20px;font-weight:800;color:#fff;margin-bottom:5px}
-.modal p{font-size:11px;color:var(--mu);line-height:1.7;margin-bottom:14px}
-.plans{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.modal>p{font-size:11px;color:var(--mu);line-height:1.7;margin-bottom:14px}
+.plans{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
 .plan{border:1px solid var(--bd);border-radius:9px;padding:13px;background:var(--s2)}
 .plan.ft{border-color:var(--tea);background:rgba(0,229,180,.04)}
 .pn{font-size:11px;font-weight:700;color:#fff;margin-bottom:3px}
@@ -277,39 +319,45 @@ header{
 .pp s{font-size:9px;color:var(--mu);font-weight:400;text-decoration:none}
 .pf{font-size:9px;color:var(--mu);margin-top:7px;line-height:1.7;list-style:none}
 .pf li::before{content:'✓ ';color:var(--tea);font-weight:700}
-.bjn{width:100%;padding:11px;border:none;border-radius:9px;font-size:13px;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--acc),var(--tea));box-shadow:0 4px 16px rgba(74,143,255,.25);transition:opacity .2s}
+
+/* ─── UPGRADE FORM ────────────────────────────────────── */
+.uform{display:flex;flex-direction:column;gap:9px;margin-top:4px}
+.uform label{font-size:9px;font-family:var(--fn);color:var(--di);letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:3px}
+.uform input,.uform select{
+  width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:7px;
+  padding:9px 11px;font-size:12px;font-family:var(--fs);color:var(--tx);outline:none;
+  transition:border-color .2s;
+}
+.uform input:focus,.uform select:focus{border-color:var(--acc)}
+.uform select option{background:#0f1525}
+.bjn{
+  width:100%;padding:11px;border:none;border-radius:9px;font-size:13px;font-weight:700;color:#fff;
+  background:linear-gradient(135deg,var(--acc),var(--tea));
+  box-shadow:0 4px 16px rgba(74,143,255,.25);transition:opacity .2s;margin-top:4px;
+}
 .bjn:hover{opacity:.88}
+.bjn:disabled{opacity:.5;cursor:not-allowed}
 .mnt{font-size:8px;font-family:var(--fn);color:var(--di);text-align:center;margin-top:8px}
+.form-ok{display:none;text-align:center;padding:16px 0;font-family:var(--fn);font-size:12px;color:var(--tea);line-height:1.8}
 
 /* ─── RESPONSIVE ─────────────────────────────────────── */
 @media (max-width:767px){
-  /* header: hide desktop tabs, show hamburger */
   .dtabs{display:none}
   .fbdg{display:none}
   .hmb{display:flex}
-
-  /* viewer area leaves room for bottom bar */
-  .app{bottom:var(--BH)}
-
-  /* sidebar becomes a left drawer */
+  .btbar{display:block}
+  /* sidebar: left drawer, height set by fitLayout() */
   .sb{
-    position:fixed;top:var(--HH);left:0;bottom:var(--BH);z-index:250;
+    position:fixed;top:var(--HH);left:0;z-index:250;
     width:min(290px,88vw);
     transform:translateX(-100%);
     transition:transform .26s cubic-bezier(.4,0,.2,1);
     border-right:1px solid var(--bhi);
   }
   .sb.o{transform:translateX(0)}
-
-  /* show bottom tab bar */
-  .btbar{display:block}
-
-  /* panels inside viewer */
   #ppr{padding:14px 11px}
   .prg{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
   .bdg{top:8px;font-size:9px}
-
-  /* modal */
   .plans{grid-template-columns:1fr}
   .modal{padding:20px 16px}
   .tst{bottom:calc(var(--BH) + 8px)}
@@ -322,19 +370,17 @@ header{
 </head>
 <body>
 
-<!-- ─── HEADER ─────────────────────────────────────────────── -->
+<!-- HEADER -->
 <header>
   <a class="logo" href="#">
     <div class="lm">CS</div>
     <div class="lt"><h1>ChemSphere Pro</h1><p>NEET · JEE · Class 11 &amp; 12</p></div>
   </a>
-
   <div class="dtabs">
-    <button class="dtab on"  id="d3d"    onclick="setMode('3d')">3D Model</button>
-    <button class="dtab"     id="d2d"    onclick="setMode('2d')">2D Structure</button>
-    <button class="dtab"     id="dpr"    onclick="setMode('props')">Properties</button>
+    <button class="dtab on" id="d3d" onclick="setMode('3d')">3D Model</button>
+    <button class="dtab"    id="d2d" onclick="setMode('2d')">2D Structure</button>
+    <button class="dtab"    id="dpr" onclick="setMode('props')">Properties</button>
   </div>
-
   <div class="hr">
     <span class="fbdg">FREE</span>
     <button class="bupg" onclick="openMod()">Upgrade →</button>
@@ -347,13 +393,11 @@ header{
 <!-- drawer backdrop -->
 <div class="dovl" id="dovl" onclick="closeDrawer()"></div>
 
-<!-- ─── MAIN APP ────────────────────────────────────────────── -->
-<div class="app">
+<!-- MAIN APP -->
+<div class="app" id="app">
 
   <!-- SIDEBAR -->
   <aside class="sb" id="sb">
-
-    <!-- Search -->
     <div class="ss">
       <div class="sl">Search Any Molecule</div>
       <div class="srw">
@@ -362,8 +406,6 @@ header{
       </div>
       <div class="eb" id="eb"></div>
     </div>
-
-    <!-- Chapter categories -->
     <div class="ss">
       <div class="sl">Chapter</div>
       <div class="ctbs" id="ctbs">
@@ -373,14 +415,10 @@ header{
         <button class="ctb"    data-cat="inorganic" onclick="pickCat('inorganic',this)">Inorganic</button>
       </div>
     </div>
-
-    <!-- Molecule grid -->
     <div class="ss">
       <div class="sl">Quick Load</div>
       <div class="mg" id="mg"></div>
     </div>
-
-    <!-- 3D Settings -->
     <div class="ss" id="s3d">
       <div class="sl">3D Settings</div>
       <div class="cr">
@@ -407,8 +445,6 @@ header{
         </label>
       </div>
     </div>
-
-    <!-- Molecule Info -->
     <div class="ss">
       <div class="sl">Molecule Info</div>
       <div class="ic" id="ic">
@@ -433,36 +469,26 @@ header{
         </div>
       </div>
     </div>
-
   </aside>
 
   <!-- VIEWER -->
   <div class="vw" id="vw">
-
-    <!-- Loader -->
     <div class="ldr" id="ldr">
       <div class="spn"></div>
       <div class="lmol" id="lmol"></div>
       <div class="ltx"  id="ltx">LOADING…</div>
     </div>
-
-    <!-- Empty state -->
     <div class="emp" id="emp">
       <div class="ei">⬡</div>
       <div class="et">SELECT A MOLECULE TO BEGIN</div>
     </div>
-
-    <!-- 3D panel -->
-    <div id="p3d"><div id="c3d"></div></div>
-
-    <!-- 2D panel -->
+    <!-- 3D panel: #p3d is the container 3Dmol will use -->
+    <div id="p3d"><canvas id="c3d"></canvas></div>
     <div id="p2d">
       <div class="sp2" id="sp2"></div>
       <div class="f2d" id="f2d"><img id="i2d" src="" alt="2D structure"></div>
       <div class="l2d" id="l2d">2D Structure — NCI Cactus</div>
     </div>
-
-    <!-- Properties panel -->
     <div id="ppr">
       <div>
         <div class="prt" id="prt">Properties</div>
@@ -470,22 +496,17 @@ header{
       </div>
       <div class="prg" id="prg"></div>
     </div>
-
-    <!-- Molecule name badge -->
     <div class="bdg" id="bdg"><span class="dot"></span><span id="bnm">—</span></div>
-
-    <!-- 3D Viewer control buttons -->
     <div class="vc" id="vc">
       <button class="vb" onclick="resetV()" title="Reset">⌖</button>
       <button class="vb" onclick="zoomV(1.3)" title="Zoom in">+</button>
       <button class="vb" onclick="zoomV(0.7)" title="Zoom out">−</button>
     </div>
-
     <div class="libst" id="libst"></div>
   </div>
 </div>
 
-<!-- ─── BOTTOM TAB BAR (mobile only) ───────────────────────── -->
+<!-- BOTTOM TAB BAR -->
 <div class="btbar">
   <div class="bti">
     <button class="bt on" id="b3d" onclick="setMode('3d')">
@@ -541,46 +562,75 @@ header{
         </ul>
       </div>
     </div>
-    <button class="bjn" onclick="toast('Waitlist joined! We will notify you.','k');closeMod()">Join Pro Waitlist →</button>
-    <div class="mnt">No credit card · Made for Indian students 🇮🇳</div>
+
+    <!-- REAL SIGN-UP FORM — submits to Google Sheets via Apps Script -->
+    <div class="uform" id="uform">
+      <div>
+        <label>Your Name</label>
+        <input type="text" id="u-name" placeholder="Rahul Sharma" autocomplete="name">
+      </div>
+      <div>
+        <label>Email Address</label>
+        <input type="email" id="u-email" placeholder="rahul@example.com" autocomplete="email">
+      </div>
+      <div>
+        <label>Phone (optional)</label>
+        <input type="tel" id="u-phone" placeholder="+91 98765 43210" autocomplete="tel">
+      </div>
+      <div>
+        <label>Interested Plan</label>
+        <select id="u-plan">
+          <option value="Pro Monthly — ₹199/mo">Pro Monthly — ₹199/mo</option>
+          <option value="Pro Annual — ₹1499/yr">Pro Annual — ₹1499/yr (Best Value)</option>
+          <option value="Just Exploring">Just exploring for now</option>
+        </select>
+      </div>
+      <button class="bjn" id="bjn" onclick="submitUpgrade()">Join Pro Waitlist →</button>
+      <div class="mnt">No payment now · We'll reach out when Pro launches 🇮🇳</div>
+    </div>
+    <!-- Success state -->
+    <div class="form-ok" id="form-ok">
+      ✅ You're on the waitlist!<br>
+      We'll email you at <strong id="ok-email"></strong><br>
+      when ChemSphere Pro launches.<br><br>
+      <span style="color:var(--mu);font-size:9px">Made with ❤️ for Indian students</span>
+    </div>
   </div>
 </div>
 
 <script>
 /* ════════════════════════════════════════
    MOLECULE DATABASE
-   Key = used for DB lookup + grid
-   pname = sent to NCI Cactus API (plain English)
 ════════════════════════════════════════ */
 const DB = {
   vsepr: [
-    {key:'vsepr-h2o',  pname:'water',                    f:'H₂O',   n:'Water',                   s:'Bent',              w:'18.02', h:'sp³',   a:'104.5°', d:'1.85 D', g:'Bent / V-Shape — 2 lone pairs on O reduce bond angle below 109.5°',      x:'Bond angle 104.5° (not 109.5°) due to lone pair–bond pair repulsion. Most common NEET VSEPR question.'},
-    {key:'vsepr-co2',  pname:'carbon dioxide',            f:'CO₂',   n:'Carbon Dioxide',          s:'Linear',            w:'44.01', h:'sp',    a:'180°',   d:'0 D',    g:'Linear — symmetric, 2 C=O bonds, no lone pairs on C',                    x:'ZERO net dipole despite polar C=O bonds — symmetry causes cancellation. Classic NEET trap!'},
-    {key:'vsepr-bf3',  pname:'boron trifluoride',         f:'BF₃',   n:'Boron Trifluoride',       s:'Trigonal Planar',   w:'67.81', h:'sp²',   a:'120°',   d:'0 D',    g:'Trigonal Planar — sp², empty p-orbital on B (Lewis acid)',                x:'BF₃ is a strong Lewis acid. Its empty p-orbital accepts lone pairs. Dipole = 0 (symmetric).'},
-    {key:'vsepr-ch4',  pname:'methane',                   f:'CH₄',   n:'Methane',                 s:'Tetrahedral',       w:'16.04', h:'sp³',   a:'109.5°', d:'0 D',    g:'Tetrahedral — perfect symmetry, all 4 bond pairs equivalent',             x:'All bonds equivalent by symmetry → dipole = 0. The ideal tetrahedral reference molecule.'},
-    {key:'vsepr-nh3',  pname:'ammonia',                   f:'NH₃',   n:'Ammonia',                 s:'Pyramidal',         w:'17.03', h:'sp³',   a:'107°',   d:'1.47 D', g:'Trigonal Pyramidal — 1 lone pair on N lowers angle to 107°',              x:'NH₃ is a Lewis base & Brønsted base. Lone pair on N is key for H-bond donation & nucleophilicity.'},
-    {key:'vsepr-pcl5', pname:'phosphorus pentachloride',  f:'PCl₅',  n:'PCl₅',                    s:'Trig. Bipyramidal', w:'208.2', h:'sp³d',  a:'90°/120°',d:'0 D',   g:'Trigonal Bipyramidal — axial bonds longer than equatorial',               x:'Axial bonds (240 pm) > equatorial bonds (202 pm). Expanded octet on P. JEE Advanced level.'},
-    {key:'vsepr-sf6',  pname:'sulfur hexafluoride',       f:'SF₆',   n:'Sulfur Hexafluoride',     s:'Octahedral',        w:'146.1', h:'sp³d²', a:'90°',    d:'0 D',    g:'Octahedral — sp³d², all 90° bond angles, no lone pairs',                 x:'SF₆ is a greenhouse gas 23,500× more potent than CO₂. Inert due to perfect octahedral symmetry.'},
-    {key:'vsepr-xef4', pname:'xenon tetrafluoride',       f:'XeF₄',  n:'Xenon Tetrafluoride',     s:'Square Planar',     w:'207.3', h:'sp³d²', a:'90°',    d:'0 D',    g:'Square Planar — 2 lone pairs sit opposite (trans) each other',            x:'6 electron pairs (sp³d²) but 2 lone pairs cancel → Square Planar. Key JEE distinction.'},
+    {key:'vsepr-h2o',  pname:'water',                   f:'H₂O',   n:'Water',              s:'Bent',              w:'18.02', h:'sp³',   a:'104.5°', d:'1.85 D', g:'Bent / V-Shape — 2 lone pairs on O reduce bond angle below 109.5°',      x:'Bond angle 104.5° (not 109.5°) due to lone pair–bond pair repulsion. Most common NEET VSEPR question.'},
+    {key:'vsepr-co2',  pname:'carbon dioxide',           f:'CO₂',   n:'Carbon Dioxide',     s:'Linear',            w:'44.01', h:'sp',    a:'180°',   d:'0 D',    g:'Linear — symmetric, 2 C=O bonds, no lone pairs on C',                    x:'ZERO net dipole despite polar C=O bonds — symmetry causes cancellation. Classic NEET trap!'},
+    {key:'vsepr-bf3',  pname:'boron trifluoride',        f:'BF₃',   n:'Boron Trifluoride',  s:'Trigonal Planar',   w:'67.81', h:'sp²',   a:'120°',   d:'0 D',    g:'Trigonal Planar — sp², empty p-orbital on B (Lewis acid)',                x:'BF₃ is a strong Lewis acid. Its empty p-orbital accepts lone pairs. Dipole = 0 (symmetric).'},
+    {key:'vsepr-ch4',  pname:'methane',                  f:'CH₄',   n:'Methane',            s:'Tetrahedral',       w:'16.04', h:'sp³',   a:'109.5°', d:'0 D',    g:'Tetrahedral — perfect symmetry, all 4 bond pairs equivalent',             x:'All bonds equivalent by symmetry → dipole = 0. The ideal tetrahedral reference molecule.'},
+    {key:'vsepr-nh3',  pname:'ammonia',                  f:'NH₃',   n:'Ammonia',            s:'Pyramidal',         w:'17.03', h:'sp³',   a:'107°',   d:'1.47 D', g:'Trigonal Pyramidal — 1 lone pair on N lowers angle to 107°',              x:'NH₃ is a Lewis base & Brønsted base. Lone pair on N is key for H-bond donation & nucleophilicity.'},
+    {key:'vsepr-pcl5', pname:'phosphorus pentachloride', f:'PCl₅',  n:'PCl₅',               s:'Trig. Bipyramidal', w:'208.2', h:'sp³d',  a:'90°/120°',d:'0 D',   g:'Trigonal Bipyramidal — axial bonds longer than equatorial',               x:'Axial bonds (240 pm) > equatorial bonds (202 pm). Expanded octet on P. JEE Advanced level.'},
+    {key:'vsepr-sf6',  pname:'sulfur hexafluoride',      f:'SF₆',   n:'Sulfur Hexafluoride',s:'Octahedral',        w:'146.1', h:'sp³d²', a:'90°',    d:'0 D',    g:'Octahedral — sp³d², all 90° bond angles, no lone pairs',                 x:'SF₆ is a greenhouse gas 23,500× more potent than CO₂. Inert due to perfect octahedral symmetry.'},
+    {key:'vsepr-xef4', pname:'xenon tetrafluoride',      f:'XeF₄',  n:'Xenon Tetrafluoride',s:'Square Planar',     w:'207.3', h:'sp³d²', a:'90°',    d:'0 D',    g:'Square Planar — 2 lone pairs sit opposite (trans) each other',            x:'6 electron pairs (sp³d²) but 2 lone pairs cancel → Square Planar. Key JEE distinction.'},
   ],
   organic: [
-    {key:'org-benz',   pname:'benzene',      f:'C₆H₆',    n:'Benzene',      s:'Hexagonal',       w:'78.11', h:'sp²', a:'120°',   d:'0 D',    g:'Planar hexagonal ring — resonance stabilized, delocalized π electrons', x:'6 equivalent C-C bonds via resonance. Aromatic (Hückel: 4n+2, n=1). Dipole = 0.'},
-    {key:'org-etoh',   pname:'ethanol',      f:'C₂H₅OH',  n:'Ethanol',      s:'Tetrahedral C',   w:'46.07', h:'sp³', a:'109.5°', d:'1.69 D', g:'Tetrahedral C atoms; bent O (H-bond donor, –OH group)',                x:'–OH forms H-bonds → fully miscible in water. Bp 78°C >> propane –42°C, similar MW.'},
-    {key:'org-acet',   pname:'acetone',      f:'C₃H₆O',   n:'Acetone',      s:'Trigonal Planar', w:'58.08', h:'sp²', a:'~120°',  d:'2.91 D', g:'Trigonal planar at carbonyl C (sp²) — C=O double bond',                x:'Ketone (propanone). Most polar common solvent without H-bond donation. Nail polish remover.'},
-    {key:'org-acac',   pname:'acetic acid',  f:'CH₃COOH', n:'Acetic Acid',  s:'Planar –COOH',    w:'60.05', h:'sp²', a:'~120°',  d:'1.74 D', g:'Planar –COOH group; sp² carbonyl carbon with resonance',               x:'Forms H-bonded DIMERS in nonpolar solvents → apparent MW ~120 g/mol. Classic JEE concept.'},
-    {key:'org-form',   pname:'formaldehyde', f:'CH₂O',    n:'Formaldehyde', s:'Trigonal Planar', w:'30.03', h:'sp²', a:'~120°',  d:'2.33 D', g:'Trigonal planar (sp²) — simplest aldehyde, C=O double bond',           x:'Formalin (37% aq.) = preservative. Reacts with NaHSO₃ → bisulfite addition product.'},
+    {key:'org-benz',  pname:'benzene',      f:'C₆H₆',    n:'Benzene',      s:'Hexagonal',       w:'78.11', h:'sp²', a:'120°',   d:'0 D',    g:'Planar hexagonal ring — resonance stabilized, delocalized π electrons', x:'6 equivalent C-C bonds via resonance. Aromatic (Hückel: 4n+2, n=1). Dipole = 0.'},
+    {key:'org-etoh',  pname:'ethanol',      f:'C₂H₅OH',  n:'Ethanol',      s:'Tetrahedral C',   w:'46.07', h:'sp³', a:'109.5°', d:'1.69 D', g:'Tetrahedral C atoms; bent O (H-bond donor, –OH group)',                x:'–OH forms H-bonds → fully miscible in water. Bp 78°C >> propane –42°C, similar MW.'},
+    {key:'org-acet',  pname:'acetone',      f:'C₃H₆O',   n:'Acetone',      s:'Trigonal Planar', w:'58.08', h:'sp²', a:'~120°',  d:'2.91 D', g:'Trigonal planar at carbonyl C (sp²) — C=O double bond',                x:'Ketone (propanone). Most polar common solvent without H-bond donation. Nail polish remover.'},
+    {key:'org-acac',  pname:'acetic acid',  f:'CH₃COOH', n:'Acetic Acid',  s:'Planar –COOH',    w:'60.05', h:'sp²', a:'~120°',  d:'1.74 D', g:'Planar –COOH group; sp² carbonyl carbon with resonance',               x:'Forms H-bonded DIMERS in nonpolar solvents → apparent MW ~120 g/mol. Classic JEE concept.'},
+    {key:'org-form',  pname:'formaldehyde', f:'CH₂O',    n:'Formaldehyde', s:'Trigonal Planar', w:'30.03', h:'sp²', a:'~120°',  d:'2.33 D', g:'Trigonal planar (sp²) — simplest aldehyde, C=O double bond',           x:'Formalin (37% aq.) = preservative. Reacts with NaHSO₃ → bisulfite addition product.'},
   ],
   biomol: [
-    {key:'bio-gluc',   pname:'glucose',      f:'C₆H₁₂O₆', n:'Glucose',     s:'Pyranose Ring',   w:'180.2', h:'sp³', a:'109.5°', d:'—', g:'Pyranose ring — 6-membered; chair conformation, all sp³ C',               x:'α-glucose (36%) and β-glucose (64%) in solution — mutarotation. D-glucose is dextrorotatory.'},
-    {key:'bio-aden',   pname:'adenine',      f:'C₅H₅N₅',  n:'Adenine',     s:'Planar Bicyclic', w:'135.1', h:'sp²', a:'~120°',  d:'—', g:'Planar purine — bicyclic aromatic (sp² N and C atoms)',                    x:'Pairs with Thymine via 2 H-bonds in DNA; Uracil in RNA. Component of ATP.'},
-    {key:'bio-chol',   pname:'cholesterol',  f:'C₂₇H₄₆O', n:'Cholesterol', s:'Steroid Core',    w:'386.7', h:'sp³', a:'109.5°', d:'—', g:'Four fused rings (steroid skeleton) — mostly sp³ carbons',                 x:'Precursor to Vitamin D, bile acids & steroid hormones. Transported by LDL (bad cholesterol).'},
-    {key:'bio-alan',   pname:'alanine',      f:'C₃H₇NO₂', n:'Alanine',     s:'Tetrahedral',     w:'89.09', h:'sp³', a:'109.5°', d:'—', g:'Tetrahedral α-carbon (sp³) — simplest chiral amino acid',                  x:'Simplest chiral (L-config) amino acid. R-group = –CH₃. Non-essential amino acid.'},
+    {key:'bio-gluc',  pname:'glucose',     f:'C₆H₁₂O₆', n:'Glucose',     s:'Pyranose Ring',   w:'180.2', h:'sp³', a:'109.5°', d:'—', g:'Pyranose ring — 6-membered; chair conformation, all sp³ C',               x:'α-glucose (36%) and β-glucose (64%) in solution — mutarotation. D-glucose is dextrorotatory.'},
+    {key:'bio-aden',  pname:'adenine',     f:'C₅H₅N₅',  n:'Adenine',     s:'Planar Bicyclic', w:'135.1', h:'sp²', a:'~120°',  d:'—', g:'Planar purine — bicyclic aromatic (sp² N and C atoms)',                    x:'Pairs with Thymine via 2 H-bonds in DNA; Uracil in RNA. Component of ATP.'},
+    {key:'bio-chol',  pname:'cholesterol', f:'C₂₇H₄₆O', n:'Cholesterol', s:'Steroid Core',    w:'386.7', h:'sp³', a:'109.5°', d:'—', g:'Four fused rings (steroid skeleton) — mostly sp³ carbons',                 x:'Precursor to Vitamin D, bile acids & steroid hormones. Transported by LDL (bad cholesterol).'},
+    {key:'bio-alan',  pname:'alanine',     f:'C₃H₇NO₂', n:'Alanine',     s:'Tetrahedral',     w:'89.09', h:'sp³', a:'109.5°', d:'—', g:'Tetrahedral α-carbon (sp³) — simplest chiral amino acid',                  x:'Simplest chiral (L-config) amino acid. R-group = –CH₃. Non-essential amino acid.'},
   ],
   inorganic: [
-    {key:'in-h2so4',   pname:'sulfuric acid',    f:'H₂SO₄',  n:'Sulfuric Acid',    s:'Tetrahedral',     w:'98.08', h:'sp³',   a:'109.5°', d:'—', g:'Tetrahedral around S — sp³, two S=O and two S–OH bonds',      x:'Conc. H₂SO₄ = strong dehydrating & oxidising agent. ALWAYS add acid to water!'},
-    {key:'in-hno3',    pname:'nitric acid',      f:'HNO₃',   n:'Nitric Acid',      s:'Trigonal Planar', w:'63.01', h:'sp²',   a:'~120°',  d:'—', g:'Trigonal planar around N (sp²) — resonance in NO₃⁻',             x:'HNO₃ + conc. HCl (1:3) = Aqua Regia — dissolves gold & platinum. Brown ring test for NO₃⁻.'},
-    {key:'in-nh3',     pname:'ammonia',          f:'NH₃',    n:'Ammonia',          s:'Pyramidal',        w:'17.03', h:'sp³',   a:'107°',   d:'1.47 D', g:'Trigonal Pyramidal — 1 lone pair on N',                    x:'Haber Process: N₂ + 3H₂ ⇌ 2NH₃ (Fe catalyst, ~500°C, ~200 atm). Le Chatelier principle.'},
-    {key:'in-h3po4',   pname:'phosphoric acid',  f:'H₃PO₄',  n:'Phosphoric Acid',  s:'Tetrahedral',     w:'98.0',  h:'sp³',   a:'~109.5°',d:'—', g:'Tetrahedral around P — sp³ hybridised phosphorus',               x:'Triprotic acid (Ka1>>Ka2>>Ka3). Phosphodiester bonds in DNA/RNA backbone.'},
+    {key:'in-h2so4',  pname:'sulfuric acid',   f:'H₂SO₄', n:'Sulfuric Acid',   s:'Tetrahedral',     w:'98.08', h:'sp³',   a:'109.5°', d:'—', g:'Tetrahedral around S — sp³, two S=O and two S–OH bonds',      x:'Conc. H₂SO₄ = strong dehydrating & oxidising agent. ALWAYS add acid to water!'},
+    {key:'in-hno3',   pname:'nitric acid',     f:'HNO₃',  n:'Nitric Acid',     s:'Trigonal Planar', w:'63.01', h:'sp²',   a:'~120°',  d:'—', g:'Trigonal planar around N (sp²) — resonance in NO₃⁻',             x:'HNO₃ + conc. HCl (1:3) = Aqua Regia — dissolves gold & platinum. Brown ring test for NO₃⁻.'},
+    {key:'in-nh3',    pname:'ammonia',         f:'NH₃',   n:'Ammonia',         s:'Pyramidal',       w:'17.03', h:'sp³',   a:'107°',   d:'1.47 D', g:'Trigonal Pyramidal — 1 lone pair on N',                    x:'Haber Process: N₂ + 3H₂ ⇌ 2NH₃ (Fe catalyst, ~500°C, ~200 atm). Le Chatelier principle.'},
+    {key:'in-h3po4',  pname:'phosphoric acid', f:'H₃PO₄', n:'Phosphoric Acid', s:'Tetrahedral',     w:'98.0',  h:'sp³',   a:'~109.5°',d:'—', g:'Tetrahedral around P — sp³ hybridised phosphorus',               x:'Triprotic acid (Ka1>>Ka2>>Ka3). Phosphodiester bonds in DNA/RNA backbone.'},
   ]
 };
 
@@ -595,72 +645,118 @@ let dmol = false, token = 0;
 const CACTUS = 'https://cactus.nci.nih.gov/chemical/structure';
 
 /* ════════════════════════════════════════
+   FIT LAYOUT — the core fix
+   Stamps explicit px dimensions on every
+   element whose height Chrome mobile
+   cannot compute from CSS alone.
+════════════════════════════════════════ */
+function fitLayout() {
+  const W   = window.innerWidth;
+  const H   = window.innerHeight;
+  const mob = W < 768;
+  const HH  = 56;
+  const BH  = mob ? 58 : 0;
+  const appH = H - HH - BH;
+  const sbW  = mob ? 0 : 300;
+  const vwW  = W - sbW;
+
+  // .app height
+  const app = document.getElementById('app');
+  app.style.height = appH + 'px';
+
+  // .vw (viewer wrapper)
+  const vw = document.getElementById('vw');
+  vw.style.width  = vwW + 'px';
+  vw.style.height = appH + 'px';
+
+  // #p3d (3Dmol container)
+  const p3d = document.getElementById('p3d');
+  p3d.style.width  = vwW + 'px';
+  p3d.style.height = appH + 'px';
+
+  // #c3d (the actual canvas)
+  const c3d = document.getElementById('c3d');
+  c3d.style.width  = vwW + 'px';
+  c3d.style.height = appH + 'px';
+  c3d.width  = vwW;   // also set attribute so WebGL buffer is correct
+  c3d.height = appH;
+
+  // sidebar height on mobile
+  const sb = document.getElementById('sb');
+  sb.style.height = appH + 'px';
+
+  // tell 3Dmol to repaint
+  if (viewer) {
+    viewer.resize();
+    viewer.render();
+  }
+}
+
+/* ════════════════════════════════════════
    INIT
 ════════════════════════════════════════ */
-window.addEventListener('load', () => {
+window.addEventListener('DOMContentLoaded', () => {
+  // Run layout FIRST — before 3Dmol so canvas has real px size
+  fitLayout();
+
   const ls = document.getElementById('libst');
-  const c3d = document.getElementById('c3d');
-  const vw  = document.getElementById('vw');
 
-  // Force canvas to fill parent before 3Dmol init (critical for Chrome mobile)
-  function sizeCanvas() {
-    const rect = vw.getBoundingClientRect();
-    c3d.style.width  = rect.width  + 'px';
-    c3d.style.height = rect.height + 'px';
-  }
-  sizeCanvas();
-
-  // 3Dmol init
   if (typeof $3Dmol !== 'undefined') {
     dmol = true;
-    ls.innerHTML = '<span class="lok">✓ 3Dmol.js ready</span><span class="lok">✓ NCI Cactus API</span>';
+    ls.innerHTML = '<span class="lok">✓ 3Dmol ready</span><span class="lok">✓ NCI Cactus API</span>';
     try {
-      viewer = $3Dmol.createViewer(c3d, { backgroundColor: '#060810' });
+      // Pass the container div — 3Dmol will manage the canvas inside it
+      viewer = $3Dmol.createViewer('c3d', {
+        backgroundColor: '#060810',
+        antialias: true,
+        id: 'viewer3d'
+      });
       viewer.resize();
-    } catch(e) { dmol = false; console.warn('3Dmol init:', e); }
+    } catch(e) {
+      dmol = false;
+      ls.innerHTML = '<span class="lfl">✗ 3Dmol error: ' + e.message + '</span>';
+      console.error('3Dmol init error:', e);
+    }
   } else {
-    ls.innerHTML = '<span class="lfl">✗ 3Dmol failed — 2D fallback</span><span class="lok">✓ NCI Cactus API</span>';
+    ls.innerHTML = '<span class="lfl">✗ 3Dmol not loaded — 2D mode</span><span class="lok">✓ NCI Cactus API</span>';
   }
 
-  // Render initial grid
   renderGrid('vsepr');
 
-  // Resize: update canvas size + notify 3Dmol
-  function onResize() {
-    sizeCanvas();
-    if (viewer) viewer.resize();
-  }
-  window.addEventListener('resize', onResize);
-  // ResizeObserver catches mobile browser chrome show/hide
-  if (window.ResizeObserver) {
-    new ResizeObserver(onResize).observe(vw);
+  // Resize handler
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(fitLayout, 80);
+  });
+  // Catch mobile browser chrome show/hide
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(fitLayout, 80);
+    });
   }
 
-  // Keyboard: Cmd/Ctrl+K → focus search
   document.addEventListener('keydown', e => {
     if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); document.getElementById('mol-in').focus(); }
     if (e.key === 'Escape') { closeMod(); closeDrawer(); }
   });
 
-  // Grid click — event delegation (safe, no inline onclick)
   document.getElementById('mg').addEventListener('click', e => {
     const card = e.target.closest('.mc');
     if (card) pickMol(card.dataset.key);
   });
 
-  // Search enter key
   document.getElementById('mol-in').addEventListener('keypress', e => {
     if (e.key === 'Enter') doSearch();
   });
 
-  // Auto-load methane after libs settle
-  // Hide loader initially
   document.getElementById('ldr').classList.add('h');
-  setTimeout(() => pickMol('vsepr-ch4'), 1400);
+  setTimeout(() => pickMol('vsepr-ch4'), 800);
 });
 
 /* ════════════════════════════════════════
-   DRAWER (mobile sidebar)
+   DRAWER
 ════════════════════════════════════════ */
 function togDrawer() {
   const open = document.getElementById('sb').classList.toggle('o');
@@ -702,36 +798,21 @@ function renderGrid(cat) {
 ════════════════════════════════════════ */
 function setMode(mode) {
   curMode = mode;
-
-  // Desktop tabs
-  ['d3d','d2d','dpr'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.classList.remove('on');
-  });
+  ['d3d','d2d','dpr'].forEach(id => { const el = document.getElementById(id); if(el) el.classList.remove('on'); });
   const dtMap = {'3d':'d3d','2d':'d2d','props':'dpr'};
-  const de = document.getElementById(dtMap[mode]);
-  if (de) de.classList.add('on');
-
-  // Bottom tabs
-  ['b3d','b2d','bpr'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.classList.remove('on');
-  });
+  const de = document.getElementById(dtMap[mode]); if(de) de.classList.add('on');
+  ['b3d','b2d','bpr'].forEach(id => { const el = document.getElementById(id); if(el) el.classList.remove('on'); });
   const btMap = {'3d':'b3d','2d':'b2d','props':'bpr'};
-  const be = document.getElementById(btMap[mode]);
-  if (be) be.classList.add('on');
+  const be = document.getElementById(btMap[mode]); if(be) be.classList.add('on');
 
-  // Panels
-  document.getElementById('p3d').style.display = mode === '3d' ? 'block' : 'none';
+  document.getElementById('p3d').style.display  = mode === '3d' ? 'block' : 'none';
   document.getElementById('p2d').classList.toggle('on', mode === '2d');
   document.getElementById('ppr').classList.toggle('on', mode === 'props');
-  document.getElementById('s3d').style.display = mode === '3d' ? 'block' : 'none';
-  document.getElementById('vc').style.display  = mode === '3d' ? 'flex'  : 'none';
+  document.getElementById('s3d').style.display  = mode === '3d' ? 'block' : 'none';
+  document.getElementById('vc').style.display   = mode === '3d' ? 'flex'  : 'none';
 
-  // Close drawer on mobile after mode switch
   if (window.innerWidth < 768) closeDrawer();
-
-  // Reload current molecule for new mode
+  if (mode === '3d' && viewer) { fitLayout(); viewer.render(); }
   if (curQ) {
     if (mode === '2d')    load2D(curQ);
     if (mode === 'props') loadProps(curQ, curMeta);
@@ -739,19 +820,16 @@ function setMode(mode) {
 }
 
 /* ════════════════════════════════════════
-   LOAD MOLECULES
+   MOLECULE LOAD
 ════════════════════════════════════════ */
 function pickMol(key) {
   selKey = key;
   renderGrid(curCat);
-
-  // Find meta in any category
   let meta = null;
   for (const arr of Object.values(DB)) {
     meta = arr.find(m => m.key === key);
     if (meta) break;
   }
-
   if (window.innerWidth < 768) closeDrawer();
   go(meta ? meta.pname : key, meta);
 }
@@ -767,7 +845,7 @@ function doSearch() {
 }
 
 /* ════════════════════════════════════════
-   NCI CACTUS helper
+   NCI CACTUS
 ════════════════════════════════════════ */
 async function cactus(name, rep) {
   const url = `${CACTUS}/${encodeURIComponent(name)}/${rep}`;
@@ -779,37 +857,25 @@ async function cactus(name, rep) {
 }
 
 /* ════════════════════════════════════════
-   MAIN ORCHESTRATOR — race-condition safe
+   MAIN ORCHESTRATOR
 ════════════════════════════════════════ */
 async function go(query, meta) {
-  const tk = ++token;   // unique token; stale calls are silently dropped
-
+  const tk = ++token;
   showLoad(true, query, 'RESOLVING MOLECULE…');
   clearErr();
   document.getElementById('emp').style.display = 'none';
-  curQ = query;
-  curMeta = meta;
-
+  curQ = query; curMeta = meta;
   try {
-    // Verify exists on Cactus & get IUPAC name
     const iupac = await cactus(query, 'iupac_name').catch(() => null);
     if (tk !== token) return;
-
-    // Render for current mode
     if      (curMode === '3d')    await do3D(query, tk);
     else if (curMode === '2d')    await load2D(query);
     else if (curMode === 'props') await loadProps(query, meta);
-
     if (tk !== token) return;
-
-    // Fill sidebar info card
     if (meta) fillInfo(meta);
     else      await liveMeta(query, iupac);
-
-    // Update badge
     document.getElementById('bnm').textContent = meta ? meta.n : (iupac || query);
     document.getElementById('bdg').classList.add('v');
-
   } catch(err) {
     if (tk !== token) return;
     showErr(`"${query}" not found. Try: water, caffeine, aspirin, benzene.`);
@@ -837,15 +903,13 @@ async function do3D(query, tk) {
   model = viewer.addModel(sdf, 'sdf');
   applyStyle();
   viewer.zoomTo();
-  viewer.render();
-  // Force resize after render — critical for Chrome mobile zero-size canvas bug
-  viewer.resize();
+  fitLayout();       // ensure canvas px size is correct
   viewer.render();
   if (rotating) viewer.animate({ loop: 'forward', step: 0.5 });
 }
 
 /* ════════════════════════════════════════
-   2D IMAGE — with loading state
+   2D IMAGE
 ════════════════════════════════════════ */
 async function load2D(query) {
   const frame = document.getElementById('f2d');
@@ -868,7 +932,6 @@ async function load2D(query) {
 async function loadProps(query, meta) {
   document.getElementById('prt').textContent = meta ? meta.n : query;
   document.getElementById('prg').innerHTML   = '<div style="font-family:var(--fn);font-size:10px;color:var(--di);padding:8px">Fetching…</div>';
-
   const fields = [
     {label:'Molecular Formula',  key:'formula'},
     {label:'Molecular Weight',   key:'mw'},
@@ -881,9 +944,7 @@ async function loadProps(query, meta) {
     {label:'Rotatable Bonds',    key:'rotatable_bond_count'},
     {label:'Heavy Atom Count',   key:'heavy_atom_count'},
   ];
-
   const results = await Promise.allSettled(fields.map(f => cactus(query, f.key)));
-
   document.getElementById('prg').innerHTML = fields.map((f, i) => {
     const val      = results[i].status === 'fulfilled' ? results[i].value : '—';
     const small    = val.length > 20;
@@ -898,7 +959,7 @@ async function loadProps(query, meta) {
 }
 
 /* ════════════════════════════════════════
-   LIVE META (for searched molecules)
+   LIVE META
 ════════════════════════════════════════ */
 async function liveMeta(query, iupac) {
   try {
@@ -919,7 +980,7 @@ async function liveMeta(query, iupac) {
 }
 
 /* ════════════════════════════════════════
-   FILL INFO CARD
+   FILL INFO
 ════════════════════════════════════════ */
 function fillInfo(m) {
   document.getElementById('i-nm').textContent = m.n;
@@ -934,7 +995,7 @@ function fillInfo(m) {
 }
 
 /* ════════════════════════════════════════
-   3D STYLE & ROTATION
+   3D CONTROLS
 ════════════════════════════════════════ */
 function applyStyle() {
   if (!viewer || !model) return;
@@ -952,8 +1013,8 @@ function togRot() {
   if (!viewer) return;
   rotating ? viewer.animate({ loop: 'forward', step: 0.5 }) : viewer.stopAnimate();
 }
-function resetV()   { if (viewer) { viewer.zoomTo(); viewer.render(); } }
-function zoomV(f)   { if (viewer) viewer.zoom(f, 500); }
+function resetV() { if (viewer) { viewer.zoomTo(); viewer.render(); } }
+function zoomV(f) { if (viewer) viewer.zoom(f, 500); }
 
 /* ════════════════════════════════════════
    UI HELPERS
@@ -978,8 +1039,56 @@ async function doCopy(text, label) {
   try { await navigator.clipboard.writeText(text); toast(label + ' copied!', 'k'); }
   catch { toast('Copy failed', 'e'); }
 }
-function openMod()  { document.getElementById('movl').classList.add('v'); }
+function openMod()  {
+  document.getElementById('movl').classList.add('v');
+  // Reset form
+  document.getElementById('uform').style.display = 'flex';
+  document.getElementById('form-ok').style.display = 'none';
+  document.getElementById('bjn').disabled = false;
+  document.getElementById('bjn').textContent = 'Join Pro Waitlist →';
+}
 function closeMod() { document.getElementById('movl').classList.remove('v'); }
+
+/* ════════════════════════════════════════
+   UPGRADE FORM SUBMISSION
+   Submits to Google Apps Script web app
+   which writes to a Google Sheet.
+   Replace SCRIPT_URL with your deployed
+   Apps Script URL.
+════════════════════════════════════════ */
+const SCRIPT_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID_HERE/exec';
+
+async function submitUpgrade() {
+  const name  = document.getElementById('u-name').value.trim();
+  const email = document.getElementById('u-email').value.trim();
+  const phone = document.getElementById('u-phone').value.trim();
+  const plan  = document.getElementById('u-plan').value;
+
+  if (!name)  { toast('Please enter your name', 'e'); return; }
+  if (!email || !/^[^@]+@[^@]+\.[^@]+$/.test(email)) { toast('Please enter a valid email', 'e'); return; }
+
+  const btn = document.getElementById('bjn');
+  btn.disabled = true;
+  btn.textContent = 'Submitting…';
+
+  try {
+    // Using no-cors mode since Apps Script doesn't send CORS headers on redirect
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, phone, plan, ts: new Date().toISOString() })
+    });
+    // no-cors means we can't read the response — assume success
+    document.getElementById('ok-email').textContent = email;
+    document.getElementById('uform').style.display = 'none';
+    document.getElementById('form-ok').style.display = 'block';
+  } catch(err) {
+    btn.disabled = false;
+    btn.textContent = 'Join Pro Waitlist →';
+    toast('Network error — please try again', 'e');
+  }
+}
 </script>
 </body>
 </html>
