@@ -306,32 +306,11 @@ header{
 @media (max-width:767px){
   .dtabs{display:none}
   .fbdg{display:none}
-  .hmb{display:flex}
+  .hmb{display:none} /* no hamburger needed - bottom tab handles it */
   .app{bottom:var(--BH)}
-
-  /* MOBILE DRAWER — full screen width, fully opaque solid bg.
-     WebGL canvas gets GPU-promoted and paints over children regardless of
-     z-index. The only reliable fix is:
-     1. Full 100vw width so no viewer bleeds through the side
-     2. Solid opaque background (no rgba, no transparency)
-     3. z-index high enough above the overlay (200) and viewer (1)
-     4. Pause/hide the 3D viewer while drawer is open (done in JS) */
-  .sb{
-    position:fixed;
-    top:var(--HH);left:0;right:0;bottom:var(--BH);
-    width:100vw;
-    z-index:500;
-    background:#0a0e1a;
-    transform:translateX(-100%);
-    transition:transform .25s cubic-bezier(.4,0,.2,1);
-    border-right:none;
-    will-change:transform;
-  }
-  .sb.o{transform:translateX(0)}
-
-  /* Hide overlay — not needed when drawer is full screen */
+  /* Sidebar completely hidden on mobile - mol-screen replaces it */
+  .sb{display:none}
   .dovl{display:none!important}
-
   .btbar{display:block}
   #ppr{padding:14px 12px}
   .prg{grid-template-columns:1fr 1fr}
@@ -347,8 +326,61 @@ header{
 }
 @media (min-width:768px){
   .btbar,.hmb,.dovl{display:none!important}
+  #mol-screen{display:none!important}
   .sb{transform:none!important;position:relative;width:var(--SW)}
 }
+
+/* ─── MOBILE MOLECULE SCREEN ─────────────────────────── */
+/* This is a completely separate page-level panel.
+   It lives OUTSIDE the viewer div so WebGL never touches it.
+   No z-index battle. No GPU compositing bleed. Just a normal div. */
+#mol-screen{
+  display:none;
+  position:fixed;
+  top:var(--HH);left:0;right:0;bottom:var(--BH);
+  background:#0a0e1a;
+  overflow-y:auto;overflow-x:hidden;
+  z-index:50; /* only needs to be above .app z-index:1 */
+  flex-direction:column;
+}
+#mol-screen.v{ display:flex }
+.ms-search{ padding:14px 14px 10px; border-bottom:1px solid var(--bd) }
+.ms-srw{ position:relative }
+.ms-input{
+  width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:9px;
+  padding:10px 70px 10px 12px;font-size:14px;font-family:var(--fs);color:var(--tx);outline:none;
+}
+.ms-input:focus{ border-color:var(--acc) }
+.ms-go{
+  position:absolute;right:5px;top:50%;transform:translateY(-50%);
+  background:var(--acc);border:none;border-radius:6px;
+  padding:6px 12px;color:#fff;font-size:12px;font-weight:700;
+}
+.ms-err{
+  background:rgba(255,60,60,.06);border:1px solid rgba(255,60,60,.2);
+  border-radius:7px;padding:8px 11px;font-size:11px;color:#ff7070;
+  display:none;margin-top:8px;font-family:var(--fn);line-height:1.5;
+}
+.ms-err.v{ display:block }
+.ms-cats{ display:flex;gap:6px;flex-wrap:wrap;padding:12px 14px;border-bottom:1px solid var(--bd) }
+.ms-cat{
+  font-size:11px;font-family:var(--fn);padding:6px 14px;border-radius:6px;
+  border:1px solid var(--bd);color:var(--mu);background:transparent;
+}
+.ms-cat.on{ border-color:var(--acc);color:var(--acc);background:rgba(74,143,255,.08) }
+.ms-grid-wrap{ padding:12px 14px }
+.ms-label{ font-family:var(--fn);font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--di);margin-bottom:10px }
+.ms-grid{ display:grid;grid-template-columns:1fr 1fr;gap:8px }
+.ms-card{
+  background:var(--s2);border:1px solid var(--bd);border-radius:10px;
+  padding:12px;transition:border-color .15s;
+}
+.ms-card.sel{ border-color:var(--tea) }
+.ms-card:active{ border-color:var(--acc) }
+.ms-cf{ font-family:var(--fn);font-size:13px;font-weight:700;color:var(--tea);margin-bottom:3px }
+.ms-cn{ font-size:12px;color:var(--mu) }
+.ms-cs{ font-size:9px;font-family:var(--fn);color:var(--di);margin-top:4px }
+
 </style>
 </head>
 <body>
@@ -516,6 +548,32 @@ header{
   </div>
 </div>
 
+<!-- ─── MOBILE MOLECULE SCREEN ───────────────────────────────── -->
+<!-- Completely separate from .app div. WebGL is inside .app, this is outside.
+     No GPU compositing battle. No z-index tricks needed. Just works. -->
+<div id="mol-screen">
+  <!-- Search -->
+  <div class="ms-search">
+    <div class="ms-srw">
+      <input class="ms-input" id="ms-in" placeholder="Search: caffeine, aspirin, benzene…" autocomplete="off">
+      <button class="ms-go" onclick="msSearch()">Go →</button>
+    </div>
+    <div class="ms-err" id="ms-err"></div>
+  </div>
+  <!-- Categories -->
+  <div class="ms-cats">
+    <button class="ms-cat on" data-cat="vsepr"     onclick="msCat('vsepr',this)">VSEPR</button>
+    <button class="ms-cat"    data-cat="organic"   onclick="msCat('organic',this)">Organic</button>
+    <button class="ms-cat"    data-cat="biomol"    onclick="msCat('biomol',this)">Bio</button>
+    <button class="ms-cat"    data-cat="inorganic" onclick="msCat('inorganic',this)">Inorganic</button>
+  </div>
+  <!-- Molecule grid -->
+  <div class="ms-grid-wrap">
+    <div class="ms-label">Quick Load</div>
+    <div class="ms-grid" id="ms-grid"></div>
+  </div>
+</div>
+
 <!-- ─── BOTTOM TAB BAR (mobile only) ───────────────────────── -->
 <div class="btbar">
   <div class="bti">
@@ -654,9 +712,12 @@ window.addEventListener('load', () => {
     if (card) pickMol(card.dataset.key);
   });
 
-  // Search enter key
+  // Search enter key (desktop sidebar + mobile screen)
   document.getElementById('mol-in').addEventListener('keypress', e => {
     if (e.key === 'Enter') doSearch();
+  });
+  document.getElementById('ms-in').addEventListener('keypress', e => {
+    if (e.key === 'Enter') msSearch();
   });
 
   // Hide loader at start
@@ -716,37 +777,78 @@ window.addEventListener('load', () => {
 });
 
 /* ════════════════════════════════════════
-   DRAWER (mobile sidebar)
-   WebGL canvases get GPU-promoted and can paint over CSS siblings
-   regardless of z-index. We pause animation + hide the 3D panel
-   while the drawer is open so nothing bleeds through.
+   MOBILE MOLECULE SCREEN
+   Lives outside .app entirely — WebGL canvas inside .app can never
+   affect it. No z-index needed, no GPU compositing issues.
 ════════════════════════════════════════ */
-function togDrawer() {
-  const sb   = document.getElementById('sb');
-  const open = sb.classList.toggle('o');
-  document.getElementById('hmb').classList.toggle('o', open);
-  const bm = document.getElementById('bmol');
-  if (bm) bm.classList.toggle('on', open);
+let molScreenOpen = false;
 
-  if (open) {
-    // Pause & hide 3D viewer while drawer is shown
-    if (viewer) viewer.stopAnimate();
-    document.getElementById('p3d').style.visibility = 'hidden';
-  } else {
-    // Restore viewer when drawer closes
-    document.getElementById('p3d').style.visibility = 'visible';
-    if (viewer && rotating) viewer.animate({ loop: 'forward', step: 0.5 });
-  }
+function openMolScreen() {
+  molScreenOpen = true;
+  document.getElementById('mol-screen').classList.add('v');
+  // Pause 3D to save battery, not for z-index reasons
+  if (viewer) viewer.stopAnimate();
+  // Sync the mobile grid with current selection
+  msRenderGrid(curCat);
+  // Sync category buttons
+  document.querySelectorAll('.ms-cat').forEach(b => {
+    b.classList.toggle('on', b.dataset.cat === curCat);
+  });
+  // Update bottom tab
+  document.getElementById('bmol').classList.add('on');
 }
 
-function closeDrawer() {
-  document.getElementById('sb').classList.remove('o');
-  document.getElementById('hmb').classList.remove('o');
-  const bm = document.getElementById('bmol');
-  if (bm) bm.classList.remove('on');
-  // Restore viewer
-  document.getElementById('p3d').style.visibility = 'visible';
-  if (viewer && rotating) viewer.animate({ loop: 'forward', step: 0.5 });
+function closeMolScreen() {
+  molScreenOpen = false;
+  document.getElementById('mol-screen').classList.remove('v');
+  document.getElementById('bmol').classList.remove('on');
+  // Resume 3D
+  if (viewer && rotating && curMode === '3d') viewer.animate({ loop:'forward', step:0.5 });
+}
+
+function togDrawer() {
+  molScreenOpen ? closeMolScreen() : openMolScreen();
+}
+function closeDrawer() { closeMolScreen(); }
+
+function msCat(cat, btn) {
+  curCat = cat;
+  document.querySelectorAll('.ms-cat').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  // Also sync desktop sidebar tabs
+  document.querySelectorAll('.ctb').forEach(b => b.classList.toggle('on', b.dataset.cat === cat));
+  msRenderGrid(cat);
+}
+
+function msRenderGrid(cat) {
+  const mols = DB[cat] || [];
+  document.getElementById('ms-grid').innerHTML = mols.map(m =>
+    `<div class="ms-card${m.key === selKey ? ' sel':''}" data-key="${m.key}" onclick="msPick('${m.key}')">
+      <div class="ms-cf">${m.f}</div>
+      <div class="ms-cn">${m.n}</div>
+      <div class="ms-cs">${m.s}</div>
+    </div>`
+  ).join('');
+}
+
+function msPick(key) {
+  selKey = key;
+  msRenderGrid(curCat);
+  renderGrid(curCat); // keep desktop grid in sync
+  closeMolScreen();
+  let meta = null;
+  for (const arr of Object.values(DB)) { meta = arr.find(m => m.key === key); if (meta) break; }
+  go(meta ? meta.pname : key, meta);
+}
+
+function msSearch() {
+  const val = document.getElementById('ms-in').value.trim();
+  if (!val) return;
+  selKey = null;
+  document.getElementById('ms-err').classList.remove('v');
+  closeMolScreen();
+  clearErr();
+  go(val, null);
 }
 
 /* ════════════════════════════════════════
@@ -800,8 +902,8 @@ function setMode(mode) {
   document.getElementById('s3d').style.display = mode === '3d' ? 'block' : 'none';
   document.getElementById('vc').style.display  = mode === '3d' ? 'flex'  : 'none';
 
-  // Close drawer on mobile after mode switch
-  if (window.innerWidth < 768) closeDrawer();
+  // Close mol-screen on mobile when switching modes
+  if (window.innerWidth < 768) closeMolScreen();
 
   // Reload current molecule for new mode
   if (curQ) {
@@ -816,15 +918,12 @@ function setMode(mode) {
 function pickMol(key) {
   selKey = key;
   renderGrid(curCat);
-
-  // Find meta in any category
   let meta = null;
   for (const arr of Object.values(DB)) {
     meta = arr.find(m => m.key === key);
     if (meta) break;
   }
-
-  if (window.innerWidth < 768) closeDrawer();
+  if (window.innerWidth < 768) closeMolScreen();
   go(meta ? meta.pname : key, meta);
 }
 
@@ -834,7 +933,7 @@ function doSearch() {
   selKey = null;
   renderGrid(curCat);
   clearErr();
-  if (window.innerWidth < 768) closeDrawer();
+  if (window.innerWidth < 768) closeMolScreen();
   go(val, null);
 }
 
