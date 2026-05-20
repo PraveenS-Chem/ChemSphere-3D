@@ -381,6 +381,23 @@ header{
 .ms-cn{ font-size:12px;color:var(--mu) }
 .ms-cs{ font-size:9px;font-family:var(--fn);color:var(--di);margin-top:4px }
 
+/* ─── MOBILE 3D CONTROLS ─────────────────────────────── */
+.ms-ctrls{
+  padding:12px 14px;border-top:1px solid var(--bd);
+  background:var(--s1);margin-top:4px;
+}
+.ms-ctrl-label{
+  font-family:var(--fn);font-size:8px;letter-spacing:2px;
+  text-transform:uppercase;color:var(--di);margin-bottom:8px;
+}
+.ms-ctrl-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ms-ctrl-lbl{font-family:var(--fn);font-size:10px;color:var(--mu)}
+.ms-sel{
+  background:var(--s2);border:1px solid var(--bd);border-radius:6px;
+  padding:5px 8px;font-size:11px;font-family:var(--fn);color:var(--tx);
+  outline:none;flex:1;min-width:80px;
+}
+
 
 /* ─── INTRO / LANDING SCREEN ─────────────────────────── */
 #intro-screen {
@@ -609,7 +626,7 @@ header{
         <span class="cl">Model Style</span>
         <select class="cs" id="sty" onchange="applyStyle()">
           <option value="stick">Stick</option>
-          <option value="sphere">Spacefill</option>
+          <option value="sphere">Atomic Size</option>
           <option value="line">Wireframe</option>
         </select>
       </div>
@@ -767,6 +784,24 @@ header{
   <div class="ms-grid-wrap">
     <div class="ms-label">Quick Load</div>
     <div class="ms-grid" id="ms-grid"></div>
+  </div>
+  <!-- Mobile 3D Controls — synced with desktop sidebar selects -->
+  <div class="ms-ctrls" id="ms-ctrls">
+    <div class="ms-ctrl-label">3D Display</div>
+    <div class="ms-ctrl-row">
+      <span class="ms-ctrl-lbl">Style</span>
+      <select class="ms-sel" id="ms-sty" onchange="msSyncStyle()">
+        <option value="stick">Stick</option>
+        <option value="sphere">Atomic Size</option>
+        <option value="line">Wireframe</option>
+      </select>
+      <span class="ms-ctrl-lbl">Color</span>
+      <select class="ms-sel" id="ms-col" onchange="msSyncColor()">
+        <option value="Jmol">CPK</option>
+        <option value="ssPyMol">PyMol</option>
+        <option value="rasmol">RasMol</option>
+      </select>
+    </div>
   </div>
 </div>
 
@@ -950,13 +985,19 @@ window.addEventListener('load', () => {
           c3d.style.width  = '';
           c3d.style.height = '';
           viewer.resize();
-          setTimeout(() => pickMol('vsepr-ch4'), 100);
+          // PATCH: Extra safety resize for Android Chrome desktop mode —
+          // viewport calculation can lag 200-400ms in desktop emulation
+          setTimeout(() => {
+            viewer.resize();
+            viewer.render();
+            pickMol('vsepr-ch4');
+          }, 300);
         });
       } catch(e) {
         console.error('3Dmol createViewer failed:', e);
         dmol = false;
         ls.innerHTML = '<span class="lfl">✗ 3Dmol error: ' + e.message + '</span>';
-        setTimeout(() => pickMol('vsepr-ch4'), 100);
+        setTimeout(() => pickMol('vsepr-ch4'), 300);
       }
     }));
 
@@ -990,6 +1031,11 @@ function openMolScreen() {
   document.querySelectorAll('.ms-cat').forEach(b => {
     b.classList.toggle('on', b.dataset.cat === curCat);
   });
+  // Sync mobile style/color selects with desktop sidebar values
+  const dSty = document.getElementById('sty');
+  const dCol = document.getElementById('col');
+  if (dSty) document.getElementById('ms-sty').value = dSty.value;
+  if (dCol) document.getElementById('ms-col').value = dCol.value;
   // Update bottom tab
   document.getElementById('bmol').classList.add('on');
 }
@@ -1045,6 +1091,18 @@ function msSearch() {
   closeMolScreen();
   clearErr();
   go(val, null);
+}
+
+/* Mobile style/color sync — keep desktop sidebar in sync */
+function msSyncStyle() {
+  const val = document.getElementById('ms-sty').value;
+  document.getElementById('sty').value = val;
+  applyStyle();
+}
+function msSyncColor() {
+  const val = document.getElementById('ms-col').value;
+  document.getElementById('col').value = val;
+  applyStyle();
 }
 
 /* ════════════════════════════════════════
@@ -1210,6 +1268,7 @@ async function do3D(query, tk) {
   model = viewer.addModel(sdf, 'sdf');
   applyStyle();
   viewer.zoomTo();
+  viewer.zoom(0.85);
   viewer.render();
 
   // Chrome: canvas stays black unless we resize+render in next paint cycle
@@ -1321,11 +1380,17 @@ function applyStyle() {
   if (!viewer || !model) return;
   const s = document.getElementById('sty').value;
   const c = document.getElementById('col').value;
-  let cfg = {};
-  if      (s === 'sphere') cfg = { sphere: { scale: 0.35, colorscheme: c } };
-  else if (s === 'line')   cfg = { line:   { colorscheme: c } };
-  else                     cfg = { stick:  { radius: 0.18, colorscheme: c } };
-  model.setStyle({}, cfg);
+  if (s === 'sphere') {
+    // Hybrid "Atomic Size" mode: large spheres + thin sticks for connectivity
+    model.setStyle({}, {
+      sphere: { scale: 0.26, colorscheme: c },
+      stick:  { radius: 0.10, colorscheme: c }
+    });
+  } else if (s === 'line') {
+    model.setStyle({}, { line: { colorscheme: c } });
+  } else {
+    model.setStyle({}, { stick: { radius: 0.18, colorscheme: c } });
+  }
   viewer.render();
 }
 function togRot() {
