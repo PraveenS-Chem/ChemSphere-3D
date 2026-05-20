@@ -469,6 +469,117 @@ header{
   font-family:var(--fn);font-size:9px;color:var(--di);letter-spacing:1px;
 }
 
+/* ─── FEATURED MOLECULES ON INTRO ────────────────────── */
+.intro-featured{
+  position:relative;z-index:1;margin-top:22px;width:100%;max-width:480px;
+}
+.intro-feat-label{
+  font-family:var(--fn);font-size:8px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--di);margin-bottom:10px;text-align:center;
+}
+.intro-feat-row{
+  display:flex;gap:7px;flex-wrap:wrap;justify-content:center;
+}
+.intro-feat-card{
+  background:rgba(74,143,255,.05);border:1px solid var(--bd);border-radius:9px;
+  padding:8px 12px;display:flex;flex-direction:column;align-items:center;gap:3px;
+  cursor:pointer;transition:border-color .18s,background .18s;min-width:72px;
+}
+.intro-feat-card:hover{border-color:var(--tea);background:rgba(0,229,180,.06)}
+.intro-feat-card span{font-family:var(--fn);font-size:11px;font-weight:700;color:var(--tea)}
+.intro-feat-card{font-size:10px;color:var(--mu);font-family:var(--fs)}
+
+/* ─── INSTITUTIONAL BADGE ───────────────────────────── */
+.intro-inst{
+  position:relative;z-index:1;margin-top:10px;
+  font-family:var(--fn);font-size:8px;color:var(--di);letter-spacing:0.5px;
+  border:1px solid var(--bd);border-radius:20px;padding:4px 12px;
+  display:inline-block;
+}
+
+/* ─── GUIDED DEMO MODE ──────────────────────────────── */
+#demo-bar{
+  position:fixed;top:calc(var(--HH) + 8px);left:50%;transform:translateX(-50%);
+  z-index:100;display:none;align-items:center;gap:10px;
+  background:rgba(6,8,16,.97);border:1px solid var(--tea);border-radius:20px;
+  padding:7px 16px;font-family:var(--fn);font-size:10px;color:var(--tea);
+  white-space:nowrap;
+}
+#demo-bar.v{display:flex}
+.demo-prog{
+  display:flex;gap:4px;align-items:center;
+}
+.demo-dot{
+  width:5px;height:5px;border-radius:50%;background:rgba(0,229,180,.3);transition:background .3s;
+}
+.demo-dot.on{background:var(--tea)}
+#demo-exit{
+  background:transparent;border:1px solid rgba(0,229,180,.3);border-radius:5px;
+  padding:3px 8px;color:var(--mu);font-size:9px;font-family:var(--fn);cursor:pointer;
+  transition:border-color .15s,color .15s;margin-left:4px;
+}
+#demo-exit:hover{border-color:var(--tea);color:var(--tea)}
+
+/* ─── PRESENTATION MODE ─────────────────────────────── */
+body.pmode #edu-card{max-width:260px;padding:16px 18px}
+body.pmode .edu-mol-name{font-size:15px}
+body.pmode .edu-label{font-size:10px;letter-spacing:1.5px}
+body.pmode .edu-val{font-size:12px}
+body.pmode .edu-insight{font-size:11px;line-height:1.7}
+body.pmode .geov{font-size:13px}
+body.pmode .fctv{font-size:11px}
+body.pmode .aleg-name{font-size:12px}
+body.pmode #atom-legend{max-width:180px}
+/* Presentation mode indicator in header */
+#pmode-btn{
+  font-family:var(--fn);font-size:9px;padding:4px 10px;border-radius:6px;
+  border:1px solid var(--bd);color:var(--mu);background:transparent;
+  cursor:pointer;transition:all .15s;white-space:nowrap;
+}
+#pmode-btn:hover{border-color:var(--bhi);color:var(--tx)}
+#pmode-btn.on{border-color:var(--acc);color:var(--acc);background:rgba(74,143,255,.07)}
+@media(max-width:767px){#pmode-btn{display:none}}
+
+/* ─── GUIDED DEMO BUTTON IN HEADER ─────────────────── */
+#demo-btn{
+  font-family:var(--fn);font-size:9px;padding:4px 10px;border-radius:6px;
+  border:1px solid var(--bd);color:var(--mu);background:transparent;
+  cursor:pointer;transition:all .15s;white-space:nowrap;
+}
+#demo-btn:hover{border-color:var(--tea);color:var(--tea)}
+#demo-btn.on{border-color:var(--tea);color:var(--tea);background:rgba(0,229,180,.07)}
+@media(max-width:767px){#demo-btn{display:none}}
+
+/* ─── EDUCATIONAL HIGHLIGHT OVERLAY ────────────────── */
+#edu-highlight{
+  position:absolute;bottom:14px;left:50%;transform:translateX(-50%);
+  z-index:18;display:none;
+  background:rgba(6,8,16,.96);border:1px solid rgba(0,229,180,.35);
+  border-radius:10px;padding:10px 16px;max-width:min(380px,88vw);
+  font-family:var(--fn);font-size:11px;color:var(--tea);
+  text-align:center;line-height:1.6;
+  animation:hlIn .35s cubic-bezier(.34,1.56,.64,1);
+}
+#edu-highlight.v{display:block}
+@keyframes hlIn{from{opacity:0;transform:translateX(-50%) translateY(10px)}}
+.hl-title{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--mu);margin-bottom:4px}
+.hl-text{font-size:11px;color:var(--tea);line-height:1.6}
+@media(max-width:767px){
+  #edu-highlight{bottom:calc(var(--BH) + 8px);font-size:10px}
+}
+
+/* ─── BOND ANGLE VISUALIZATION ──────────────────────── */
+#bond-angle-svg{
+  position:absolute;bottom:80px;left:50%;transform:translateX(-50%);
+  z-index:16;pointer-events:none;display:none;
+  opacity:0.7;
+}
+#bond-angle-svg.v{display:block}
+@media(max-width:767px){
+  #bond-angle-svg{bottom:calc(var(--BH) + 70px);width:100px;height:60px}
+}
+
+
 /* ─── ATOM COLOR LEGEND ──────────────────────────────── */
 #atom-legend {
   position:absolute;bottom:58px;left:14px;z-index:15;
@@ -558,7 +669,20 @@ header{
     <button class="intro-btn-primary" onclick="enterApp(false)">Start Exploring →</button>
     <button class="intro-btn-secondary" onclick="enterApp(true)">Load Demo Molecules</button>
   </div>
+  <!-- Featured molecule quick-load cards -->
+  <div class="intro-featured">
+    <div class="intro-feat-label">Featured Molecules</div>
+    <div class="intro-feat-row">
+      <button class="intro-feat-card" onclick="enterApp(false);setTimeout(()=>pickMol('vsepr-h2o'),400)"><span>H₂O</span>Water</button>
+      <button class="intro-feat-card" onclick="enterApp(false);setTimeout(()=>pickMol('org-benz'),400)"><span>C₆H₆</span>Benzene</button>
+      <button class="intro-feat-card" onclick="enterApp(false);setTimeout(()=>pickMol('bio-chol'),400)"><span>C₂₇H₄₆O</span>Cholesterol</button>
+      <button class="intro-feat-card" onclick="enterApp(false);setTimeout(()=>pickMol('vsepr-sf6'),400)"><span>SF₆</span>SF₆</button>
+      <button class="intro-feat-card" onclick="enterApp(false);setTimeout(()=>pickMol('bio-gluc'),400)"><span>C₆H₁₂O₆</span>Glucose</button>
+    </div>
+  </div>
   <div class="intro-badge">FREE · 21 CURATED MOLECULES · NCI CACTUS</div>
+  <!-- Feature 7: Institutional badge -->
+  <div class="intro-inst">Institution-ready interactive STEM visualization platform</div>
 </div>
 
 <!-- ─── HEADER ─────────────────────────────────────────────── -->
@@ -576,6 +700,8 @@ header{
 
   <div class="hr">
     <span class="fbdg">FREE</span>
+    <button id="demo-btn" onclick="toggleDemo()">▶ Demo</button>
+    <button id="pmode-btn" onclick="togglePmode()">⊞ Present</button>
     <button class="bupg" onclick="openMod()">Upgrade →</button>
     <button class="hmb" id="hmb" onclick="togDrawer()" aria-label="Molecules">
       <em></em><em></em><em></em>
@@ -758,6 +884,25 @@ header{
       <div class="hint-chip">⊕ Scroll to zoom</div>
       <div class="hint-chip">⬡ Tap Molecules to explore</div>
     </div>
+
+    <!-- ─── GUIDED DEMO BAR ─── -->
+    <div id="demo-bar">
+      <span id="demo-mol-name">Demo</span>
+      <div class="demo-prog" id="demo-prog"></div>
+      <button id="demo-exit" onclick="stopDemo()">✕ Exit</button>
+    </div>
+
+    <!-- ─── EDUCATIONAL HIGHLIGHT ─── -->
+    <div id="edu-highlight">
+      <div class="hl-title" id="hl-title">Key Concept</div>
+      <div class="hl-text"  id="hl-text">—</div>
+    </div>
+
+    <!-- ─── BOND ANGLE SVG ─── -->
+    <svg id="bond-angle-svg" width="120" height="70" viewBox="0 0 120 70">
+      <path id="ba-arc" d="" stroke="rgba(0,229,180,.6)" stroke-width="1.5" fill="rgba(0,229,180,.08)" />
+      <text id="ba-label" x="60" y="62" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" fill="rgba(0,229,180,.9)">—</text>
+    </svg>
 
   </div><!-- /.vw -->
 
@@ -1155,6 +1300,11 @@ function setMode(mode) {
   document.getElementById('ppr').classList.toggle('on', mode === 'props');
   document.getElementById('s3d').style.display = mode === '3d' ? 'block' : 'none';
   document.getElementById('vc').style.display  = mode === '3d' ? 'flex'  : 'none';
+  // Hide edu overlays when not in 3D
+  if (mode !== '3d') {
+    document.getElementById('edu-highlight').classList.remove('v');
+    document.getElementById('bond-angle-svg').classList.remove('v');
+  }
   // ── NEW: edu overlays only visible in 3D mode ──
   const showOverlays = mode === '3d';
   document.getElementById('edu-card').style.display    = showOverlays ? '' : 'none';
@@ -1182,6 +1332,8 @@ function pickMol(key) {
     meta = arr.find(m => m.key === key);
     if (meta) break;
   }
+  // Attach key to meta so fillInfo can trigger edu features
+  if (meta) meta._key = key;
   if (window.innerWidth < 768) closeMolScreen();
   go(meta ? meta.pname : key, meta);
 }
@@ -1371,6 +1523,11 @@ function fillInfo(m) {
   // ── NEW: update legend + edu overlay ──
   updateAtomLegend(m);
   updateEduCard(m);
+  // ── Feature 2+5: edu highlight + bond angle ──
+  if (m._key) {
+    showEduHighlight(m._key);
+    showBondAngle(m._key);
+  }
 }
 
 /* ════════════════════════════════════════
@@ -1550,13 +1707,175 @@ function updateEduCard(meta) {
 (function initHints() {
   if (sessionStorage.getItem('cs-hints-seen')) return;
   const bar = document.getElementById('hint-bar');
-  // Auto-dismiss after 5 seconds
   setTimeout(() => {
     bar.classList.add('out');
     setTimeout(() => { bar.style.display = 'none'; }, 520);
     sessionStorage.setItem('cs-hints-seen', '1');
   }, 5000);
 })();
+
+/* ════════════════════════════════════════
+   FEATURE 2 — GUIDED EDUCATIONAL HIGHLIGHTS
+   Key concept overlays for supported molecules
+════════════════════════════════════════ */
+const EDU_HIGHLIGHTS = {
+  'vsepr-h2o': {
+    title:'Lone Pair Effect',
+    text:'2 lone pairs on O compress bond angle from 109.5° → 104.5°. Greater lone pair–bond pair repulsion = smaller angle.'
+  },
+  'vsepr-nh3': {
+    title:'Lone Pair Compression',
+    text:'1 lone pair on N reduces bond angle from 109.5° → 107°. Pyramidal shape — N acts as Lewis base via this lone pair.'
+  },
+  'vsepr-co2': {
+    title:'Symmetry Cancels Dipole',
+    text:'Both C=O bonds are polar, but they point in opposite directions. Net dipole = 0. Linear + symmetric = non-polar.'
+  },
+  'vsepr-sf6': {
+    title:'Expanded Octet',
+    text:'S uses d-orbitals to hold 6 bond pairs (sp³d²). All 90° angles. Perfect octahedral symmetry → dipole = 0.'
+  },
+  'vsepr-xef4': {
+    title:'Square Planar Geometry',
+    text:'6 electron pairs but 2 are lone pairs. They sit opposite each other (trans), giving square planar shape — not octahedral.'
+  },
+  'vsepr-ch4': {
+    title:'Perfect Tetrahedral',
+    text:'4 identical C-H bonds at 109.5°. No lone pairs. Complete symmetry → dipole = 0. The VSEPR reference molecule.'
+  },
+  'vsepr-bf3': {
+    title:'Lewis Acid — Empty Orbital',
+    text:'sp² hybridised B has an empty p-orbital. Accepts lone pairs from Lewis bases. Trigonal planar → dipole = 0.'
+  },
+  'org-benz': {
+    title:'Aromatic Resonance',
+    text:'6 π electrons delocalised over ring (Hückel: 4n+2, n=1). All C-C bonds equal length. Extra stability from resonance energy.'
+  },
+  'bio-gluc': {
+    title:'Anomeric Carbon',
+    text:'C1 is the anomeric carbon. α-glucose (36%) and β-glucose (64%) interconvert in solution — called mutarotation.'
+  },
+};
+
+function showEduHighlight(key) {
+  const hl = EDU_HIGHLIGHTS[key];
+  const el = document.getElementById('edu-highlight');
+  if (!hl || curMode !== '3d') { el.classList.remove('v'); return; }
+  document.getElementById('hl-title').textContent = hl.title;
+  document.getElementById('hl-text').textContent  = hl.text;
+  el.classList.add('v');
+  // Auto-hide after 8 seconds
+  clearTimeout(showEduHighlight._t);
+  showEduHighlight._t = setTimeout(() => el.classList.remove('v'), 8000);
+}
+
+/* ════════════════════════════════════════
+   FEATURE 5 — BOND ANGLE VISUALIZATION
+   SVG arc diagram for supported molecules
+════════════════════════════════════════ */
+const BOND_ANGLES = {
+  'vsepr-h2o':  104.5,
+  'vsepr-nh3':  107,
+  'vsepr-ch4':  109.5,
+  'vsepr-bf3':  120,
+  'vsepr-co2':  180,
+  'vsepr-sf6':  90,
+  'vsepr-xef4': 90,
+  'vsepr-pcl5': 120,
+  'org-benz':   120,
+};
+
+function showBondAngle(key) {
+  const angle = BOND_ANGLES[key];
+  const svg   = document.getElementById('bond-angle-svg');
+  if (!angle || curMode !== '3d') { svg.classList.remove('v'); return; }
+
+  const cx = 60, cy = 10, r = 44;
+  const label = angle + '°';
+
+  if (angle >= 175) {
+    // Linear — show straight line with angle
+    document.getElementById('ba-arc').setAttribute('d',
+      `M 10,${cy} L 110,${cy}`);
+    document.getElementById('ba-arc').setAttribute('fill','none');
+  } else {
+    // Draw arc between two bond vectors
+    const half = (angle / 2) * Math.PI / 180;
+    const x1 = cx + r * Math.sin(-half);
+    const y1 = cy + r * Math.cos(-half);
+    const x2 = cx + r * Math.sin(half);
+    const y2 = cy + r * Math.cos(half);
+    const large = angle > 180 ? 1 : 0;
+    document.getElementById('ba-arc').setAttribute('d',
+      `M ${x1.toFixed(1)},${y1.toFixed(1)} A ${r},${r} 0 ${large},1 ${x2.toFixed(1)},${y2.toFixed(1)} L ${cx},${cy} Z`);
+    document.getElementById('ba-arc').setAttribute('fill','rgba(0,229,180,.08)');
+  }
+  document.getElementById('ba-label').textContent = label;
+  svg.classList.add('v');
+}
+
+/* ════════════════════════════════════════
+   FEATURE 3 — GUIDED DEMO MODE
+════════════════════════════════════════ */
+const DEMO_SEQ = ['vsepr-h2o','vsepr-ch4','vsepr-bf3','vsepr-nh3','vsepr-sf6','org-benz','bio-chol'];
+let demoActive = false, demoIdx = 0, demoTimer = null;
+
+function toggleDemo() {
+  demoActive ? stopDemo() : startDemo();
+}
+
+function startDemo() {
+  demoActive = true;
+  demoIdx = 0;
+  document.getElementById('demo-btn').classList.add('on');
+  document.getElementById('demo-bar').classList.add('v');
+  // Build progress dots
+  document.getElementById('demo-prog').innerHTML =
+    DEMO_SEQ.map((_,i) => `<div class="demo-dot${i===0?' on':''}" id="ddot-${i}"></div>`).join('');
+  runDemoStep();
+}
+
+function runDemoStep() {
+  if (!demoActive || demoIdx >= DEMO_SEQ.length) { stopDemo(); return; }
+  const key = DEMO_SEQ[demoIdx];
+  // Update progress dots
+  DEMO_SEQ.forEach((_,i) => {
+    const d = document.getElementById('ddot-'+i);
+    if (d) d.classList.toggle('on', i === demoIdx);
+  });
+  // Update demo bar mol name
+  let meta = null;
+  for (const arr of Object.values(DB)) { meta = arr.find(m => m.key === key); if (meta) break; }
+  document.getElementById('demo-mol-name').textContent = meta ? meta.n : key;
+  // Load molecule
+  pickMol(key);
+  demoIdx++;
+  demoTimer = setTimeout(runDemoStep, 5000);
+}
+
+function stopDemo() {
+  demoActive = false;
+  clearTimeout(demoTimer);
+  document.getElementById('demo-btn').classList.remove('on');
+  document.getElementById('demo-bar').classList.remove('v');
+}
+
+/* ════════════════════════════════════════
+   FEATURE 4 — PRESENTATION MODE
+════════════════════════════════════════ */
+let pmodeOn = false;
+function togglePmode() {
+  pmodeOn = !pmodeOn;
+  document.body.classList.toggle('pmode', pmodeOn);
+  document.getElementById('pmode-btn').classList.toggle('on', pmodeOn);
+  document.getElementById('pmode-btn').textContent = pmodeOn ? '⊞ Exit Present' : '⊞ Present';
+  // Slow rotation in presentation mode
+  if (viewer && rotating) {
+    viewer.stopAnimate();
+    viewer.animate({ loop:'forward', step: pmodeOn ? 0.25 : 0.5 });
+  }
+  toast(pmodeOn ? 'Presentation mode ON' : 'Presentation mode OFF', 'k');
+}
 </script>
 </body>
 </html>
