@@ -2014,20 +2014,22 @@ function enterApp(loadDemo) {
 
   if (loadDemo) {
     // "Load Demo Molecules" path: skip showcase, go straight to guided demo
+    // 650ms > 550ms CSS transition so it fully completes before display:none
     setTimeout(() => {
       intro.style.display = 'none';
       // Wait for viewer then start demo
       const kickDemo = () => { startDemo(); toast('Demo running — tap ✕ to exit', 'k'); };
       window._viewerReady ? kickDemo() : (window._onViewerReady = kickDemo);
-    }, 560);
+    }, 650);
     return;
   }
 
   // "Start Exploring" path: show cinematic transition → showcase
+  // 650ms > 550ms CSS transition so fade-out fully completes before display:none
   setTimeout(() => {
     intro.style.display = 'none';
     showEntryTransition();
-  }, 520);
+  }, 650);
 }
 
 function showEntryTransition() {
@@ -2391,8 +2393,4 @@ function enterFullscreen() {
   if (fn) fn.call(el).catch(() => {});
 }
 function exitFullscreen() {
-  const fn = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
-  if (fn) fn.call(document).catch(() => {});
-}
-
-/* Listen for native fullscreen exit (Esc key / bro
+  const fn = document.exitFullscreen || document.webkitExitFullscreen |
