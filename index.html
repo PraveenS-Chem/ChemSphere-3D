@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>ChemSphere Pro — NEET & JEE 3D Molecular Visualizer</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-<script src="https://3dmol.csb.pitt.edu/build/3Dmol-min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" defer></script>
+<script src="https://3dmol.csb.pitt.edu/build/3Dmol-min.js" defer></script>
 <style>
 /* ─── TOKENS ─────────────────────────────────────────── */
 :root {
@@ -2392,4 +2392,3 @@ function exitFullscreen() {
 
 /* Listen for native fullscreen exit (Esc key / browser chrome) */
 document.addEventListener('fullscreenchange',     syncPmodeFromFullscreen);
-document.ad
