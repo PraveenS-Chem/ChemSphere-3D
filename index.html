@@ -1983,6 +1983,22 @@ let miniDemoActive = false, miniDemoIdx = 0, miniDemoTimer = null;
 let _overlayDelayTimer = null;
 const OVERLAY_DELAY = 2200; // ms after molecule load before overlays fade in
 
+/* ─── Hook _onViewerReady ─────────────────────────────────────
+   MUST be defined BEFORE initIntro() runs, so the setter is
+   already in place when returning-user path assigns _onViewerReady.
+─────────────────────────────────────────────────────────────── */
+Object.defineProperty(window, '_viewerReady', {
+  set(v) {
+    this._vr = v;
+    if (v && typeof window._onViewerReady === 'function') {
+      window._onViewerReady();
+      window._onViewerReady = null;
+    }
+  },
+  get() { return this._vr; },
+  configurable: true,
+});
+
 (function initIntro() {
   const intro = document.getElementById('intro-screen');
   if (sessionStorage.getItem('cs-intro-seen')) {
@@ -2014,7 +2030,7 @@ function enterApp(loadDemo) {
 
   if (loadDemo) {
     // "Load Demo Molecules" path: skip showcase, go straight to guided demo
-    // 650ms > 550ms CSS transition so it fully completes before display:none
+    // 650ms > 550ms CSS transition — prevents race condition
     setTimeout(() => {
       intro.style.display = 'none';
       // Wait for viewer then start demo
@@ -2025,7 +2041,7 @@ function enterApp(loadDemo) {
   }
 
   // "Start Exploring" path: show cinematic transition → showcase
-  // 650ms > 550ms CSS transition so fade-out fully completes before display:none
+  // 650ms > 550ms CSS transition — prevents race condition
   setTimeout(() => {
     intro.style.display = 'none';
     showEntryTransition();
@@ -2104,30 +2120,7 @@ function stopMiniDemo() {
   clearTimeout(miniDemoTimer);
 }
 
-/* ─── Hook _onViewerReady ─────────────────────────────────────
-   Called once the 3Dmol viewer signals it's ready.
-   Allows showcase / smart-default to fire at the right moment.
-─────────────────────────────────────────────────────────────── */
-// We override the viewer init to call this hook after _viewerReady is set
-const _origViewerReady = () => {
-  window._viewerReady = true;
-  if (typeof window._onViewerReady === 'function') {
-    window._onViewerReady();
-    window._onViewerReady = null;
-  }
-};
-// Patch: override the flag setter used in init
-Object.defineProperty(window, '_viewerReady', {
-  set(v) {
-    this._vr = v;
-    if (v && typeof window._onViewerReady === 'function') {
-      window._onViewerReady();
-      window._onViewerReady = null;
-    }
-  },
-  get() { return this._vr; },
-  configurable: true,
-});
+/* ─── Hook _onViewerReady — moved to before initIntro() ──────── */
 
 
 
@@ -2393,4 +2386,10 @@ function enterFullscreen() {
   if (fn) fn.call(el).catch(() => {});
 }
 function exitFullscreen() {
-  const fn = document.exitFullscreen || document.webkitExitFullscreen |
+  const fn = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
+  if (fn) fn.call(document).catch(() => {});
+}
+
+/* Listen for native fullscreen exit (Esc key / browser chrome) */
+document.addEventListener('fullscreenchange',     syncPmodeFromFullscreen);
+document.ad
