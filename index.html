@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>ChemSphere Pro — NEET & JEE 3D Molecular Visualizer</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" defer></script>
-<script src="https://3dmol.csb.pitt.edu/build/3Dmol-min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="https://3dmol.csb.pitt.edu/build/3Dmol-min.js"></script>
 <style>
 /* ─── TOKENS ─────────────────────────────────────────── */
 :root {
@@ -498,7 +498,6 @@ header{
 }
 
 /* ─── ENTRY TRANSITION OVERLAY ──────────────────────── */
-/* Feature 2: immersive fade overlay between intro and app */
 #entry-transition {
   position:fixed;inset:0;z-index:9998;
   background:var(--bg);
@@ -510,14 +509,10 @@ header{
 #entry-transition.out { opacity:0;transition:opacity .5s ease }
 .et-glow {
   position:absolute;inset:0;pointer-events:none;
-  background:
-    radial-gradient(ellipse 50% 50% at 50% 50%,rgba(0,229,180,.07) 0%,transparent 70%);
+  background:radial-gradient(ellipse 50% 50% at 50% 50%,rgba(0,229,180,.07) 0%,transparent 70%);
   animation:etPulse 2.5s ease-in-out infinite;
 }
-@keyframes etPulse {
-  0%,100% { opacity:.6 }
-  50%      { opacity:1 }
-}
+@keyframes etPulse { 0%,100%{opacity:.6} 50%{opacity:1} }
 .et-logo {
   width:44px;height:44px;border-radius:12px;
   background:linear-gradient(135deg,var(--acc),var(--tea));
@@ -527,24 +522,17 @@ header{
   position:relative;z-index:1;
   animation:etLogoPulse 1.5s ease-in-out infinite;
 }
-@keyframes etLogoPulse {
-  0%,100% { box-shadow:0 0 20px rgba(0,229,180,.3) }
-  50%      { box-shadow:0 0 40px rgba(0,229,180,.55) }
-}
+@keyframes etLogoPulse { 0%,100%{box-shadow:0 0 20px rgba(0,229,180,.3)} 50%{box-shadow:0 0 40px rgba(0,229,180,.55)} }
 .et-text {
   font-family:var(--fn);font-size:11px;letter-spacing:2px;
   color:var(--tea);text-transform:uppercase;
   position:relative;z-index:1;
   animation:etBlink 1.2s steps(2) infinite;
 }
-@keyframes etBlink { 50% { opacity:.4 } }
-.et-sub {
-  font-family:var(--fn);font-size:9px;color:var(--di);letter-spacing:1px;
-  position:relative;z-index:1;
-}
+@keyframes etBlink { 50%{opacity:.4} }
+.et-sub { font-family:var(--fn);font-size:9px;color:var(--di);letter-spacing:1px;position:relative;z-index:1; }
 
 /* ─── FEATURED MOLECULE SHOWCASE ────────────────────── */
-/* Feature 3: post-transition molecule showcase panel */
 #showcase-screen {
   position:fixed;inset:0;z-index:9997;
   background:var(--bg);
@@ -553,15 +541,13 @@ header{
   animation:showcaseIn .5s cubic-bezier(.34,1.2,.64,1);
 }
 #showcase-screen.v { display:flex }
-@keyframes showcaseIn { from { opacity:0;transform:translateY(12px) } }
-
+@keyframes showcaseIn { from{opacity:0;transform:translateY(12px)} }
 .sc-logo {
   width:36px;height:36px;border-radius:10px;
   background:linear-gradient(135deg,var(--acc),var(--tea));
   display:flex;align-items:center;justify-content:center;
   font-family:var(--fn);font-size:12px;font-weight:700;color:#fff;
-  box-shadow:0 0 18px rgba(74,143,255,.35);
-  margin-bottom:14px;flex-shrink:0;
+  box-shadow:0 0 18px rgba(74,143,255,.35);margin-bottom:14px;flex-shrink:0;
 }
 .sc-title {
   font-size:clamp(18px,5vw,26px);font-weight:800;
@@ -569,26 +555,18 @@ header{
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
   margin-bottom:6px;line-height:1.2;
 }
-.sc-sub {
-  font-family:var(--fn);font-size:10px;color:var(--di);
-  letter-spacing:1.5px;text-transform:uppercase;margin-bottom:28px;
-}
-.sc-label {
-  font-family:var(--fn);font-size:8px;letter-spacing:2px;text-transform:uppercase;
-  color:var(--di);margin-bottom:12px;
-}
+.sc-sub { font-family:var(--fn);font-size:10px;color:var(--di);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:28px; }
+.sc-label { font-family:var(--fn);font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--di);margin-bottom:12px; }
 .sc-grid {
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
+  display:grid;grid-template-columns:repeat(3,1fr);
   gap:9px;width:100%;max-width:480px;margin-bottom:20px;
 }
-@media(max-width:400px) { .sc-grid { grid-template-columns:repeat(2,1fr) } }
+@media(max-width:400px){.sc-grid{grid-template-columns:repeat(2,1fr)}}
 .sc-card {
   background:var(--s2);border:1px solid var(--bd);border-radius:11px;
   padding:13px 10px 11px;
   display:flex;flex-direction:column;align-items:center;gap:4px;
-  cursor:pointer;
-  transition:border-color .18s,background .18s,transform .15s,box-shadow .18s;
+  cursor:pointer;transition:border-color .18s,background .18s,transform .15s,box-shadow .18s;
   position:relative;overflow:hidden;
 }
 .sc-card::before {
@@ -596,36 +574,27 @@ header{
   background:linear-gradient(135deg,rgba(0,229,180,.06),transparent);
   opacity:0;transition:opacity .2s;
 }
-.sc-card:hover { border-color:var(--tea);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,229,180,.12) }
-.sc-card:hover::before { opacity:1 }
-.sc-card:active { transform:translateY(0) }
-.sc-formula { font-family:var(--fn);font-size:13px;font-weight:700;color:var(--tea);line-height:1 }
-.sc-name { font-size:10px;color:var(--tx);margin-top:1px }
-.sc-tag { font-family:var(--fn);font-size:8px;color:var(--di);margin-top:2px }
-
-.sc-actions {
-  display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:4px;
-}
+.sc-card:hover{border-color:var(--tea);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,229,180,.12)}
+.sc-card:hover::before{opacity:1}
+.sc-card:active{transform:translateY(0)}
+.sc-formula{font-family:var(--fn);font-size:13px;font-weight:700;color:var(--tea);line-height:1}
+.sc-name{font-size:10px;color:var(--tx);margin-top:1px}
+.sc-tag{font-family:var(--fn);font-size:8px;color:var(--di);margin-top:2px}
+.sc-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:4px;}
 .sc-btn-primary {
   padding:11px 26px;border-radius:9px;border:none;
   background:linear-gradient(135deg,var(--acc),var(--tea));
   color:#fff;font-size:13px;font-weight:700;font-family:var(--fs);
-  box-shadow:0 3px 14px rgba(74,143,255,.3);
-  transition:opacity .2s,transform .15s;cursor:pointer;
+  box-shadow:0 3px 14px rgba(74,143,255,.3);transition:opacity .2s,transform .15s;cursor:pointer;
 }
-.sc-btn-primary:hover { opacity:.88;transform:translateY(-1px) }
+.sc-btn-primary:hover{opacity:.88;transform:translateY(-1px)}
 .sc-btn-secondary {
-  padding:11px 18px;border-radius:9px;
-  border:1px solid var(--bhi);background:transparent;
+  padding:11px 18px;border-radius:9px;border:1px solid var(--bhi);background:transparent;
   color:var(--tx);font-size:12px;font-weight:600;font-family:var(--fs);
   transition:border-color .2s,background .2s;cursor:pointer;
 }
-.sc-btn-secondary:hover { border-color:var(--tea);background:rgba(0,229,180,.05) }
-.sc-skip {
-  margin-top:14px;font-family:var(--fn);font-size:9px;color:var(--di);
-  letter-spacing:1px;
-}
-
+.sc-btn-secondary:hover{border-color:var(--tea);background:rgba(0,229,180,.05)}
+.sc-skip{margin-top:14px;font-family:var(--fn);font-size:9px;color:var(--di);letter-spacing:1px;}
 
 /* ─── GUIDED DEMO MODE ──────────────────────────────── */
 #demo-bar{
@@ -651,187 +620,15 @@ header{
 #demo-exit:hover{border-color:var(--tea);color:var(--tea)}
 
 /* ─── PRESENTATION MODE ─────────────────────────────── */
-
-/* Fullscreen API rules */
-:fullscreen body.pmode,
-:-webkit-full-screen body.pmode,
-body.pmode {
-  --pmode-active: 1;
-}
-
-/* === PRESENTATION MODE BASE (desktop/smartboard) === */
-body.pmode header {
-  background: rgba(6,8,16,.6);
-  border-bottom-color: rgba(99,155,255,.06);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-body.pmode .sb { display: none !important; }
-body.pmode .app { left: 0; }
-body.pmode .hr > :not(#pmode-btn):not(#demo-btn) { display: none !important; }
-body.pmode .dtabs { display: none !important; }
-
-/* Large viewport — classroom/smartboard layout */
-body.pmode #edu-card {
-  max-width: 320px;
-  padding: 20px 22px;
-  border: 1px solid rgba(0,229,180,.4);
-  background: rgba(6,8,16,.95);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  top: 16px; right: 16px;
-}
-body.pmode .edu-mol-name { font-size: 20px; font-weight: 800; letter-spacing: -.3px; margin-bottom: 10px }
-body.pmode .edu-label { font-size: 10px; letter-spacing: 2px; color: var(--mu) }
-body.pmode .edu-val { font-size: 14px; color: var(--tea); font-weight: 700 }
-body.pmode .edu-insight { font-size: 12px; line-height: 1.8; color: var(--tx); font-style: normal; margin-top: 4px }
-body.pmode .edu-divider { margin: 10px 0 }
-body.pmode .geov { font-size: 15px }
-body.pmode .fctv { font-size: 12px; line-height: 1.75 }
-body.pmode .aleg-name { font-size: 13px }
-body.pmode #atom-legend {
-  max-width: 190px;
-  bottom: 80px; left: 20px;
-  border-color: rgba(0,229,180,.35);
-  background: rgba(6,8,16,.95);
-}
-body.pmode .aleg-title { font-size: 9px; letter-spacing: 2px }
-body.pmode .aleg-dot { width: 11px; height: 11px }
-body.pmode .vc { bottom: 20px; right: 20px }
-body.pmode .vb { width: 42px; height: 42px; font-size: 18px }
-
-/* Bond angle SVG — bigger in pmode */
-body.pmode #bond-angle-svg {
-  width: 160px; height: 90px;
-  bottom: 110px;
-  opacity: .85;
-}
-body.pmode #ba-label { font-size: 14px }
-
-/* Educational highlight — bigger */
-body.pmode #edu-highlight {
-  max-width: min(520px,90vw);
-  padding: 14px 22px;
-  font-size: 13px;
-  border-width: 1.5px;
-  bottom: 20px;
-}
-body.pmode .hl-title { font-size: 10px; letter-spacing: 2px }
-body.pmode .hl-text { font-size: 13px }
-
-/* Pmode: hide demo-bar label overflow on small screens */
-body.pmode #demo-bar { top: calc(var(--HH) + 12px) }
-
-/* === PMODE HEADER SLIM BAR === */
-body.pmode header { height: 46px }
-body.pmode .app { top: 46px }
-
-/* === TABLET ADAPTATION (768–1024px) === */
-@media (min-width:768px) and (max-width:1024px) {
-  body.pmode #edu-card { max-width: 260px; padding: 14px 16px }
-  body.pmode .edu-mol-name { font-size: 16px }
-  body.pmode .edu-val { font-size: 12px }
-  body.pmode .edu-insight { font-size: 11px }
-  body.pmode #atom-legend { max-width: 160px }
-  body.pmode .vb { width: 40px; height: 40px }
-}
-
-/* === MOBILE ADAPTATION (<768px) === */
-@media (max-width:767px) {
-  body.pmode header { height: var(--HH); background: #060810 }
-  body.pmode .app { top: var(--HH) }
-  body.pmode .sb { display: none !important }
-  body.pmode #edu-card {
-    top: auto; bottom: calc(var(--BH) + 56px);
-    right: 10px; max-width: 150px;
-    padding: 10px 12px;
-  }
-  body.pmode .edu-mol-name { font-size: 12px }
-  body.pmode .edu-val { font-size: 10px }
-  body.pmode .edu-insight { font-size: 9px }
-  body.pmode #atom-legend { bottom: calc(var(--BH) + 130px); left: 10px }
-  body.pmode #bond-angle-svg { width: 110px; height: 65px; bottom: calc(var(--BH) + 74px) }
-  body.pmode #edu-highlight { bottom: calc(var(--BH) + 10px); font-size: 10px; max-width: 90vw }
-  body.pmode .vb { width: 38px; height: 38px }
-  body.pmode .vc { bottom: calc(var(--BH) + 10px) }
-}
-
-/* === PMODE SMART CLASSROOM PANEL (desktop only) === */
-#pmode-panel {
-  position: absolute;
-  top: 16px; left: 16px;
-  z-index: 16;
-  display: none;
-  flex-direction: column;
-  gap: 8px;
-  min-width: 200px;
-  max-width: 240px;
-}
-body.pmode #pmode-panel { display: flex }
-@media (max-width:767px) { body.pmode #pmode-panel { display: none !important } }
-.pmp-card {
-  background: rgba(6,8,16,.95);
-  border: 1px solid rgba(99,155,255,.18);
-  border-radius: 10px;
-  padding: 10px 13px;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  animation: eduIn .3s cubic-bezier(.34,1.56,.64,1);
-}
-.pmp-label {
-  font-family: var(--fn);
-  font-size: 8px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--di);
-  margin-bottom: 5px;
-}
-.pmp-value {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--tea);
-  line-height: 1.3;
-}
-.pmp-fact {
-  font-size: 10px;
-  color: var(--mu);
-  line-height: 1.6;
-  margin-top: 4px;
-}
-.pmp-badge {
-  display: inline-block;
-  font-family: var(--fn);
-  font-size: 8px;
-  letter-spacing: 1px;
-  padding: 2px 8px;
-  border-radius: 4px;
-  background: rgba(74,143,255,.12);
-  border: 1px solid rgba(74,143,255,.25);
-  color: var(--acc);
-  margin-top: 5px;
-}
-/* pmode exit hint */
-#pmode-exit-hint {
-  position: fixed;
-  bottom: 16px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 400;
-  display: none;
-  font-family: var(--fn);
-  font-size: 9px;
-  color: var(--di);
-  background: rgba(6,8,16,.7);
-  border: 1px solid var(--bd);
-  border-radius: 20px;
-  padding: 4px 14px;
-  pointer-events: none;
-  letter-spacing: 1px;
-  transition: opacity .5s;
-}
-body.pmode #pmode-exit-hint { display: block }
-@media (max-width:767px) { #pmode-exit-hint { display: none !important } }
-
+body.pmode #edu-card{max-width:260px;padding:16px 18px}
+body.pmode .edu-mol-name{font-size:15px}
+body.pmode .edu-label{font-size:10px;letter-spacing:1.5px}
+body.pmode .edu-val{font-size:12px}
+body.pmode .edu-insight{font-size:11px;line-height:1.7}
+body.pmode .geov{font-size:13px}
+body.pmode .fctv{font-size:11px}
+body.pmode .aleg-name{font-size:12px}
+body.pmode #atom-legend{max-width:180px}
 /* Presentation mode indicator in header */
 #pmode-btn{
   font-family:var(--fn);font-size:9px;padding:4px 10px;border-radius:6px;
@@ -839,7 +636,7 @@ body.pmode #pmode-exit-hint { display: block }
   cursor:pointer;transition:all .15s;white-space:nowrap;
 }
 #pmode-btn:hover{border-color:var(--bhi);color:var(--tx)}
-#pmode-btn.on{border-color:var(--tea);color:var(--tea);background:rgba(0,229,180,.07);box-shadow:0 0 8px rgba(0,229,180,.15)}
+#pmode-btn.on{border-color:var(--acc);color:var(--acc);background:rgba(74,143,255,.07)}
 @media(max-width:767px){#pmode-btn{display:none}}
 
 /* ─── GUIDED DEMO BUTTON IN HEADER ─────────────────── */
@@ -874,9 +671,7 @@ body.pmode #pmode-exit-hint { display: block }
 #bond-angle-svg{
   position:absolute;bottom:80px;left:50%;transform:translateX(-50%);
   z-index:16;pointer-events:none;display:none;
-  opacity:0.75;
-  filter: drop-shadow(0 0 6px rgba(0,229,180,.3));
-  transition: opacity .3s, width .3s, height .3s;
+  opacity:0.7;
 }
 #bond-angle-svg.v{display:block}
 @media(max-width:767px){
@@ -990,7 +785,6 @@ body.pmode #pmode-exit-hint { display: block }
 </div>
 
 <!-- ─── ENTRY TRANSITION OVERLAY ─────────────────────────── -->
-<!-- Feature 2: shown briefly between intro and showcase -->
 <div id="entry-transition">
   <div class="et-glow"></div>
   <div class="et-logo">CS</div>
@@ -999,15 +793,12 @@ body.pmode #pmode-exit-hint { display: block }
 </div>
 
 <!-- ─── FEATURED MOLECULE SHOWCASE ───────────────────────── -->
-<!-- Feature 3: shown after transition, before user picks first molecule -->
 <div id="showcase-screen">
   <div class="sc-logo">CS</div>
   <div class="sc-title">Explore Molecules in 3D</div>
   <div class="sc-sub">Tap any molecule to begin</div>
   <div class="sc-label">Featured Molecules</div>
-  <div class="sc-grid" id="sc-grid">
-    <!-- filled by JS -->
-  </div>
+  <div class="sc-grid" id="sc-grid"><!-- filled by JS --></div>
   <div class="sc-actions">
     <button class="sc-btn-primary" onclick="startMiniDemo()">▶ Mini Tour</button>
     <button class="sc-btn-secondary" onclick="dismissShowcase()">Browse All →</button>
@@ -1234,24 +1025,7 @@ body.pmode #pmode-exit-hint { display: block }
       <text id="ba-label" x="60" y="62" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" fill="rgba(0,229,180,.9)">—</text>
     </svg>
 
-    <!-- ─── SMART CLASSROOM PANEL (pmode desktop only) ─── -->
-    <div id="pmode-panel">
-      <div class="pmp-card" id="pmp-geo-card" style="display:none">
-        <div class="pmp-label">VSEPR Geometry</div>
-        <div class="pmp-value" id="pmp-geo">—</div>
-        <div class="pmp-fact" id="pmp-geo-fact">—</div>
-      </div>
-      <div class="pmp-card" id="pmp-hyb-card" style="display:none">
-        <div class="pmp-label">Hybridization &amp; Angle</div>
-        <div class="pmp-value" id="pmp-hyb">—</div>
-        <span class="pmp-badge" id="pmp-angle">—</span>
-      </div>
-    </div>
-
   </div><!-- /.vw -->
-
-<!-- ─── PMODE EXIT HINT ─── -->
-<div id="pmode-exit-hint">Press ESC or click ⊞ to exit presentation</div>
 
 <!-- ─── MOBILE MOLECULE SCREEN ───────────────────────────────── -->
 <!-- Completely separate from .app div. WebGL is inside .app, this is outside.
@@ -1482,21 +1256,20 @@ window.addEventListener('load', () => {
           setTimeout(() => {
             viewer.resize();
             viewer.render();
-            // Feature 4: No Methane autoload — viewer is ready, showcase will handle first molecule
-            window._viewerReady = true;
+            pickMol('vsepr-ch4');
           }, 300);
         });
       } catch(e) {
         console.error('3Dmol createViewer failed:', e);
         dmol = false;
         ls.innerHTML = '<span class="lfl">✗ 3Dmol error: ' + e.message + '</span>';
-        window._viewerReady = true;
+        setTimeout(() => pickMol('vsepr-ch4'), 300);
       }
     }));
 
   } else {
     ls.innerHTML = '<span class="lfl">✗ 3Dmol.js not loaded</span><span class="lok">✓ NCI Cactus API</span>';
-    window._viewerReady = true;
+    setTimeout(() => pickMol('vsepr-ch4'), 100);
   }
 
   // Keep viewer sized on window resize
@@ -1856,10 +1629,8 @@ async function liveMeta(query, iupac) {
 }
 
 /* ════════════════════════════════════════
-   FILL INFO CARD — full implementation below near pmode section
+   FILL INFO CARD
 ════════════════════════════════════════ */
-// fillInfo is defined later in the file (near presentation mode) so it can
-// also call updatePmodePanel. The function at the bottom overrides this one.
 function fillInfo(m) {
   document.getElementById('i-nm').textContent = m.n;
   document.getElementById('i-fm').innerHTML   = m.f;
@@ -1870,24 +1641,14 @@ function fillInfo(m) {
   document.getElementById('i-go').textContent = m.g;
   document.getElementById('i-fc').textContent = m.x;
   document.getElementById('ic').classList.add('v');
+  // ── NEW: update legend + edu overlay ──
   updateAtomLegend(m);
-
-  // Feature 6: delay educational overlays for cinematic feel
-  clearTimeout(_overlayDelayTimer);
-  // Hide overlays immediately on new molecule load
-  document.getElementById('edu-card').classList.remove('v');
-  document.getElementById('edu-highlight').classList.remove('v');
-  document.getElementById('bond-angle-svg').classList.remove('v');
-
-  _overlayDelayTimer = setTimeout(() => {
-    updateEduCard(m);
-    if (m._key) {
-      showEduHighlight(m._key);
-      showBondAngle(m._key);
-    }
-    // pmode panel (pmodeOn set by the time this runs after init)
-    if (typeof pmodeOn !== 'undefined' && pmodeOn) updatePmodePanel(m);
-  }, OVERLAY_DELAY);
+  updateEduCard(m);
+  // ── Feature 2+5: edu highlight + bond angle ──
+  if (m._key) {
+    showEduHighlight(m._key);
+    showBondAngle(m._key);
+  }
 }
 
 /* ════════════════════════════════════════
@@ -1958,10 +1719,9 @@ function showGForm() {
 }
 /* ════════════════════════════════════════
    INTRO SCREEN + SHOWCASE FLOW
-   Features 1-6: transition, showcase, smart default, mini-demo, overlay delay
 ════════════════════════════════════════ */
 
-/* Featured molecules for the showcase (Feature 3) */
+/* Featured molecules for the showcase */
 const SHOWCASE_MOLS = [
   { key:'org-benz',  f:'C₆H₆',    n:'Benzene',     tag:'Aromatic' },
   { key:'vsepr-sf6', f:'SF₆',      n:'SF₆',         tag:'Octahedral' },
@@ -1971,7 +1731,7 @@ const SHOWCASE_MOLS = [
   { key:'org-etoh',  f:'C₂H₅OH',   n:'Ethanol',     tag:'Organic' },
 ];
 
-/* Mini demo sequence (Feature 5) */
+/* Mini demo sequence */
 const MINI_DEMO = [
   { key:'org-benz',  caption:'Aromatic resonance system' },
   { key:'vsepr-sf6', caption:'Perfect octahedral geometry' },
@@ -1979,14 +1739,7 @@ const MINI_DEMO = [
 ];
 let miniDemoActive = false, miniDemoIdx = 0, miniDemoTimer = null;
 
-/* Delay educational overlay appearance (Feature 6) */
-let _overlayDelayTimer = null;
-const OVERLAY_DELAY = 2200; // ms after molecule load before overlays fade in
-
-/* ─── Hook _onViewerReady ─────────────────────────────────────
-   MUST be defined BEFORE initIntro() runs, so the setter is
-   already in place when returning-user path assigns _onViewerReady.
-─────────────────────────────────────────────────────────────── */
+/* _viewerReady setter — MUST be defined before initIntro runs */
 Object.defineProperty(window, '_viewerReady', {
   set(v) {
     this._vr = v;
@@ -2003,18 +1756,19 @@ Object.defineProperty(window, '_viewerReady', {
   const intro = document.getElementById('intro-screen');
   if (sessionStorage.getItem('cs-intro-seen')) {
     intro.style.display = 'none';
-    // Returning user: load smart default (Feature 4)
+    // Returning user: load smart default
     window._viewerReady
       ? loadSmartDefault()
       : (window._onViewerReady = loadSmartDefault);
     return;
   }
-  // Build showcase grid immediately so it's ready
   buildShowcaseGrid();
 })();
 
 function buildShowcaseGrid() {
-  document.getElementById('sc-grid').innerHTML = SHOWCASE_MOLS.map(m =>
+  const grid = document.getElementById('sc-grid');
+  if (!grid) return;
+  grid.innerHTML = SHOWCASE_MOLS.map(m =>
     `<div class="sc-card" onclick="showcasePick('${m.key}')">
       <div class="sc-formula">${m.f}</div>
       <div class="sc-name">${m.n}</div>
@@ -2029,19 +1783,16 @@ function enterApp(loadDemo) {
   intro.classList.add('out');
 
   if (loadDemo) {
-    // "Load Demo Molecules" path: skip showcase, go straight to guided demo
-    // 650ms > 550ms CSS transition — prevents race condition
+    // "Load Demo Molecules" — skip showcase, go straight to guided demo
     setTimeout(() => {
       intro.style.display = 'none';
-      // Wait for viewer then start demo
       const kickDemo = () => { startDemo(); toast('Demo running — tap ✕ to exit', 'k'); };
       window._viewerReady ? kickDemo() : (window._onViewerReady = kickDemo);
     }, 650);
     return;
   }
 
-  // "Start Exploring" path: show cinematic transition → showcase
-  // 650ms > 550ms CSS transition — prevents race condition
+  // "Start Exploring" — cinematic transition → showcase
   setTimeout(() => {
     intro.style.display = 'none';
     showEntryTransition();
@@ -2049,7 +1800,6 @@ function enterApp(loadDemo) {
 }
 
 function showEntryTransition() {
-  // Feature 2: brief immersive overlay
   const et = document.getElementById('entry-transition');
   et.style.pointerEvents = 'none';
   et.classList.add('in');
@@ -2070,9 +1820,7 @@ function dismissShowcase(skipLoad) {
   document.getElementById('showcase-screen').classList.remove('v');
   stopMiniDemo();
   if (!skipLoad) {
-    // Feature 4: smart default based on device
-    const isMobile = window.innerWidth < 768;
-    const defaultKey = isMobile ? 'org-benz' : 'vsepr-sf6';
+    const defaultKey = window.innerWidth < 768 ? 'org-benz' : 'vsepr-sf6';
     const load = () => pickMol(defaultKey);
     window._viewerReady ? load() : (window._onViewerReady = load);
   }
@@ -2085,17 +1833,14 @@ function showcasePick(key) {
   window._viewerReady ? load() : (window._onViewerReady = load);
 }
 
-/* Feature 4: smart default for returning users */
 function loadSmartDefault() {
-  const isMobile = window.innerWidth < 768;
-  pickMol(isMobile ? 'org-benz' : 'vsepr-sf6');
+  pickMol(window.innerWidth < 768 ? 'org-benz' : 'vsepr-sf6');
 }
 
-/* Feature 5: Mini guided demo from showcase */
 function startMiniDemo() {
   miniDemoActive = true;
   miniDemoIdx = 0;
-  dismissShowcase(true); // hide showcase but don't load default
+  dismissShowcase(true);
   runMiniDemoStep();
 }
 
@@ -2106,10 +1851,7 @@ function runMiniDemoStep() {
     return;
   }
   const step = MINI_DEMO[miniDemoIdx];
-  const load = () => {
-    pickMol(step.key);
-    setTimeout(() => toast(step.caption, 'k'), 800);
-  };
+  const load = () => { pickMol(step.key); setTimeout(() => toast(step.caption,'k'), 800); };
   window._viewerReady ? load() : (window._onViewerReady = load);
   miniDemoIdx++;
   miniDemoTimer = setTimeout(runMiniDemoStep, 5500);
@@ -2119,10 +1861,6 @@ function stopMiniDemo() {
   miniDemoActive = false;
   clearTimeout(miniDemoTimer);
 }
-
-/* ─── Hook _onViewerReady — moved to before initIntro() ──────── */
-
-
 
 /* ════════════════════════════════════════
    ATOM COLOR LEGEND
@@ -2291,28 +2029,25 @@ function showBondAngle(key) {
   const svg   = document.getElementById('bond-angle-svg');
   if (!angle || curMode !== '3d') { svg.classList.remove('v'); return; }
 
-  const cx = 60, cy = 12, r = 44;
+  const cx = 60, cy = 10, r = 44;
   const label = angle + '°';
 
   if (angle >= 175) {
-    // Linear — show straight line with arrows
+    // Linear — show straight line with angle
     document.getElementById('ba-arc').setAttribute('d',
       `M 10,${cy} L 110,${cy}`);
     document.getElementById('ba-arc').setAttribute('fill','none');
-    document.getElementById('ba-arc').setAttribute('stroke','rgba(0,229,180,.6)');
   } else {
-    // Draw arc between two bond vectors from center
+    // Draw arc between two bond vectors
     const half = (angle / 2) * Math.PI / 180;
     const x1 = cx + r * Math.sin(-half);
     const y1 = cy + r * Math.cos(-half);
     const x2 = cx + r * Math.sin(half);
     const y2 = cy + r * Math.cos(half);
     const large = angle > 180 ? 1 : 0;
-    // Arc fill
     document.getElementById('ba-arc').setAttribute('d',
       `M ${x1.toFixed(1)},${y1.toFixed(1)} A ${r},${r} 0 ${large},1 ${x2.toFixed(1)},${y2.toFixed(1)} L ${cx},${cy} Z`);
     document.getElementById('ba-arc').setAttribute('fill','rgba(0,229,180,.08)');
-    document.getElementById('ba-arc').setAttribute('stroke','rgba(0,229,180,.5)');
   }
   document.getElementById('ba-label').textContent = label;
   svg.classList.add('v');
@@ -2321,7 +2056,7 @@ function showBondAngle(key) {
 /* ════════════════════════════════════════
    FEATURE 3 — GUIDED DEMO MODE
 ════════════════════════════════════════ */
-const DEMO_SEQ = ['vsepr-h2o','vsepr-ch4','vsepr-bf3','vsepr-nh3','vsepr-co2','vsepr-sf6','vsepr-xef4','org-benz','bio-chol'];
+const DEMO_SEQ = ['vsepr-h2o','vsepr-ch4','vsepr-bf3','vsepr-nh3','vsepr-sf6','org-benz','bio-chol'];
 let demoActive = false, demoIdx = 0, demoTimer = null;
 
 function toggleDemo() {
@@ -2354,7 +2089,7 @@ function runDemoStep() {
   // Load molecule
   pickMol(key);
   demoIdx++;
-  demoTimer = setTimeout(runDemoStep, 6000);
+  demoTimer = setTimeout(runDemoStep, 5000);
 }
 
 function stopDemo() {
@@ -2365,30 +2100,21 @@ function stopDemo() {
 }
 
 /* ════════════════════════════════════════
-   FEATURE 1+2+3+6 — TRUE FULLSCREEN PRESENTATION MODE
-   Device-aware adaptive + smart classroom layout
+   FEATURE 4 — PRESENTATION MODE
 ════════════════════════════════════════ */
 let pmodeOn = false;
-
-/* Detect device type for adaptive layout */
-function getDeviceType() {
-  const w = window.innerWidth;
-  const hasTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
-  if (w < 768) return 'mobile';
-  if (w <= 1180 && hasTouch) return 'tablet';
-  return 'desktop'; // includes smartboard
+function togglePmode() {
+  pmodeOn = !pmodeOn;
+  document.body.classList.toggle('pmode', pmodeOn);
+  document.getElementById('pmode-btn').classList.toggle('on', pmodeOn);
+  document.getElementById('pmode-btn').textContent = pmodeOn ? '⊞ Exit Present' : '⊞ Present';
+  // Slow rotation in presentation mode
+  if (viewer && rotating) {
+    viewer.stopAnimate();
+    viewer.animate({ loop:'forward', step: pmodeOn ? 0.25 : 0.5 });
+  }
+  toast(pmodeOn ? 'Presentation mode ON' : 'Presentation mode OFF', 'k');
 }
-
-/* Request actual fullscreen (desktop/tablet only) */
-function enterFullscreen() {
-  const el = document.documentElement;
-  const fn = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
-  if (fn) fn.call(el).catch(() => {});
-}
-function exitFullscreen() {
-  const fn = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
-  if (fn) fn.call(document).catch(() => {});
-}
-
-/* Listen for native fullscreen exit (Esc key / browser chrome) */
-document.addEventListener('fullscreenchange',     syncPmodeFromFullscreen);
+</script>
+</body>
+</html>
