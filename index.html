@@ -620,23 +620,116 @@ header{
 #demo-exit:hover{border-color:var(--tea);color:var(--tea)}
 
 /* ─── PRESENTATION MODE ─────────────────────────────── */
-body.pmode #edu-card{max-width:260px;padding:16px 18px}
-body.pmode .edu-mol-name{font-size:15px}
-body.pmode .edu-label{font-size:10px;letter-spacing:1.5px}
-body.pmode .edu-val{font-size:12px}
-body.pmode .edu-insight{font-size:11px;line-height:1.7}
-body.pmode .geov{font-size:13px}
-body.pmode .fctv{font-size:11px}
-body.pmode .aleg-name{font-size:12px}
-body.pmode #atom-legend{max-width:180px}
-/* Presentation mode indicator in header */
+
+:fullscreen body.pmode,
+:-webkit-full-screen body.pmode,
+body.pmode { --pmode-active: 1; }
+
+body.pmode header {
+  background: rgba(6,8,16,.6);
+  border-bottom-color: rgba(99,155,255,.06);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+body.pmode .sb { display: none !important; }
+body.pmode .app { left: 0; }
+body.pmode .hr > :not(#pmode-btn):not(#demo-btn) { display: none !important; }
+body.pmode .dtabs { display: none !important; }
+
+body.pmode #edu-card {
+  max-width: 320px; padding: 20px 22px;
+  border: 1px solid rgba(0,229,180,.4);
+  background: rgba(6,8,16,.95);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  top: 16px; right: 16px;
+}
+body.pmode .edu-mol-name { font-size: 20px; font-weight: 800; letter-spacing: -.3px; margin-bottom: 10px }
+body.pmode .edu-label { font-size: 10px; letter-spacing: 2px; color: var(--mu) }
+body.pmode .edu-val { font-size: 14px; color: var(--tea); font-weight: 700 }
+body.pmode .edu-insight { font-size: 12px; line-height: 1.8; color: var(--tx); font-style: normal; margin-top: 4px }
+body.pmode .edu-divider { margin: 10px 0 }
+body.pmode .geov { font-size: 15px }
+body.pmode .fctv { font-size: 12px; line-height: 1.75 }
+body.pmode .aleg-name { font-size: 13px }
+body.pmode #atom-legend {
+  max-width: 190px; bottom: 80px; left: 20px;
+  border-color: rgba(0,229,180,.35); background: rgba(6,8,16,.95);
+}
+body.pmode .aleg-title { font-size: 9px; letter-spacing: 2px }
+body.pmode .aleg-dot { width: 11px; height: 11px }
+body.pmode .vc { bottom: 20px; right: 20px }
+body.pmode .vb { width: 42px; height: 42px; font-size: 18px }
+body.pmode #bond-angle-svg { width: 160px; height: 90px; bottom: 110px; opacity: .85; }
+body.pmode #ba-label { font-size: 14px }
+body.pmode #edu-highlight { max-width: min(520px,90vw); padding: 14px 22px; font-size: 13px; border-width: 1.5px; bottom: 20px; }
+body.pmode .hl-title { font-size: 10px; letter-spacing: 2px }
+body.pmode .hl-text { font-size: 13px }
+body.pmode #demo-bar { top: calc(var(--HH) + 12px) }
+body.pmode header { height: 46px }
+body.pmode .app { top: 46px }
+
+@media (min-width:768px) and (max-width:1024px) {
+  body.pmode #edu-card { max-width: 260px; padding: 14px 16px }
+  body.pmode .edu-mol-name { font-size: 16px }
+  body.pmode .edu-val { font-size: 12px }
+  body.pmode .edu-insight { font-size: 11px }
+  body.pmode #atom-legend { max-width: 160px }
+  body.pmode .vb { width: 40px; height: 40px }
+}
+
+@media (max-width:767px) {
+  body.pmode header { height: var(--HH); background: #060810 }
+  body.pmode .app { top: var(--HH) }
+  body.pmode .sb { display: none !important }
+  body.pmode #edu-card { top: auto; bottom: calc(var(--BH) + 56px); right: 10px; max-width: 150px; padding: 10px 12px; }
+  body.pmode .edu-mol-name { font-size: 12px }
+  body.pmode .edu-val { font-size: 10px }
+  body.pmode .edu-insight { font-size: 9px }
+  body.pmode #atom-legend { bottom: calc(var(--BH) + 130px); left: 10px }
+  body.pmode #bond-angle-svg { width: 110px; height: 65px; bottom: calc(var(--BH) + 74px) }
+  body.pmode #edu-highlight { bottom: calc(var(--BH) + 10px); font-size: 10px; max-width: 90vw }
+  body.pmode .vb { width: 38px; height: 38px }
+  body.pmode .vc { bottom: calc(var(--BH) + 10px) }
+}
+
+/* Smart classroom panel (desktop pmode only) */
+#pmode-panel {
+  position: absolute; top: 16px; left: 16px; z-index: 16;
+  display: none; flex-direction: column; gap: 8px;
+  min-width: 200px; max-width: 240px;
+}
+body.pmode #pmode-panel { display: flex }
+@media (max-width:767px) { body.pmode #pmode-panel { display: none !important } }
+.pmp-card {
+  background: rgba(6,8,16,.95); border: 1px solid rgba(99,155,255,.18);
+  border-radius: 10px; padding: 10px 13px;
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  animation: eduIn .3s cubic-bezier(.34,1.56,.64,1);
+}
+.pmp-label { font-family: var(--fn); font-size: 8px; letter-spacing: 2px; text-transform: uppercase; color: var(--di); margin-bottom: 5px; }
+.pmp-value { font-size: 15px; font-weight: 700; color: var(--tea); line-height: 1.3; }
+.pmp-fact { font-size: 10px; color: var(--mu); line-height: 1.6; margin-top: 4px; }
+.pmp-badge { display: inline-block; font-family: var(--fn); font-size: 8px; letter-spacing: 1px; padding: 2px 8px; border-radius: 4px; background: rgba(74,143,255,.12); border: 1px solid rgba(74,143,255,.25); color: var(--acc); margin-top: 5px; }
+
+#pmode-exit-hint {
+  position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+  z-index: 400; display: none;
+  font-family: var(--fn); font-size: 9px; color: var(--di);
+  background: rgba(6,8,16,.7); border: 1px solid var(--bd);
+  border-radius: 20px; padding: 4px 14px;
+  pointer-events: none; letter-spacing: 1px; transition: opacity .5s;
+}
+body.pmode #pmode-exit-hint { display: block }
+@media (max-width:767px) { #pmode-exit-hint { display: none !important } }
+
+/* Presentation mode button */
 #pmode-btn{
   font-family:var(--fn);font-size:9px;padding:4px 10px;border-radius:6px;
   border:1px solid var(--bd);color:var(--mu);background:transparent;
   cursor:pointer;transition:all .15s;white-space:nowrap;
 }
 #pmode-btn:hover{border-color:var(--bhi);color:var(--tx)}
-#pmode-btn.on{border-color:var(--acc);color:var(--acc);background:rgba(74,143,255,.07)}
+#pmode-btn.on{border-color:var(--tea);color:var(--tea);background:rgba(0,229,180,.07);box-shadow:0 0 8px rgba(0,229,180,.15)}
 @media(max-width:767px){#pmode-btn{display:none}}
 
 /* ─── GUIDED DEMO BUTTON IN HEADER ─────────────────── */
@@ -1025,7 +1118,24 @@ body.pmode #atom-legend{max-width:180px}
       <text id="ba-label" x="60" y="62" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" fill="rgba(0,229,180,.9)">—</text>
     </svg>
 
+    <!-- ─── SMART CLASSROOM PANEL (pmode desktop only) ─── -->
+    <div id="pmode-panel">
+      <div class="pmp-card" id="pmp-geo-card" style="display:none">
+        <div class="pmp-label">VSEPR Geometry</div>
+        <div class="pmp-value" id="pmp-geo">—</div>
+        <div class="pmp-fact" id="pmp-geo-fact">—</div>
+      </div>
+      <div class="pmp-card" id="pmp-hyb-card" style="display:none">
+        <div class="pmp-label">Hybridization &amp; Angle</div>
+        <div class="pmp-value" id="pmp-hyb">—</div>
+        <span class="pmp-badge" id="pmp-angle">—</span>
+      </div>
+    </div>
+
   </div><!-- /.vw -->
+
+<!-- ─── PMODE EXIT HINT ─── -->
+<div id="pmode-exit-hint">Press ESC or click ⊞ to exit presentation</div>
 
 <!-- ─── MOBILE MOLECULE SCREEN ───────────────────────────────── -->
 <!-- Completely separate from .app div. WebGL is inside .app, this is outside.
@@ -1641,14 +1751,22 @@ function fillInfo(m) {
   document.getElementById('i-go').textContent = m.g;
   document.getElementById('i-fc').textContent = m.x;
   document.getElementById('ic').classList.add('v');
-  // ── NEW: update legend + edu overlay ──
   updateAtomLegend(m);
-  updateEduCard(m);
-  // ── Feature 2+5: edu highlight + bond angle ──
-  if (m._key) {
-    showEduHighlight(m._key);
-    showBondAngle(m._key);
-  }
+
+  // Hide overlays immediately on new molecule load, then fade in after delay
+  clearTimeout(_overlayDelayTimer);
+  document.getElementById('edu-card').classList.remove('v');
+  document.getElementById('edu-highlight').classList.remove('v');
+  document.getElementById('bond-angle-svg').classList.remove('v');
+
+  _overlayDelayTimer = setTimeout(() => {
+    updateEduCard(m);
+    if (m._key) {
+      showEduHighlight(m._key);
+      showBondAngle(m._key);
+    }
+    if (typeof pmodeOn !== 'undefined' && pmodeOn) updatePmodePanel(m);
+  }, OVERLAY_DELAY);
 }
 
 /* ════════════════════════════════════════
@@ -1738,6 +1856,10 @@ const MINI_DEMO = [
   { key:'bio-chol',  caption:'Biochemistry visualised in 3D' },
 ];
 let miniDemoActive = false, miniDemoIdx = 0, miniDemoTimer = null;
+
+/* Delay educational overlay appearance */
+let _overlayDelayTimer = null;
+const OVERLAY_DELAY = 2200; // ms after molecule load before overlays fade in
 
 /* _viewerReady setter — MUST be defined before initIntro runs */
 Object.defineProperty(window, '_viewerReady', {
@@ -2056,7 +2178,7 @@ function showBondAngle(key) {
 /* ════════════════════════════════════════
    FEATURE 3 — GUIDED DEMO MODE
 ════════════════════════════════════════ */
-const DEMO_SEQ = ['vsepr-h2o','vsepr-ch4','vsepr-bf3','vsepr-nh3','vsepr-sf6','org-benz','bio-chol'];
+const DEMO_SEQ = ['vsepr-h2o','vsepr-ch4','vsepr-bf3','vsepr-nh3','vsepr-co2','vsepr-sf6','vsepr-xef4','org-benz','bio-chol'];
 let demoActive = false, demoIdx = 0, demoTimer = null;
 
 function toggleDemo() {
@@ -2089,7 +2211,7 @@ function runDemoStep() {
   // Load molecule
   pickMol(key);
   demoIdx++;
-  demoTimer = setTimeout(runDemoStep, 5000);
+  demoTimer = setTimeout(runDemoStep, 6000);
 }
 
 function stopDemo() {
@@ -2100,21 +2222,105 @@ function stopDemo() {
 }
 
 /* ════════════════════════════════════════
-   FEATURE 4 — PRESENTATION MODE
+   PRESENTATION MODE — device-aware + fullscreen + smart classroom
 ════════════════════════════════════════ */
 let pmodeOn = false;
+
+function getDeviceType() {
+  const w = window.innerWidth;
+  const hasTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+  if (w < 768) return 'mobile';
+  if (w <= 1180 && hasTouch) return 'tablet';
+  return 'desktop';
+}
+
+function enterFullscreen() {
+  const el = document.documentElement;
+  const fn = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+  if (fn) fn.call(el).catch(() => {});
+}
+function exitFullscreen() {
+  const fn = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
+  if (fn) fn.call(document).catch(() => {});
+}
+
+document.addEventListener('fullscreenchange',       syncPmodeFromFullscreen);
+document.addEventListener('webkitfullscreenchange', syncPmodeFromFullscreen);
+document.addEventListener('mozfullscreenchange',    syncPmodeFromFullscreen);
+function syncPmodeFromFullscreen() {
+  const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement);
+  if (pmodeOn && !isFs) { pmodeOn = false; applyPmodeState(false); }
+}
+
 function togglePmode() {
   pmodeOn = !pmodeOn;
-  document.body.classList.toggle('pmode', pmodeOn);
-  document.getElementById('pmode-btn').classList.toggle('on', pmodeOn);
-  document.getElementById('pmode-btn').textContent = pmodeOn ? '⊞ Exit Present' : '⊞ Present';
-  // Slow rotation in presentation mode
+  const device = getDeviceType();
+  if (pmodeOn) {
+    applyPmodeState(true, device);
+    if (device !== 'mobile') enterFullscreen();
+  } else {
+    applyPmodeState(false, device);
+    exitFullscreen();
+  }
+}
+
+function applyPmodeState(on, device) {
+  device = device || getDeviceType();
+  document.body.classList.toggle('pmode', on);
+  document.body.dataset.pmodeDevice = on ? device : '';
+
+  const btn = document.getElementById('pmode-btn');
+  if (btn) {
+    btn.classList.toggle('on', on);
+    btn.textContent = on ? '⊞ Exit Present' : '⊞ Present';
+  }
+
   if (viewer && rotating) {
     viewer.stopAnimate();
-    viewer.animate({ loop:'forward', step: pmodeOn ? 0.25 : 0.5 });
+    const step = on ? (device === 'mobile' ? 0.3 : 0.2) : 0.5;
+    viewer.animate({ loop: 'forward', step });
   }
-  toast(pmodeOn ? 'Presentation mode ON' : 'Presentation mode OFF', 'k');
+
+  if (on && curMeta) updatePmodePanel(curMeta);
+  else hidePmodePanel();
+
+  requestAnimationFrame(() => { if (viewer) { viewer.resize(); viewer.render(); } });
+  toast(on ? 'Presentation mode ON' : 'Presentation mode OFF', 'k');
 }
+
+function updatePmodePanel(meta) {
+  if (!meta) { hidePmodePanel(); return; }
+  const geoCard = document.getElementById('pmp-geo-card');
+  const hybCard = document.getElementById('pmp-hyb-card');
+  if (meta.g) {
+    document.getElementById('pmp-geo').textContent      = meta.s || '—';
+    document.getElementById('pmp-geo-fact').textContent = meta.g || '';
+    geoCard.style.display = '';
+  } else { geoCard.style.display = 'none'; }
+  if (meta.h) {
+    document.getElementById('pmp-hyb').textContent   = meta.h || '—';
+    document.getElementById('pmp-angle').textContent = meta.a ? '∠ ' + meta.a : '—';
+    hybCard.style.display = '';
+  } else { hybCard.style.display = 'none'; }
+}
+
+function hidePmodePanel() {
+  document.getElementById('pmp-geo-card').style.display = 'none';
+  document.getElementById('pmp-hyb-card').style.display = 'none';
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && pmodeOn) {
+    setTimeout(() => {
+      const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+      if (!isFs && pmodeOn) { pmodeOn = false; applyPmodeState(false); }
+    }, 80);
+  }
+}, true);
+
+window.addEventListener('resize', () => {
+  if (pmodeOn) document.body.dataset.pmodeDevice = getDeviceType();
+});
 </script>
 </body>
 </html>
