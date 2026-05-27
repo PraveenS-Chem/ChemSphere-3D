@@ -628,44 +628,48 @@ body.pmode .hr > :not(#pmode-btn):not(#demo-btn) { display: none !important; }
 body.pmode .dtabs { display: none !important; }
 
 body.pmode #edu-card {
-  max-width: 320px; padding: 20px 22px;
+  max-width: 340px; padding: 22px 24px;
   border: 1px solid rgba(0,229,180,.4);
   background: rgba(6,8,16,.95);
   backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
   top: 16px; right: 16px;
 }
-body.pmode .edu-mol-name { font-size: 20px; font-weight: 800; letter-spacing: -.3px; margin-bottom: 10px }
+body.pmode .edu-mol-name { font-size: 22px; font-weight: 800; letter-spacing: -.3px; margin-bottom: 12px }
 body.pmode .edu-label { font-size: 10px; letter-spacing: 2px; color: var(--mu) }
-body.pmode .edu-val { font-size: 14px; color: var(--tea); font-weight: 700 }
-body.pmode .edu-insight { font-size: 12px; line-height: 1.8; color: var(--tx); font-style: normal; margin-top: 4px }
-body.pmode .edu-divider { margin: 10px 0 }
+body.pmode .edu-val { font-size: 16px; color: var(--tea); font-weight: 700 }
+body.pmode .edu-insight { font-size: 13px; line-height: 1.85; color: var(--tx); font-style: normal; margin-top: 8px }
+body.pmode .edu-divider { margin: 12px 0 }
 body.pmode .geov { font-size: 15px }
 body.pmode .fctv { font-size: 12px; line-height: 1.75 }
-body.pmode .aleg-name { font-size: 13px }
+body.pmode .aleg-name { font-size: 15px }
 body.pmode #atom-legend {
-  max-width: 190px; bottom: 80px; left: 20px;
+  max-width: 210px; bottom: 90px; left: 20px;
   border-color: rgba(0,229,180,.35); background: rgba(6,8,16,.95);
 }
-body.pmode .aleg-title { font-size: 9px; letter-spacing: 2px }
-body.pmode .aleg-dot { width: 11px; height: 11px }
+body.pmode .aleg-title { font-size: 10px; letter-spacing: 2px }
+body.pmode .aleg-dot { width: 13px; height: 13px }
 body.pmode .vc { bottom: 20px; right: 20px }
 body.pmode .vb { width: 42px; height: 42px; font-size: 18px }
-body.pmode #bond-angle-svg { width: 160px; height: 90px; bottom: 110px; opacity: .85; }
-body.pmode #ba-label { font-size: 14px }
-body.pmode #edu-highlight { max-width: min(520px,90vw); padding: 14px 22px; font-size: 13px; border-width: 1.5px; bottom: 20px; }
-body.pmode .hl-title { font-size: 10px; letter-spacing: 2px }
-body.pmode .hl-text { font-size: 13px }
+body.pmode #bond-angle-svg { width: 180px; height: 105px; bottom: 120px; opacity: 1; }
+body.pmode #ba-label { font-size: 18px !important; fill: rgba(0,229,180,1); font-weight: 700 }
+body.pmode #edu-highlight { max-width: min(600px,90vw); padding: 18px 28px; font-size: 15px; border-width: 1.5px; bottom: 24px; }
+body.pmode .hl-title { font-size: 11px; letter-spacing: 2.5px; margin-bottom: 6px }
+body.pmode .hl-text  { font-size: 15px; line-height: 1.75 }
 body.pmode #demo-bar { top: calc(var(--HH) + 12px) }
 body.pmode header { height: 46px }
 body.pmode .app { top: 46px }
 
 @media (min-width:768px) and (max-width:1024px) {
-  body.pmode #edu-card { max-width: 260px; padding: 14px 16px }
-  body.pmode .edu-mol-name { font-size: 16px }
-  body.pmode .edu-val { font-size: 12px }
-  body.pmode .edu-insight { font-size: 11px }
-  body.pmode #atom-legend { max-width: 160px }
+  body.pmode #edu-card { max-width: 280px; padding: 16px 18px }
+  body.pmode .edu-mol-name { font-size: 18px }
+  body.pmode .edu-val { font-size: 14px }
+  body.pmode .edu-insight { font-size: 12px }
+  body.pmode #atom-legend { max-width: 180px }
+  body.pmode .aleg-name { font-size: 13px }
   body.pmode .vb { width: 40px; height: 40px }
+  body.pmode .pmp-value { font-size: 18px }
+  body.pmode .pmp-fact  { font-size: 12px }
+  body.pmode .pmp-step  { font-size: 12px }
 }
 
 @media (max-width:767px) {
@@ -686,11 +690,13 @@ body.pmode .app { top: 46px }
 /* Smart classroom panel (desktop pmode only) */
 #pmode-panel {
   position: absolute; top: 16px; left: 16px; z-index: 16;
-  display: none; flex-direction: column; gap: 8px;
-  min-width: 200px; max-width: 240px;
+  display: none; flex-direction: column; gap: 10px;
+  min-width: 230px; max-width: 270px;
 }
 body.pmode #pmode-panel { display: flex }
 @media (max-width:767px) { body.pmode #pmode-panel { display: none !important } }
+
+/* ── Base pmp-card: normal (non-pmode) ── */
 .pmp-card {
   background: rgba(6,8,16,.95); border: 1px solid rgba(99,155,255,.18);
   border-radius: 10px; padding: 10px 13px;
@@ -701,6 +707,26 @@ body.pmode #pmode-panel { display: flex }
 .pmp-value { font-size: 15px; font-weight: 700; color: var(--tea); line-height: 1.3; }
 .pmp-fact { font-size: 10px; color: var(--mu); line-height: 1.6; margin-top: 4px; }
 .pmp-badge { display: inline-block; font-family: var(--fn); font-size: 8px; letter-spacing: 1px; padding: 2px 8px; border-radius: 4px; background: rgba(74,143,255,.12); border: 1px solid rgba(74,143,255,.25); color: var(--acc); margin-top: 5px; }
+
+/* ── pmode overrides: classroom-scale ── */
+body.pmode .pmp-card {
+  padding: 14px 18px;
+  border-radius: 12px;
+  border-color: rgba(99,155,255,.28);
+  gap: 0; /* children use their own margins */
+}
+body.pmode .pmp-label {
+  font-size: 9px; letter-spacing: 2.5px; margin-bottom: 8px; color: rgba(90,110,150,.9);
+}
+body.pmode .pmp-value {
+  font-size: 22px; font-weight: 800; line-height: 1.2; letter-spacing: -.3px;
+}
+body.pmode .pmp-fact {
+  font-size: 13px; line-height: 1.7; margin-top: 8px; color: var(--tx);
+}
+body.pmode .pmp-badge {
+  font-size: 10px; padding: 4px 11px; margin-top: 8px; letter-spacing: 1.5px;
+}
 
 #pmode-exit-hint {
   position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
@@ -853,6 +879,19 @@ body.pmode #pmode-exit-hint { display: block }
 }
 .pmp-rw { font-size:9px;color:var(--mu);line-height:1.5;border-top:1px solid var(--bd);margin-top:6px;padding-top:6px }
 .pmp-rw-k { font-family:var(--fn);font-size:7px;letter-spacing:1.5px;text-transform:uppercase;color:var(--di);display:block;margin-bottom:2px }
+
+/* ── Pmode: classroom-scale steps ── */
+body.pmode .pmp-steps { gap: 10px; margin-top: 10px }
+body.pmode .pmp-step  { font-size: 13px; color: var(--tx); line-height: 1.65; gap: 10px }
+body.pmode .pmp-step-n {
+  font-size: 9px; padding: 3px 8px; border-radius: 4px; margin-top: 3px;
+  background: rgba(0,229,180,.14); min-width: 22px; text-align: center;
+}
+body.pmode .pmp-rw {
+  font-size: 12px; line-height: 1.65; margin-top: 12px; padding-top: 10px;
+  color: var(--mu);
+}
+body.pmode .pmp-rw-k { font-size: 8px; letter-spacing: 2px; margin-bottom: 5px }
 
 /* ─── BOND ANGLE REASON TEXT ────────────────────────── */
 #ba-reason {
@@ -1355,7 +1394,7 @@ body.pmode #edu-bottom-sheet { display: none !important }
     <!-- ─── BOND ANGLE SVG ─── -->
     <svg id="bond-angle-svg" width="120" height="70" viewBox="0 0 120 70">
       <path id="ba-arc" d="" stroke="rgba(0,229,180,.75)" stroke-width="2" fill="rgba(0,229,180,.1)" />
-      <text id="ba-label" x="60" y="62" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="12" fill="rgba(0,229,180,1)" font-weight="700">—</text>
+      <text id="ba-label" x="60" y="62" text-anchor="middle" font-family="JetBrains Mono,monospace" style="font-size:12px;font-weight:700" fill="rgba(0,229,180,1)">—</text>
     </svg>
     <span id="ba-reason"></span>
 
@@ -3331,7 +3370,7 @@ function updatePmodePanelEnhanced(meta, key) {
 
   if (e && e.presentation && e.presentation.length) {
     stepsList.innerHTML = e.presentation.map((s, i) =>
-      `<li class="pmp-step"><span class="pmp-step-n">${i+1}</span>${s}</li>`
+      `<li class="pmp-step"><span class="pmp-step-n">${pmodeOn ? '•' : i+1}</span>${s}</li>`
     ).join('');
     if (e.real_world) {
       rwText.textContent = e.real_world;
