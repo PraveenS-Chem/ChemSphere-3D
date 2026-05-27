@@ -3242,6 +3242,8 @@ function pndUpdate() {
     if (pills) pills.addEventListener('scroll', pndUpdateArrows, { passive: true });
   });
 })();
+
+function updatePmodePanel(meta) {
   if (!meta) { hidePmodePanel(); return; }
   const geoCard = document.getElementById('pmp-geo-card');
   const hybCard = document.getElementById('pmp-hyb-card');
