@@ -67,12 +67,6 @@ header{
 
 .hr{display:flex;align-items:center;gap:7px;flex-shrink:0}
 .fbdg{font-size:9px;font-family:var(--fn);padding:3px 8px;border-radius:5px;color:var(--tea);border:1px solid rgba(0,229,180,.3);background:rgba(0,229,180,.05)}
-.bupg{
-  font-size:11px;font-weight:700;padding:6px 12px;border-radius:7px;border:none;
-  background:linear-gradient(135deg,var(--acc),var(--tea));color:#fff;
-  box-shadow:0 3px 12px rgba(74,143,255,.3);transition:opacity .2s;white-space:nowrap;
-}
-.bupg:hover{opacity:.85}
 /* hamburger not used — bottom tab bar handles mobile nav */
 
 /* ─── LAYOUT ─────────────────────────────────────────── */
@@ -268,31 +262,6 @@ header{
 .tst.e{border-color:rgba(255,60,60,.3);color:#ff7070}
 .tst.k{border-color:rgba(0,229,180,.3);color:var(--tea)}
 
-/* ─── UPGRADE MODAL ──────────────────────────────────── */
-.movl{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.82);display:none;align-items:center;justify-content:center;padding:16px}
-.movl.v{display:flex}
-.modal{background:var(--s1);border:1px solid var(--bhi);border-radius:14px;padding:26px;max-width:450px;width:100%;box-shadow:0 20px 70px rgba(0,0,0,.7);position:relative;animation:mi .28s cubic-bezier(.34,1.56,.64,1);max-height:92dvh;overflow-y:auto}
-@keyframes mi{from{transform:scale(.93) translateY(16px);opacity:0}}
-.mcl{position:absolute;top:13px;right:13px;width:26px;height:26px;border:1px solid var(--bd);border-radius:5px;background:transparent;color:var(--mu);font-size:13px;display:flex;align-items:center;justify-content:center;transition:all .15s}
-.mcl:hover{border-color:var(--bhi);color:var(--tx)}
-.mbdg{display:inline-block;font-size:8px;font-family:var(--fn);font-weight:700;letter-spacing:1px;padding:3px 9px;border-radius:4px;margin-bottom:11px;background:linear-gradient(90deg,var(--acc),var(--tea));color:#fff}
-.modal h2{font-size:20px;font-weight:800;color:#fff;margin-bottom:5px}
-.modal p{font-size:11px;color:var(--mu);line-height:1.7;margin-bottom:14px}
-.plans{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
-.plan{border:1px solid var(--bd);border-radius:9px;padding:13px;background:var(--s2)}
-.plan.ft{border-color:var(--tea);background:rgba(0,229,180,.04)}
-.pn{font-size:11px;font-weight:700;color:#fff;margin-bottom:3px}
-.pp{font-family:var(--fn);font-size:17px;font-weight:700;color:var(--tea)}
-.pp s{font-size:9px;color:var(--mu);font-weight:400;text-decoration:none}
-.pf{font-size:9px;color:var(--mu);margin-top:7px;line-height:1.7;list-style:none}
-.pf li::before{content:'✓ ';color:var(--tea);font-weight:700}
-.bjn{width:100%;padding:11px;border:none;border-radius:9px;font-size:13px;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--acc),var(--tea));box-shadow:0 4px 16px rgba(74,143,255,.25);transition:opacity .2s}
-.bjn:hover{opacity:.88}
-.bjn.done{background:linear-gradient(135deg,#1a4a1a,#0a5a3a);cursor:default}
-.mnt{font-size:8px;font-family:var(--fn);color:var(--di);text-align:center;margin-top:8px}
-/* Google Form wrapper */
-#gf-wrap{border-radius:10px;overflow:hidden;border:1px solid var(--bhi);margin-bottom:10px}
-
 /* ─── RESPONSIVE ─────────────────────────────────────── */
 @media (max-width:767px){
   .dtabs{display:none}
@@ -310,10 +279,7 @@ header{
   .f2d{padding:12px;max-width:95vw}
   #i2d{max-height:42vh}
   .bdg{top:8px;font-size:9px}
-  .plans{grid-template-columns:1fr}
-  .modal{padding:20px 16px}
   .tst{bottom:calc(var(--BH) + 8px)}
-  .gf-wrap iframe{height:340px}
 }
 @media (min-width:768px){
   .btbar,.hmb,.dovl{display:none!important}
@@ -1344,7 +1310,7 @@ body.pmode #edu-bottom-sheet { display: none !important }
       <button class="intro-feat-card" onclick="enterApp(false);setTimeout(()=>showcasePick('bio-gluc'),1600)"><span>C₆H₁₂O₆</span>Glucose</button>
     </div>
   </div>
-  <div class="intro-badge">FREE · 21 CURATED MOLECULES · NCI CACTUS</div>
+  <div class="intro-badge">FREE FOR ALL STUDENTS · SEARCH ANY MOLECULE · NCI CACTUS</div>
   <!-- Feature 7: Institutional badge -->
   <div class="intro-inst">Institution-ready interactive STEM visualization platform</div>
 </div>
@@ -1385,10 +1351,9 @@ body.pmode #edu-bottom-sheet { display: none !important }
   </div>
 
   <div class="hr">
-    <span class="fbdg">FREE</span>
+    <span class="fbdg">FREE FOR ALL</span>
     <button id="demo-btn"  class="hdr-btn" onclick="toggleDemo()"  aria-label="Toggle guided demo">▶ Demo</button>
     <button id="pmode-btn" class="hdr-btn" onclick="togglePmode()" aria-label="Toggle presentation mode">⊞ Present</button>
-    <button class="bupg" onclick="openMod()">Upgrade →</button>
     <button class="hmb" id="hmb" onclick="togDrawer()" aria-label="Molecules">
       <em></em><em></em><em></em>
     </button>
@@ -1772,49 +1737,6 @@ body.pmode #edu-bottom-sheet { display: none !important }
 <!-- TOAST -->
 <div class="tst" id="tst"></div>
 
-<!-- UPGRADE MODAL -->
-<div class="movl" id="movl" onclick="if(event.target===this)closeMod()">
-  <div class="modal">
-    <button class="mcl" onclick="closeMod()">✕</button>
-    <div class="mbdg">CHEMSPHERE PRO</div>
-    <h2>Unlock Everything</h2>
-    <p>Free gives you 21 curated NEET/JEE molecules. Pro unlocks 500+ structures, quiz mode, offline access, AI molecular assistant and much more.</p>
-    <div class="plans">
-      <div class="plan">
-        <div class="pn">Free</div>
-        <div class="pp">₹0 <s>/ forever</s></div>
-        <ul class="pf">
-          <li>21 NEET/JEE molecules</li>
-          <li>3D · 2D · Properties</li>
-          <li>VSEPR facts</li>
-          <li>Cactus search</li>
-        </ul>
-      </div>
-      <div class="plan ft">
-        <div class="pn">Pro</div>
-        <div class="pp">₹199 <s>/ month</s></div>
-        <ul class="pf">
-          <li>500+ molecules</li>
-          <li>Protein 3D viewer</li>
-          <li>Quiz &amp; flashcards</li>
-          <li>Offline access</li>
-          <li>AI assistant</li>
-          <li>Export structures</li>
-        </ul>
-      </div>
-    </div>
-    <!-- Google Form embed. Replace the src with YOUR form's embed URL:
-         Google Forms → Send → Embed → copy src from the <iframe> tag shown -->
-  <div id="gf-wrap" style="display:none;margin-bottom:8px">
-  <iframe id="gf-frame"
-    src="https://docs.google.com/forms/d/e/1FAIpQLSdtdC1EtxV4nCS_ThxY1RR7HL4AuYdHw2P_xPH2Nzc1e8RP_w/viewform?embedded=true"
-    width="100%" height="1411" frameborder="0" marginheight="0" marginwidth="0"
-    style="border-radius:8px;background:#fff;display:block">Loading…</iframe>
-    </div>
-    <button class="bjn" id="bjn-main" onclick="showGForm()">Join Pro Waitlist →</button>
-    <div class="mnt">No credit card · Made for Indian students 🇮🇳</div>
-  </div>
-</div>
 
 <script>
 /* ════════════════════════════════════════
@@ -2490,21 +2412,10 @@ async function doCopy(text, label) {
   try { await navigator.clipboard.writeText(text); toast(label + ' copied!', 'k'); }
   catch { toast('Copy failed', 'e'); }
 }
-function openMod()  { document.getElementById('movl').classList.add('v'); }
-function closeMod() { document.getElementById('movl').classList.remove('v'); }
+function openMod()  { /* removed — no upgrade modal */ }
+function closeMod() { /* removed — no upgrade modal */ }
 
 /* Google Form — show iframe on button click */
-function showGForm() {
-  const wrap = document.getElementById('gf-wrap');
-  const btn  = document.getElementById('bjn-main');
-  if (wrap.style.display === 'none' || wrap.style.display === '') {
-    wrap.style.display = 'block';
-    btn.textContent    = '✓ Form is open below — fill & submit!';
-    btn.classList.add('done');
-    // Scroll modal to show form
-    setTimeout(() => wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
-  }
-}
 /* ════════════════════════════════════════
    INTRO SCREEN + SHOWCASE FLOW
 ════════════════════════════════════════ */
