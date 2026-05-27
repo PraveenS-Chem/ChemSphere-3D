@@ -774,7 +774,7 @@ body.pmode .pmp-badge {
   border-radius: 20px; padding: 4px 14px;
   pointer-events: none; letter-spacing: 1px; transition: opacity .5s;
 }
-body.pmode #pmode-exit-hint { display: block }
+body.pmode #pmode-exit-hint { display: block; bottom: 110px }
 @media (max-width:767px) { #pmode-exit-hint { display: none !important } }
 
 /* ─── HEADER ICON BUTTONS (shared base) ────────────────── */
@@ -931,7 +931,167 @@ body.pmode .pmp-rw {
 }
 body.pmode .pmp-rw-k { font-size: 8px; letter-spacing: 2px; margin-bottom: 5px }
 
-/* ─── BOND ANGLE REASON TEXT ────────────────────────── */
+/* ─── PRESENTATION MODE MOLECULE NAV DOCK ───────────────
+   Floating bottom-center bar. Visible ONLY in body.pmode.
+   Desktop: full scrollable row of molecule pills.
+   Mobile: same but touch-scroll, smaller pills.          */
+
+#pmode-nav-dock {
+  display: none; /* hidden until pmode activates */
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 350;
+
+  /* layout */
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  max-width: min(880px, 92vw);
+  width: max-content;
+}
+
+/* Show only in pmode on desktop */
+body.pmode #pmode-nav-dock { display: flex }
+@media (max-width:767px) { body.pmode #pmode-nav-dock { display: none !important } }
+
+/* Category row */
+.pnd-cats {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+}
+.pnd-cat {
+  font-family: var(--fn);
+  font-size: 8px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 20px;
+  border: 1px solid var(--bd);
+  background: transparent;
+  color: var(--di);
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.pnd-cat:hover { border-color: var(--bhi); color: var(--mu) }
+.pnd-cat.on {
+  border-color: rgba(0,229,180,.45);
+  color: var(--tea);
+  background: rgba(0,229,180,.06);
+}
+
+/* Molecule pill row — scrollable */
+.pnd-pills-wrap {
+  position: relative;
+  max-width: min(880px, 92vw);
+}
+.pnd-pills {
+  display: flex;
+  gap: 5px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 6px 8px;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;
+
+  /* frosted glass background on the pill row */
+  background: rgba(6,8,16,.88);
+  border: 1px solid rgba(99,155,255,.14);
+  border-radius: 14px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 4px 24px rgba(0,0,0,.45), 0 0 0 1px rgba(0,229,180,.05);
+}
+.pnd-pills::-webkit-scrollbar { display: none }
+
+/* Fade edges hint that more pills exist */
+.pnd-pills-wrap::before,
+.pnd-pills-wrap::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 28px;
+  z-index: 2;
+  pointer-events: none;
+}
+.pnd-pills-wrap::before {
+  left: 0;
+  background: linear-gradient(to right, rgba(6,8,16,.7), transparent);
+  border-radius: 14px 0 0 14px;
+}
+.pnd-pills-wrap::after {
+  right: 0;
+  background: linear-gradient(to left, rgba(6,8,16,.7), transparent);
+  border-radius: 0 14px 14px 0;
+}
+
+/* Individual molecule pill */
+.pnd-pill {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 6px 12px;
+  border-radius: 9px;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  transition: background .15s, border-color .18s, transform .15s;
+  touch-action: manipulation;
+  min-width: 52px;
+}
+.pnd-pill:hover {
+  background: rgba(74,143,255,.08);
+  border-color: rgba(74,143,255,.2);
+  transform: translateY(-1px);
+}
+.pnd-pill.active {
+  background: rgba(0,229,180,.08);
+  border-color: rgba(0,229,180,.38);
+  box-shadow: 0 0 10px rgba(0,229,180,.1);
+}
+.pnd-pill-f {
+  font-family: var(--fn);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--tea);
+  line-height: 1;
+  white-space: nowrap;
+}
+.pnd-pill.active .pnd-pill-f { color: #fff }
+.pnd-pill-n {
+  font-size: 9px;
+  color: var(--mu);
+  white-space: nowrap;
+  line-height: 1.2;
+}
+.pnd-pill.active .pnd-pill-n { color: var(--tx) }
+
+/* Scroll arrow buttons (appear when overflow exists) */
+.pnd-arrow {
+  position: absolute;
+  top: 50%; transform: translateY(-50%);
+  z-index: 3;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  border: 1px solid rgba(99,155,255,.22);
+  background: rgba(6,8,16,.92);
+  color: var(--mu);
+  font-size: 11px;
+  display: none; /* shown by JS when needed */
+  align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: border-color .15s, color .15s;
+}
+.pnd-arrow:hover { border-color: var(--bhi); color: var(--tx) }
+.pnd-arrow.left  { left: -14px }
+.pnd-arrow.right { right: -14px }
+.pnd-arrow.show  { display: flex }
+
 #ba-reason {
   position:absolute;
   left:50%;transform:translateX(-50%);
@@ -1498,6 +1658,24 @@ body.pmode #edu-bottom-sheet { display: none !important }
     </div>
   </div>
 
+<!-- ─── PMODE MOLECULE NAV DOCK (desktop/smartboard only) ─── -->
+<div id="pmode-nav-dock">
+  <!-- Category filter pills -->
+  <div class="pnd-cats" id="pnd-cats">
+    <button class="pnd-cat on" data-cat="vsepr"     onclick="pndSetCat('vsepr',this)">VSEPR</button>
+    <button class="pnd-cat"    data-cat="organic"   onclick="pndSetCat('organic',this)">Organic</button>
+    <button class="pnd-cat"    data-cat="biomol"    onclick="pndSetCat('biomol',this)">Bio</button>
+    <button class="pnd-cat"    data-cat="inorganic" onclick="pndSetCat('inorganic',this)">Inorganic</button>
+    <button class="pnd-cat"    data-cat="all"       onclick="pndSetCat('all',this)">All</button>
+  </div>
+  <!-- Scrollable molecule pill strip -->
+  <div class="pnd-pills-wrap" id="pnd-pills-wrap">
+    <button class="pnd-arrow left"  id="pnd-left"  onclick="pndScroll(-1)" aria-label="Scroll left">‹</button>
+    <div    class="pnd-pills"       id="pnd-pills"></div>
+    <button class="pnd-arrow right" id="pnd-right" onclick="pndScroll(1)"  aria-label="Scroll right">›</button>
+  </div>
+</div>
+
 <!-- ─── PMODE EXIT HINT ─── -->
 <div id="pmode-exit-hint">Press ESC or click ⊞ to exit presentation</div>
 
@@ -2035,6 +2213,10 @@ function pickMol(key) {
   if (meta) meta._key = key;
   if (window.innerWidth < 768) closeMolScreen();
   go(meta ? meta.pname : key, meta);
+  // Keep nav dock active pill in sync (no-op when dock is hidden)
+  if (pmodeOn) {
+    document.querySelectorAll('.pnd-pill').forEach(p => p.classList.toggle('active', p.dataset.key === key));
+  }
 }
 
 function doSearch() {
@@ -2962,9 +3144,104 @@ function applyPmodeState(on, device) {
 
   requestAnimationFrame(() => { if (viewer) { viewer.resize(); viewer.render(); } });
   toast(on ? 'Presentation mode ON' : 'Presentation mode OFF', 'k');
+  // Refresh nav dock visibility and active state
+  pndUpdate();
 }
 
-function updatePmodePanel(meta) {
+/* ════════════════════════════════════════
+   PRESENTATION MODE MOLECULE NAV DOCK
+   Lets teachers switch molecules without exiting pmode.
+════════════════════════════════════════ */
+
+let _pndCat = 'vsepr'; // currently shown category in dock
+
+/** Build/refresh the pill strip for a given category */
+function pndRender(cat) {
+  const pills = document.getElementById('pnd-pills');
+  if (!pills) return;
+
+  // Collect molecules: 'all' flattens every category
+  let mols;
+  if (cat === 'all') {
+    mols = Object.values(DB).flat();
+  } else {
+    mols = DB[cat] || [];
+  }
+
+  pills.innerHTML = mols.map(m => `
+    <button class="pnd-pill${m.key === selKey ? ' active' : ''}"
+            data-key="${m.key}"
+            onclick="pndPick('${m.key}')"
+            title="${m.n}">
+      <span class="pnd-pill-f">${m.f}</span>
+      <span class="pnd-pill-n">${m.n}</span>
+    </button>
+  `).join('');
+
+  // Scroll to active pill so it's always visible
+  requestAnimationFrame(() => {
+    const active = pills.querySelector('.pnd-pill.active');
+    if (active) active.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    pndUpdateArrows();
+  });
+}
+
+/** Switch active category tab and re-render */
+function pndSetCat(cat, btn) {
+  _pndCat = cat;
+  document.querySelectorAll('.pnd-cat').forEach(b => b.classList.toggle('on', b.dataset.cat === cat));
+  pndRender(cat);
+}
+
+/** Pick a molecule from the dock — stays in pmode */
+function pndPick(key) {
+  if (!pmodeOn) return; // safety guard
+  // Update active pill immediately (visual feedback before load completes)
+  document.querySelectorAll('.pnd-pill').forEach(p => p.classList.toggle('active', p.dataset.key === key));
+  // Use pickMol — it calls go(), which updates all educational overlays
+  pickMol(key);
+}
+
+/** Show/hide scroll arrows based on overflow */
+function pndUpdateArrows() {
+  const pills = document.getElementById('pnd-pills');
+  const left  = document.getElementById('pnd-left');
+  const right = document.getElementById('pnd-right');
+  if (!pills || !left || !right) return;
+  const canLeft  = pills.scrollLeft > 4;
+  const canRight = pills.scrollLeft < (pills.scrollWidth - pills.clientWidth - 4);
+  left.classList.toggle('show', canLeft);
+  right.classList.toggle('show', canRight);
+}
+
+/** Scroll the pill strip left (−1) or right (+1) */
+function pndScroll(dir) {
+  const pills = document.getElementById('pnd-pills');
+  if (!pills) return;
+  pills.scrollBy({ left: dir * 200, behavior: 'smooth' });
+  setTimeout(pndUpdateArrows, 320);
+}
+
+/** Called whenever pmode turns on/off, or selKey changes */
+function pndUpdate() {
+  if (!pmodeOn) return;
+  // Sync category to whatever the main grid is showing
+  if (_pndCat !== 'all') _pndCat = curCat || _pndCat;
+  // Sync cat buttons
+  document.querySelectorAll('.pnd-cat').forEach(b => {
+    b.classList.toggle('on', b.dataset.cat === _pndCat);
+  });
+  pndRender(_pndCat);
+}
+
+// Listen for scroll events on pills to update arrows
+(function initPndScrollListener() {
+  // Deferred — DOM not ready yet at parse time
+  document.addEventListener('DOMContentLoaded', () => {
+    const pills = document.getElementById('pnd-pills');
+    if (pills) pills.addEventListener('scroll', pndUpdateArrows, { passive: true });
+  });
+})();
   if (!meta) { hidePmodePanel(); return; }
   const geoCard = document.getElementById('pmp-geo-card');
   const hybCard = document.getElementById('pmp-hyb-card');
