@@ -860,11 +860,221 @@ body.pmode #pmode-exit-hint { display: block }
   left:50%;transform:translateX(-50%);
   bottom:148px; /* just below the SVG which sits at 80px from bottom */
   z-index:16;display:none;
-  font-family:var(--fn);font-size:8px;color:rgba(0,229,180,.6);
+  font-family:var(--fn);font-size:8px;color:rgba(0,229,180,.75);
   text-align:center;white-space:nowrap;pointer-events:none;letter-spacing:.3px;
 }
 #ba-reason.v { display:block }
-@media(max-width:767px){ #ba-reason { bottom:calc(var(--BH) + 136px);font-size:7px } }
+@media(max-width:767px){ #ba-reason { display:none !important } }
+
+/* ─── BOND ANGLE IMPROVEMENTS ───────────────────────── */
+#bond-angle-svg path, #bond-angle-svg line {
+  filter: drop-shadow(0 0 3px rgba(0,229,180,.4));
+}
+/* brighter arc stroke in normal mode */
+#bond-angle-svg .ba-arc-stroke { stroke:rgba(0,229,180,.75) !important }
+
+/* ─── DESKTOP RIGHT EDUCATIONAL PANEL ───────────────── */
+/* Only shown on desktop (≥768px) in normal (non-pmode) 3D mode */
+#edu-right-panel {
+  display: none;
+  width: 260px;
+  flex-shrink: 0;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 12px;
+  background: var(--s1);
+  border-left: 1px solid var(--bd);
+  overflow-y: auto;
+  overflow-x: hidden;
+  z-index: 10;
+}
+#edu-right-panel::-webkit-scrollbar { width: 3px }
+#edu-right-panel::-webkit-scrollbar-thumb { background: var(--bhi); border-radius: 2px }
+
+#edu-right-panel.v { display: flex }
+
+.erp-label {
+  font-family: var(--fn); font-size: 8px; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--di);
+  display: flex; align-items: center; gap: 6px; margin-bottom: 4px;
+}
+.erp-label::after { content:''; flex:1; height:1px; background:var(--bd) }
+
+.erp-mol-name {
+  font-size: 15px; font-weight: 800; color: #fff;
+  line-height: 1.2; margin-bottom: 2px;
+}
+.erp-formula {
+  font-family: var(--fn); font-size: 10px; color: var(--acc); margin-bottom: 10px;
+}
+
+.erp-row {
+  display: flex; justify-content: space-between; align-items: baseline;
+  gap: 6px; padding: 5px 0; border-bottom: 1px solid var(--bd);
+}
+.erp-row:last-child { border-bottom: none }
+.erp-key {
+  font-family: var(--fn); font-size: 8px; color: var(--di);
+  letter-spacing: 1px; text-transform: uppercase; flex-shrink: 0;
+}
+.erp-val {
+  font-family: var(--fn); font-size: 10px; color: var(--tea);
+  text-align: right; line-height: 1.3;
+}
+
+.erp-card {
+  background: var(--s2); border: 1px solid var(--bd);
+  border-radius: 9px; padding: 10px 11px;
+  animation: eduIn .3s cubic-bezier(.34,1.56,.64,1);
+}
+.erp-card.geo { border-color: rgba(0,229,180,.18); background: rgba(0,229,180,.03) }
+.erp-card.tip { border-color: rgba(255,107,53,.18); background: rgba(255,107,53,.03) }
+.erp-card-k {
+  font-family: var(--fn); font-size: 7px; letter-spacing: 1.5px;
+  text-transform: uppercase; margin-bottom: 5px;
+  color: var(--tea);
+}
+.erp-card.tip .erp-card-k { color: var(--org) }
+.erp-card-v {
+  font-size: 10px; color: var(--mu); line-height: 1.65;
+}
+.erp-card.geo .erp-card-v { color: var(--tx); font-size: 10px }
+
+/* Hide edu-card overlay on desktop (right panel replaces it) */
+@media (min-width:768px) {
+  #edu-card { display: none !important }
+}
+
+/* ─── MOBILE BOTTOM SHEET ────────────────────────────── */
+#edu-bottom-sheet {
+  display: none;
+  position: fixed;
+  left: 0; right: 0;
+  bottom: var(--BH);
+  z-index: 100;
+  background: rgba(9,13,24,.97);
+  border-top: 1px solid var(--bhi);
+  border-radius: 14px 14px 0 0;
+  max-height: 72dvh;
+  transition: transform .32s cubic-bezier(.32,1,.56,1), opacity .2s;
+  transform: translateY(calc(100% - 56px)); /* collapsed: only peek */
+  overflow: hidden;
+  touch-action: pan-y;
+}
+#edu-bottom-sheet.bs-visible { display: block }
+#edu-bottom-sheet.bs-expanded { transform: translateY(0) }
+
+/* drag handle */
+.bs-handle {
+  width: 36px; height: 4px; border-radius: 2px;
+  background: var(--di); margin: 8px auto 0;
+  cursor: pointer;
+}
+
+/* collapsed header — always visible */
+.bs-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 14px 10px;
+  cursor: pointer;
+  gap: 10px;
+}
+.bs-title-wrap { flex: 1; min-width: 0 }
+.bs-title {
+  font-family: var(--fn); font-size: 10px; font-weight: 700;
+  color: var(--tea); text-transform: uppercase; letter-spacing: 1px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.bs-preview {
+  font-size: 10px; color: var(--mu); margin-top: 1px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.bs-toggle {
+  font-family: var(--fn); font-size: 8px; color: var(--di);
+  border: 1px solid var(--bd); border-radius: 4px;
+  padding: 3px 7px; white-space: nowrap; flex-shrink: 0;
+  background: transparent;
+  transition: border-color .15s, color .15s;
+}
+.bs-toggle:hover { border-color: var(--bhi); color: var(--tx) }
+#edu-bottom-sheet.bs-expanded .bs-toggle { color: var(--tea); border-color: rgba(0,229,180,.35) }
+
+/* expanded body */
+.bs-body {
+  display: none;
+  flex-direction: column;
+  gap: 9px;
+  padding: 6px 14px 20px;
+  overflow-y: auto;
+  max-height: calc(72dvh - 70px);
+}
+#edu-bottom-sheet.bs-expanded .bs-body { display: flex }
+
+.bs-divider { height: 1px; background: var(--bd); margin: 2px 0 }
+
+.bs-row {
+  display: flex; justify-content: space-between; gap: 6px;
+  align-items: baseline; padding: 3px 0; border-bottom: 1px solid rgba(99,155,255,.06);
+}
+.bs-row-k {
+  font-family: var(--fn); font-size: 8px; color: var(--di);
+  letter-spacing: 1px; text-transform: uppercase;
+}
+.bs-row-v {
+  font-family: var(--fn); font-size: 9px; color: var(--tea); text-align: right;
+}
+
+.bs-insight {
+  font-size: 10px; color: var(--mu); line-height: 1.65; font-style: italic;
+}
+
+.bs-chip {
+  background: rgba(74,143,255,.05); border: 1px solid rgba(74,143,255,.12);
+  border-radius: 7px; padding: 7px 9px;
+  font-size: 9px; color: var(--tx); line-height: 1.55;
+}
+.bs-chip-k {
+  color: var(--tea); font-weight: 700; font-family: var(--fn);
+  font-size: 8px; text-transform: uppercase; letter-spacing: .5px;
+  display: block; margin-bottom: 3px;
+}
+.bs-chip.tip { border-color: rgba(255,107,53,.18); background: rgba(255,107,53,.04) }
+.bs-chip.tip .bs-chip-k { color: var(--org) }
+.bs-chip.geo { border-color: rgba(0,229,180,.18); background: rgba(0,229,180,.04) }
+
+/* Bottom sheet only on mobile */
+@media (min-width: 768px) {
+  #edu-bottom-sheet { display: none !important }
+}
+
+/* On mobile: slightly tighten the atom legend and edu card positions */
+@media (max-width: 767px) {
+  #atom-legend {
+    bottom: calc(var(--BH) + 64px);
+    left: 10px;
+    max-width: 130px;
+  }
+  #atom-legend .aleg-name { font-size: 9px }
+  /* edu-card: hide on mobile — bottom sheet replaces it */
+  #edu-card { display: none !important }
+  /* molecule info card: slightly narrower */
+  .ic { font-size: 95% }
+  /* edu-highlight: raise above bottom sheet peek */
+  #edu-highlight { bottom: calc(var(--BH) + 64px) }
+  /* bond angle svg: raise above bottom sheet */
+  #bond-angle-svg { bottom: calc(var(--BH) + 64px) }
+  #ba-reason { bottom: calc(var(--BH) + 136px) }
+}
+
+/* Desktop layout: inject right panel into .app flex */
+@media (min-width: 768px) {
+  .app { /* already flex */ }
+  /* edu-right-panel sits after .vw */
+}
+
+/* Pmode: hide right panel (pmode-panel replaces it) */
+body.pmode #edu-right-panel { display: none !important }
+/* Pmode mobile: hide bottom sheet too */
+body.pmode #edu-bottom-sheet { display: none !important }
 </style>
 </head>
 <body>
@@ -1144,8 +1354,8 @@ body.pmode #pmode-exit-hint { display: block }
 
     <!-- ─── BOND ANGLE SVG ─── -->
     <svg id="bond-angle-svg" width="120" height="70" viewBox="0 0 120 70">
-      <path id="ba-arc" d="" stroke="rgba(0,229,180,.6)" stroke-width="1.5" fill="rgba(0,229,180,.08)" />
-      <text id="ba-label" x="60" y="62" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" fill="rgba(0,229,180,.9)">—</text>
+      <path id="ba-arc" d="" stroke="rgba(0,229,180,.75)" stroke-width="2" fill="rgba(0,229,180,.1)" />
+      <text id="ba-label" x="60" y="62" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="12" fill="rgba(0,229,180,1)" font-weight="700">—</text>
     </svg>
     <span id="ba-reason"></span>
 
@@ -1173,6 +1383,41 @@ body.pmode #pmode-exit-hint { display: block }
     </div>
 
   </div><!-- /.vw -->
+
+  <!-- ─── DESKTOP RIGHT EDUCATIONAL PANEL ─── -->
+  <!-- Shown on desktop ≥768px in 3D mode. Replaces the small edu-card overlay. -->
+  <div id="edu-right-panel">
+    <div class="erp-label">Molecule</div>
+    <div class="erp-mol-name" id="erp-name">—</div>
+    <div class="erp-formula"  id="erp-formula">—</div>
+
+    <div class="erp-card" id="erp-geo-card" style="display:none">
+      <div class="erp-card-k geo" style="color:var(--tea)">VSEPR Geometry</div>
+      <div class="erp-card-v" id="erp-geo" style="color:var(--tx);font-size:11px;font-weight:600"></div>
+      <div class="erp-card-v" id="erp-geo-fact" style="margin-top:4px"></div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:4px" id="erp-rows">
+      <div class="erp-row"><span class="erp-key">Hybridization</span><span class="erp-val" id="erp-hyb">—</span></div>
+      <div class="erp-row"><span class="erp-key">Bond Angle</span><span class="erp-val" id="erp-ang">—</span></div>
+      <div class="erp-row"><span class="erp-key">Dipole</span><span class="erp-val" id="erp-dip">—</span></div>
+    </div>
+
+    <div class="erp-card geo" id="erp-polarity-card" style="display:none">
+      <div class="erp-card-k">Polarity</div>
+      <div class="erp-card-v" id="erp-polarity"></div>
+    </div>
+
+    <div class="erp-card" id="erp-insight-card" style="display:none">
+      <div class="erp-card-k">Key Insight</div>
+      <div class="erp-card-v" id="erp-insight"></div>
+    </div>
+
+    <div class="erp-card tip" id="erp-tip-card" style="display:none">
+      <div class="erp-card-k">⚡ Exam Tip</div>
+      <div class="erp-card-v" id="erp-tip"></div>
+    </div>
+  </div>
 
 <!-- ─── PMODE EXIT HINT ─── -->
 <div id="pmode-exit-hint">Press ESC or click ⊞ to exit presentation</div>
@@ -1218,6 +1463,30 @@ body.pmode #pmode-exit-hint { display: block }
         <option value="rasmol">RasMol</option>
       </select>
     </div>
+  </div>
+</div>
+
+<!-- ─── MOBILE EDUCATIONAL BOTTOM SHEET ──────────────────── -->
+<!-- Mobile-only collapsible card. Replaces edu-card overlay on small screens. -->
+<div id="edu-bottom-sheet">
+  <div class="bs-handle" id="bs-handle"></div>
+  <div class="bs-header" id="bs-header-tap">
+    <div class="bs-title-wrap">
+      <div class="bs-title" id="bs-title">—</div>
+      <div class="bs-preview" id="bs-preview">—</div>
+    </div>
+    <button class="bs-toggle" id="bs-toggle-btn">Tap to expand</button>
+  </div>
+  <div class="bs-body" id="bs-body">
+    <div class="bs-divider"></div>
+    <div style="display:flex;flex-direction:column;gap:3px">
+      <div class="bs-row"><span class="bs-row-k">Geometry</span><span class="bs-row-v" id="bs-geo">—</span></div>
+      <div class="bs-row"><span class="bs-row-k">Hybridization</span><span class="bs-row-v" id="bs-hyb">—</span></div>
+      <div class="bs-row"><span class="bs-row-k">Bond Angle</span><span class="bs-row-v" id="bs-ang">—</span></div>
+      <div class="bs-row"><span class="bs-row-k">Dipole</span><span class="bs-row-v" id="bs-dip">—</span></div>
+    </div>
+    <div class="bs-insight" id="bs-insight"></div>
+    <div id="bs-chips"><!-- edu chips injected by JS --></div>
   </div>
 </div>
 
@@ -1410,6 +1679,12 @@ window.addEventListener('load', () => {
   window.addEventListener('resize', () => {
     if (!viewer) return;
     requestAnimationFrame(() => { viewer.resize(); viewer.render(); });
+    // Re-evaluate responsive edu panels on resize
+    if (curMeta) {
+      const key = curMeta._key || null;
+      updateEduRightPanel(curMeta, key);
+      updateEduBottomSheet(curMeta, key);
+    }
   });
 });
 
@@ -1633,6 +1908,20 @@ function setMode(mode) {
     if (!is3d) el.classList.remove('v');
     el.style.display = is3d ? '' : 'none';
   });
+
+  // Show/hide right panel and bottom sheet on mode switch
+  const rp = document.getElementById('edu-right-panel');
+  if (rp) {
+    if (!is3d || pmodeOn || window.innerWidth < 768) rp.classList.remove('v');
+    else if (is3d && curMeta) updateEduRightPanel(curMeta, curMeta._key || null);
+  }
+  const bs = document.getElementById('edu-bottom-sheet');
+  if (bs) {
+    if (!is3d || pmodeOn || window.innerWidth >= 768) {
+      bs.classList.remove('bs-visible', 'bs-expanded');
+      _bsExpanded = false;
+    } else if (is3d && curMeta) updateEduBottomSheet(curMeta, curMeta._key || null);
+  }
   // Learning Insights only shown in sidebar (always visible if present)
   // but clear bond-angle reason on mode switch
   if (!is3d) {
@@ -1864,6 +2153,8 @@ function fillInfo(m) {
   _overlayDelayTimer = setTimeout(() => {
     const key = m._key || null;
     updateEduCardEnhanced(m, key);
+    updateEduRightPanel(m, key);
+    updateEduBottomSheet(m, key);
     if (key) {
       updateEduInsights(key);
       showEduHighlightEnhanced(key);
@@ -2166,7 +2457,160 @@ function toggleLegend() {
 }
 
 /* ════════════════════════════════════════
-   EDUCATIONAL OVERLAY
+   DESKTOP RIGHT EDUCATIONAL PANEL
+   Visible on desktop ≥768px in 3D mode.
+════════════════════════════════════════ */
+function updateEduRightPanel(meta, key) {
+  const panel = document.getElementById('edu-right-panel');
+  if (!panel) return;
+  const isMobile = window.innerWidth < 768;
+  const is3d = curMode === '3d';
+
+  if (isMobile || !is3d || pmodeOn) {
+    panel.classList.remove('v');
+    return;
+  }
+
+  if (!meta || !meta.n) { panel.classList.remove('v'); return; }
+
+  document.getElementById('erp-name').textContent    = meta.n || '—';
+  document.getElementById('erp-formula').innerHTML   = meta.f || '—';
+  document.getElementById('erp-hyb').textContent     = meta.h || '—';
+  document.getElementById('erp-ang').textContent     = meta.a || '—';
+  document.getElementById('erp-dip').textContent     = meta.d || '—';
+
+  const geoCard  = document.getElementById('erp-geo-card');
+  if (meta.g || meta.s) {
+    document.getElementById('erp-geo').textContent      = meta.s || '—';
+    document.getElementById('erp-geo-fact').textContent = meta.g || '';
+    geoCard.style.display = '';
+  } else { geoCard.style.display = 'none'; }
+
+  const e = key ? EDU_CONTENT[key] : null;
+
+  const polarCard = document.getElementById('erp-polarity-card');
+  if (e && e.polarity) {
+    document.getElementById('erp-polarity').textContent = e.polarity;
+    polarCard.style.display = '';
+  } else { polarCard.style.display = 'none'; }
+
+  const insightCard = document.getElementById('erp-insight-card');
+  const insightEl   = document.getElementById('erp-insight');
+  const insight = (e && e.short && e.short[0]) ? e.short[0] : (meta.x || '');
+  if (insight) {
+    insightEl.textContent = insight;
+    insightCard.style.display = '';
+  } else { insightCard.style.display = 'none'; }
+
+  const tipCard = document.getElementById('erp-tip-card');
+  if (e && e.exam_tip) {
+    document.getElementById('erp-tip').textContent = e.exam_tip;
+    tipCard.style.display = '';
+  } else { tipCard.style.display = 'none'; }
+
+  panel.classList.add('v');
+}
+
+/* ════════════════════════════════════════
+   MOBILE BOTTOM SHEET
+   Collapsible educational card on mobile.
+════════════════════════════════════════ */
+let _bsExpanded = false;
+
+function updateEduBottomSheet(meta, key) {
+  const sheet = document.getElementById('edu-bottom-sheet');
+  if (!sheet) return;
+  const isMobile = window.innerWidth < 768;
+  const is3d = curMode === '3d';
+
+  if (!isMobile || !is3d || pmodeOn) {
+    sheet.classList.remove('bs-visible', 'bs-expanded');
+    _bsExpanded = false;
+    return;
+  }
+
+  if (!meta || !meta.n) { sheet.classList.remove('bs-visible', 'bs-expanded'); return; }
+
+  const e = key ? EDU_CONTENT[key] : null;
+
+  // Title = molecule name
+  document.getElementById('bs-title').textContent = meta.n || '—';
+
+  // Preview = short geometry description
+  const previewText = meta.s ? meta.s + (meta.a ? ' · ' + meta.a : '') : (meta.g || '—');
+  document.getElementById('bs-preview').textContent = previewText;
+
+  // Expanded body rows
+  document.getElementById('bs-geo').textContent = meta.s || '—';
+  document.getElementById('bs-hyb').textContent = meta.h || '—';
+  document.getElementById('bs-ang').textContent = meta.a || '—';
+  document.getElementById('bs-dip').textContent = meta.d || '—';
+
+  // Insight text
+  const insight = (e && e.polarity) ? e.polarity : (meta.x || meta.g || '');
+  document.getElementById('bs-insight').textContent = insight;
+
+  // Edu chips
+  const chipsEl = document.getElementById('bs-chips');
+  if (e) {
+    chipsEl.innerHTML = [
+      e.geometry_reason ? `<div class="bs-chip geo"><span class="bs-chip-k">Geometry</span>${e.geometry_reason}</div>` : '',
+      e.exam_tip        ? `<div class="bs-chip tip"><span class="bs-chip-k">⚡ Exam Tip</span>${e.exam_tip}</div>` : '',
+    ].join('');
+  } else if (meta.g) {
+    chipsEl.innerHTML = `<div class="bs-chip geo"><span class="bs-chip-k">Geometry</span>${meta.g}</div>`;
+  } else {
+    chipsEl.innerHTML = '';
+  }
+
+  // Collapse to peek state for new molecule
+  _bsExpanded = false;
+  sheet.classList.remove('bs-expanded');
+  sheet.classList.add('bs-visible');
+  document.getElementById('bs-toggle-btn').textContent = 'Tap to expand';
+}
+
+function toggleBottomSheet() {
+  const sheet = document.getElementById('edu-bottom-sheet');
+  const btn   = document.getElementById('bs-toggle-btn');
+  if (!sheet.classList.contains('bs-visible')) return;
+  _bsExpanded = !_bsExpanded;
+  sheet.classList.toggle('bs-expanded', _bsExpanded);
+  btn.textContent = _bsExpanded ? 'Collapse ↓' : 'Tap to expand';
+}
+
+// Initialise bottom sheet touch interactions
+(function initBottomSheet() {
+  let startY = 0, isDragging = false;
+  const getSheet = () => document.getElementById('edu-bottom-sheet');
+
+  document.getElementById('bs-header-tap')?.addEventListener('click', toggleBottomSheet);
+  document.getElementById('bs-handle')?.addEventListener('click', toggleBottomSheet);
+
+  // Swipe down to collapse
+  document.addEventListener('touchstart', e => {
+    const sheet = getSheet();
+    if (!sheet || !sheet.classList.contains('bs-visible')) return;
+    if (!sheet.contains(e.target)) return;
+    startY = e.touches[0].clientY;
+    isDragging = true;
+  }, { passive: true });
+
+  document.addEventListener('touchend', e => {
+    if (!isDragging) return;
+    isDragging = false;
+    const dy = e.changedTouches[0].clientY - startY;
+    if (dy > 50 && _bsExpanded) {
+      toggleBottomSheet(); // swipe down collapses
+    } else if (dy < -50 && !_bsExpanded) {
+      toggleBottomSheet(); // swipe up expands
+    }
+  }, { passive: true });
+})();
+
+/* ════════════════════════════════════════
+   EDUCATIONAL OVERLAY (legacy — desktop ≥768px keeps it hidden via CSS,
+   but keep function so other callers don't break)
 ════════════════════════════════════════ */
 function updateEduCard(meta) {
   const card = document.getElementById('edu-card');
@@ -2191,11 +2635,21 @@ function updateEduCard(meta) {
 (function initHints() {
   if (sessionStorage.getItem('cs-hints-seen')) return;
   const bar = document.getElementById('hint-bar');
-  setTimeout(() => {
+
+  function hideHints() {
     bar.classList.add('out');
     setTimeout(() => { bar.style.display = 'none'; }, 520);
     sessionStorage.setItem('cs-hints-seen', '1');
-  }, 5000);
+    document.removeEventListener('pointerdown', hideHints, { once: true });
+    document.removeEventListener('wheel', hideHints, { once: true });
+    clearTimeout(_hintsTimer);
+  }
+
+  // Auto-hide after 5s
+  const _hintsTimer = setTimeout(hideHints, 5000);
+  // Or hide on first interaction
+  document.addEventListener('pointerdown', hideHints, { once: true, passive: true });
+  document.addEventListener('wheel', hideHints, { once: true, passive: true });
 })();
 
 /* ════════════════════════════════════════
@@ -2406,6 +2860,12 @@ function applyPmodeState(on, device) {
 
   if (on && curMeta) updatePmodePanelEnhanced(curMeta, curMeta._key || null);
   else hidePmodePanel();
+
+  // Hide non-pmode educational panels in presentation mode
+  const rp = document.getElementById('edu-right-panel');
+  if (rp) rp.classList.remove('v');
+  const bs = document.getElementById('edu-bottom-sheet');
+  if (bs) { bs.classList.remove('bs-visible', 'bs-expanded'); }
 
   requestAnimationFrame(() => { if (viewer) { viewer.resize(); viewer.render(); } });
   toast(on ? 'Presentation mode ON' : 'Presentation mode OFF', 'k');
