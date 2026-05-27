@@ -1277,6 +1277,67 @@ const DB = {
 ════════════════════════════════════════ */
 let viewer = null, model = null;
 let rotating = true;
+
+/* ════════════════════════════════════════
+   ROTATION CONTROLLER
+   Manual rAF loop using viewer.rotate() — guaranteed to produce
+   visible frames on Android Chrome without requiring user interaction.
+   viewer.animate() is NOT used for auto-rotation (it only advances
+   when the GL context is already compositing, causing the "rotate only
+   after touch" bug on mobile).
+════════════════════════════════════════ */
+const ROT = {
+  rafId:       null,
+  paused:      false,   // true while user is dragging/zooming
+  resumeTimer: null,    // timeout to resume after inactivity
+  RESUME_MS:   2500,    // ms of inactivity before auto-resume
+  STEP_NORMAL: 0.4,     // degrees per frame — slow educational spin
+  STEP_PMODE:  0.22,    // cinematic, readable in presentation mode
+  STEP_MOBILE: 0.30,    // slightly reduced for mid-range Android
+
+  step() {
+    if (pmodeOn) return this.STEP_PMODE;
+    if (window.innerWidth < 768) return this.STEP_MOBILE;
+    return this.STEP_NORMAL;
+  },
+
+  start() {
+    if (!viewer || !rotating) return;
+    this.stop(); // clear any existing loop first
+    const tick = () => {
+      if (!this.paused && viewer && rotating && curMode === '3d') {
+        viewer.rotate(this.step(), 'y');
+        viewer.render();
+      }
+      this.rafId = requestAnimationFrame(tick);
+    };
+    this.rafId = requestAnimationFrame(tick);
+  },
+
+  stop() {
+    if (this.rafId) { cancelAnimationFrame(this.rafId); this.rafId = null; }
+  },
+
+  // Called on any user interaction with the 3D canvas
+  onInteract() {
+    if (!rotating) return;
+    this.paused = true;
+    clearTimeout(this.resumeTimer);
+    this.resumeTimer = setTimeout(() => {
+      this.paused = false;
+    }, this.RESUME_MS);
+  },
+
+  // Attach interaction listeners to the 3Dmol canvas element
+  attachListeners() {
+    const canvas = document.querySelector('#c3d canvas');
+    if (!canvas || canvas._rotListeners) return; // already attached
+    const onInteract = () => this.onInteract();
+    canvas.addEventListener('pointerdown', onInteract, { passive: true });
+    canvas.addEventListener('wheel',       onInteract, { passive: true });
+    canvas._rotListeners = true;
+  },
+};
 let curCat = 'vsepr', selKey = null;
 let curQ = null, curMeta = null, curMode = '3d';
 let dmol = false, token = 0;
@@ -1362,6 +1423,7 @@ function initViewer() {
         setTimeout(() => {
           viewer.resize();
           viewer.render();
+          ROT.attachListeners();
           window._viewerReady = true; // triggers _onViewerReady callback if queued
         }, 300);
       });
@@ -1384,8 +1446,8 @@ let molScreenOpen = false;
 function openMolScreen() {
   molScreenOpen = true;
   document.getElementById('mol-screen').classList.add('v');
-  // Pause 3D to save battery, not for z-index reasons
-  if (viewer) viewer.stopAnimate();
+  // Pause rotation to save battery while browsing molecules
+  ROT.stop();
   // Sync the mobile grid with current selection
   msRenderGrid(curCat);
   // Sync category buttons
@@ -1405,8 +1467,8 @@ function closeMolScreen() {
   molScreenOpen = false;
   document.getElementById('mol-screen').classList.remove('v');
   document.getElementById('bmol').classList.remove('on');
-  // Resume 3D
-  if (viewer && rotating && curMode === '3d') viewer.animate({ loop:'forward', step:0.5 });
+  // Resume rotation
+  if (curMode === '3d') ROT.start();
 }
 
 function togDrawer() {
@@ -1634,7 +1696,9 @@ async function do3D(query, tk) {
   requestAnimationFrame(() => {
     viewer.resize();
     viewer.render();
-    if (rotating) viewer.animate({ loop: 'forward', step: 0.5 });
+    ROT.attachListeners(); // safe to call repeatedly — guards against double-attach
+    ROT.paused = false;    // new molecule — always start rotating immediately
+    ROT.start();
   });
 }
 
@@ -1768,10 +1832,24 @@ function applyStyle() {
 function togRot() {
   rotating = document.getElementById('rot').checked;
   if (!viewer) return;
-  rotating ? viewer.animate({ loop: 'forward', step: 0.5 }) : viewer.stopAnimate();
+  if (rotating) {
+    ROT.paused = false;
+    ROT.start();
+  } else {
+    ROT.stop();
+  }
 }
-function resetV()   { if (viewer) { viewer.zoomTo(); viewer.render(); } }
-function zoomV(f)   { if (viewer) viewer.zoom(f, 500); }
+function resetV() {
+  if (!viewer) return;
+  ROT.onInteract(); // brief pause so user can see the reset orientation
+  viewer.zoomTo();
+  viewer.render();
+}
+function zoomV(f) {
+  if (!viewer) return;
+  ROT.onInteract();
+  viewer.zoom(f, 500);
+}
 
 /* ════════════════════════════════════════
    UI HELPERS
@@ -2255,10 +2333,11 @@ function applyPmodeState(on, device) {
     btn.textContent = on ? '⊞ Exit Present' : '⊞ Present';
   }
 
-  if (viewer && rotating) {
-    viewer.stopAnimate();
-    const step = on ? (device === 'mobile' ? 0.3 : 0.2) : 0.5;
-    viewer.animate({ loop: 'forward', step });
+  // ROT.step() automatically picks the right speed based on pmodeOn flag
+  if (rotating && curMode === '3d') {
+    ROT.stop();
+    ROT.paused = false;
+    ROT.start();
   }
 
   if (on && curMeta) updatePmodePanel(curMeta);
