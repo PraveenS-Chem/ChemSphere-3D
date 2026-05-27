@@ -643,18 +643,50 @@ body.pmode .geov { font-size: 15px }
 body.pmode .fctv { font-size: 12px; line-height: 1.75 }
 body.pmode .aleg-name { font-size: 15px }
 body.pmode #atom-legend {
-  max-width: 210px; bottom: 90px; left: 20px;
+  max-width: 210px; bottom: 20px; left: 20px;
   border-color: rgba(0,229,180,.35); background: rgba(6,8,16,.95);
 }
 body.pmode .aleg-title { font-size: 10px; letter-spacing: 2px }
 body.pmode .aleg-dot { width: 13px; height: 13px }
-body.pmode .vc { bottom: 20px; right: 20px }
+/* vc controls: sit above bond-angle SVG (which is 116px tall at bottom:80px → top edge ~196px from bottom) */
+body.pmode .vc { bottom: 210px; right: 24px }
 body.pmode .vb { width: 42px; height: 42px; font-size: 18px }
-body.pmode #bond-angle-svg { width: 180px; height: 105px; bottom: 120px; opacity: 1; }
+/* Bond-angle SVG: anchored bottom-right, away from left panel and molecule center */
+body.pmode #bond-angle-svg {
+  width: 200px; height: 116px;
+  bottom: 80px;
+  left: auto; right: 24px;
+  transform: none;
+  opacity: 1;
+}
 body.pmode #ba-label { font-size: 18px !important; fill: rgba(0,229,180,1); font-weight: 700 }
-body.pmode #edu-highlight { max-width: min(600px,90vw); padding: 18px 28px; font-size: 15px; border-width: 1.5px; bottom: 24px; }
-body.pmode .hl-title { font-size: 11px; letter-spacing: 2.5px; margin-bottom: 6px }
-body.pmode .hl-text  { font-size: 15px; line-height: 1.75 }
+/* ba-reason (long explanation text) — hidden in pmode; content is in left panel */
+body.pmode #ba-reason { display: none !important }
+/* edu-highlight banner — hidden in pmode; creates collision at bottom */
+body.pmode #edu-highlight { display: none !important }
+/* Onboarding hints — immediately hidden when pmode activates */
+body.pmode #hint-bar { display: none !important }
+
+/* ─── PMODE GEOMETRY BADGE ───────────────────────────────
+   Compact label sitting just above the bond-angle SVG (bottom-right).
+   Shows ONLY geometry name — keeps center clean.              */
+#pmode-geo-badge {
+  display: none;
+  position: absolute;
+  right: 24px;
+  z-index: 17;
+  font-family: var(--fn);
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(0,229,180,.7);
+  pointer-events: none;
+  white-space: nowrap;
+  /* positioned by JS dynamically above the SVG */
+  bottom: 200px; /* SVG bottom(80) + SVG height(116) + gap(4) */
+}
+body.pmode #pmode-geo-badge { display: block }
+@media (max-width:767px) { #pmode-geo-badge { display: none !important } }
 body.pmode #demo-bar { top: calc(var(--HH) + 12px) }
 body.pmode header { height: 46px }
 body.pmode .app { top: 46px }
@@ -664,9 +696,11 @@ body.pmode .app { top: 46px }
   body.pmode .edu-mol-name { font-size: 18px }
   body.pmode .edu-val { font-size: 14px }
   body.pmode .edu-insight { font-size: 12px }
-  body.pmode #atom-legend { max-width: 180px }
+  body.pmode #atom-legend { max-width: 180px; bottom: 20px; left: 20px }
   body.pmode .aleg-name { font-size: 13px }
   body.pmode .vb { width: 40px; height: 40px }
+  body.pmode .vc { bottom: 170px; right: 20px }
+  body.pmode #bond-angle-svg { width: 160px; height: 93px; bottom: 60px; right: 20px; left: auto; transform: none }
   body.pmode .pmp-value { font-size: 18px }
   body.pmode .pmp-fact  { font-size: 12px }
   body.pmode .pmp-step  { font-size: 12px }
@@ -680,11 +714,15 @@ body.pmode .app { top: 46px }
   body.pmode .edu-mol-name { font-size: 12px }
   body.pmode .edu-val { font-size: 10px }
   body.pmode .edu-insight { font-size: 9px }
-  body.pmode #atom-legend { bottom: calc(var(--BH) + 130px); left: 10px }
-  body.pmode #bond-angle-svg { width: 110px; height: 65px; bottom: calc(var(--BH) + 74px) }
-  body.pmode #edu-highlight { bottom: calc(var(--BH) + 10px); font-size: 10px; max-width: 90vw }
+  body.pmode #atom-legend { bottom: calc(var(--BH) + 10px); left: 10px }
+  /* Mobile pmode: bond-angle stays centered (no right-anchor) */
+  body.pmode #bond-angle-svg {
+    width: 110px; height: 65px;
+    bottom: calc(var(--BH) + 74px);
+    left: 50%; right: auto; transform: translateX(-50%);
+  }
   body.pmode .vb { width: 38px; height: 38px }
-  body.pmode .vc { bottom: calc(var(--BH) + 10px) }
+  body.pmode .vc { bottom: calc(var(--BH) + 10px); right: 10px }
 }
 
 /* Smart classroom panel (desktop pmode only) */
@@ -1397,6 +1435,8 @@ body.pmode #edu-bottom-sheet { display: none !important }
       <text id="ba-label" x="60" y="62" text-anchor="middle" font-family="JetBrains Mono,monospace" style="font-size:12px;font-weight:700" fill="rgba(0,229,180,1)">—</text>
     </svg>
     <span id="ba-reason"></span>
+    <!-- ─── PMODE GEOMETRY BADGE: compact label above bond-angle SVG ─── -->
+    <span id="pmode-geo-badge"></span>
 
     <!-- ─── SMART CLASSROOM PANEL (pmode desktop only) ─── -->
     <div id="pmode-panel">
@@ -2906,6 +2946,20 @@ function applyPmodeState(on, device) {
   const bs = document.getElementById('edu-bottom-sheet');
   if (bs) { bs.classList.remove('bs-visible', 'bs-expanded'); }
 
+  // Force-hide onboarding hints immediately on pmode toggle (CSS also hides, belt-and-suspenders)
+  const hintBar = document.getElementById('hint-bar');
+  if (hintBar) { hintBar.style.display = 'none'; }
+
+  // Update geo badge (shows geometry name above bond-angle SVG in pmode, clears on exit)
+  const geoBadge = document.getElementById('pmode-geo-badge');
+  if (geoBadge) {
+    if (on && curMeta && curMeta.s) geoBadge.textContent = curMeta.s;
+    else geoBadge.textContent = '';
+  }
+
+  // Re-run bond angle to refresh reason/badge visibility for new mode state
+  if (curMeta && curMeta._key) showBondAngleEnhanced(curMeta._key);
+
   requestAnimationFrame(() => { if (viewer) { viewer.resize(); viewer.render(); } });
   toast(on ? 'Presentation mode ON' : 'Presentation mode OFF', 'k');
 }
@@ -3389,11 +3443,13 @@ function showBondAngleEnhanced(key) {
   const angle   = BOND_ANGLES[key];
   const svg     = document.getElementById('bond-angle-svg');
   const reason  = document.getElementById('ba-reason');
+  const geoBadge = document.getElementById('pmode-geo-badge');
   if (!reason) return;
 
   if (!angle || curMode !== '3d') {
     svg.classList.remove('v');
     reason.classList.remove('v');
+    if (geoBadge) geoBadge.textContent = '';
     return;
   }
 
@@ -3414,16 +3470,29 @@ function showBondAngleEnhanced(key) {
   document.getElementById('ba-label').textContent = angle + '°';
   svg.classList.add('v');
 
-  // Reason text — from EDU_CONTENT geometry_reason (first 60 chars)
+  // Reason text (normal mode only) — truncated geometry explanation
   const e = EDU_CONTENT[key];
-  if (e && e.geometry_reason) {
-    const short = e.geometry_reason.length > 62
-      ? e.geometry_reason.slice(0,60) + '…'
-      : e.geometry_reason;
-    reason.textContent = short;
-    reason.classList.add('v');
+  if (!pmodeOn) {
+    if (e && e.geometry_reason) {
+      const short = e.geometry_reason.length > 62
+        ? e.geometry_reason.slice(0,60) + '…'
+        : e.geometry_reason;
+      reason.textContent = short;
+      reason.classList.add('v');
+    } else {
+      reason.classList.remove('v');
+    }
   } else {
     reason.classList.remove('v');
+  }
+
+  // Pmode: show compact geometry name badge above the SVG (bottom-right)
+  if (geoBadge) {
+    if (pmodeOn && curMeta && curMeta.s) {
+      geoBadge.textContent = curMeta.s;
+    } else {
+      geoBadge.textContent = '';
+    }
   }
 }
 
