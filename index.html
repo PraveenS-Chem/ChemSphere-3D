@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>ChemSphere Pro — NEET & JEE 3D Molecular Visualizer</title>
+<title>ChemSphere — Free 3D Molecular Visualizer for NEET & JEE</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://3dmol.csb.pitt.edu/build/3Dmol-min.js" defer></script>
 <style>
@@ -1287,8 +1287,8 @@ body.pmode #edu-bottom-sheet { display: none !important }
 <div id="intro-screen">
   <div class="intro-glow"></div>
   <div class="intro-logo">CS</div>
-  <div class="intro-title">ChemSphere Pro</div>
-  <div class="intro-sub">Learn Chemistry Visually in Interactive 3D — Built for NEET &amp; JEE</div>
+  <div class="intro-title">ChemSphere</div>
+  <div class="intro-sub">Free 3D molecular visualizer for NEET &amp; JEE — Search any molecule instantly</div>
   <div class="intro-bullets">
     <div class="intro-bullet"><span>🔬</span> Interactive 3D molecules</div>
     <div class="intro-bullet"><span>🧬</span> 2D Structures</div>
@@ -1341,7 +1341,7 @@ body.pmode #edu-bottom-sheet { display: none !important }
 <header>
   <a class="logo" href="#">
     <div class="lm">CS</div>
-    <div class="lt"><h1>ChemSphere Pro</h1><p>NEET · JEE · Class 11 &amp; 12</p></div>
+    <div class="lt"><h1>ChemSphere</h1><p>NEET · JEE · Class 11 &amp; 12</p></div>
   </a>
 
   <div class="dtabs">
@@ -1385,6 +1385,7 @@ body.pmode #edu-bottom-sheet { display: none !important }
       <div class="ctbs" id="ctbs">
         <button class="ctb on" data-cat="vsepr"     onclick="pickCat('vsepr',this)">VSEPR</button>
         <button class="ctb"    data-cat="organic"   onclick="pickCat('organic',this)">Organic</button>
+        <button class="ctb"    data-cat="organic2"  onclick="pickCat('organic2',this)">Organic+</button>
         <button class="ctb"    data-cat="biomol"    onclick="pickCat('biomol',this)">Bio</button>
         <button class="ctb"    data-cat="inorganic" onclick="pickCat('inorganic',this)">Inorganic</button>
       </div>
@@ -1629,6 +1630,7 @@ body.pmode #edu-bottom-sheet { display: none !important }
   <div class="pnd-cats" id="pnd-cats">
     <button class="pnd-cat on" data-cat="vsepr"     onclick="pndSetCat('vsepr',this)">VSEPR</button>
     <button class="pnd-cat"    data-cat="organic"   onclick="pndSetCat('organic',this)">Organic</button>
+    <button class="pnd-cat"    data-cat="organic2"  onclick="pndSetCat('organic2',this)">Organic+</button>
     <button class="pnd-cat"    data-cat="biomol"    onclick="pndSetCat('biomol',this)">Bio</button>
     <button class="pnd-cat"    data-cat="inorganic" onclick="pndSetCat('inorganic',this)">Inorganic</button>
     <button class="pnd-cat"    data-cat="all"       onclick="pndSetCat('all',this)">All</button>
@@ -1660,6 +1662,7 @@ body.pmode #edu-bottom-sheet { display: none !important }
   <div class="ms-cats">
     <button class="ms-cat on" data-cat="vsepr"     onclick="msCat('vsepr',this)">VSEPR</button>
     <button class="ms-cat"    data-cat="organic"   onclick="msCat('organic',this)">Organic</button>
+    <button class="ms-cat"    data-cat="organic2"  onclick="msCat('organic2',this)">Organic+</button>
     <button class="ms-cat"    data-cat="biomol"    onclick="msCat('biomol',this)">Bio</button>
     <button class="ms-cat"    data-cat="inorganic" onclick="msCat('inorganic',this)">Inorganic</button>
   </div>
@@ -1769,10 +1772,34 @@ const DB = {
     {key:'bio-alan',   pname:'alanine',      f:'C₃H₇NO₂', n:'Alanine',     s:'Tetrahedral',     w:'89.09', h:'sp³', a:'109.5°', d:'—', g:'Tetrahedral α-carbon (sp³) — simplest chiral amino acid',                  x:'Simplest chiral (L-config) amino acid. R-group = –CH₃. Non-essential amino acid.'},
   ],
   inorganic: [
-    {key:'in-h2so4',   pname:'sulfuric acid',    f:'H₂SO₄',  n:'Sulfuric Acid',    s:'Tetrahedral',     w:'98.08', h:'sp³',   a:'109.5°', d:'—', g:'Tetrahedral around S — sp³, two S=O and two S–OH bonds',      x:'Conc. H₂SO₄ = strong dehydrating & oxidising agent. ALWAYS add acid to water!'},
-    {key:'in-hno3',    pname:'nitric acid',      f:'HNO₃',   n:'Nitric Acid',      s:'Trigonal Planar', w:'63.01', h:'sp²',   a:'~120°',  d:'—', g:'Trigonal planar around N (sp²) — resonance in NO₃⁻',             x:'HNO₃ + conc. HCl (1:3) = Aqua Regia — dissolves gold & platinum. Brown ring test for NO₃⁻.'},
-    {key:'in-nh3',     pname:'ammonia',          f:'NH₃',    n:'Ammonia',          s:'Pyramidal',        w:'17.03', h:'sp³',   a:'107°',   d:'1.47 D', g:'Trigonal Pyramidal — 1 lone pair on N',                    x:'Haber Process: N₂ + 3H₂ ⇌ 2NH₃ (Fe catalyst, ~500°C, ~200 atm). Le Chatelier principle.'},
-    {key:'in-h3po4',   pname:'phosphoric acid',  f:'H₃PO₄',  n:'Phosphoric Acid',  s:'Tetrahedral',     w:'98.0',  h:'sp³',   a:'~109.5°',d:'—', g:'Tetrahedral around P — sp³ hybridised phosphorus',               x:'Triprotic acid (Ka1>>Ka2>>Ka3). Phosphodiester bonds in DNA/RNA backbone.'},
+    {key:'in-h2so4',   pname:'sulfuric acid',         f:'H₂SO₄',  n:'Sulfuric Acid',        s:'Tetrahedral',       w:'98.08', h:'sp³',   a:'109.5°',  d:'—',      g:'Tetrahedral around S — sp³, two S=O and two S–OH bonds',                   x:'Conc. H₂SO₄ = strong dehydrating & oxidising agent. ALWAYS add acid to water!'},
+    {key:'in-hno3',    pname:'nitric acid',           f:'HNO₃',   n:'Nitric Acid',          s:'Trigonal Planar',   w:'63.01', h:'sp²',   a:'~120°',   d:'—',      g:'Trigonal planar around N (sp²) — resonance in NO₃⁻',                       x:'HNO₃ + conc. HCl (1:3) = Aqua Regia — dissolves gold & platinum. Brown ring test for NO₃⁻.'},
+    {key:'in-nh3',     pname:'ammonia',               f:'NH₃',    n:'Ammonia',              s:'Pyramidal',         w:'17.03', h:'sp³',   a:'107°',    d:'1.47 D', g:'Trigonal Pyramidal — 1 lone pair on N',                                     x:'Haber Process: N₂ + 3H₂ ⇌ 2NH₃ (Fe catalyst, ~500°C, ~200 atm). Le Chatelier principle.'},
+    {key:'in-h3po4',   pname:'phosphoric acid',       f:'H₃PO₄',  n:'Phosphoric Acid',      s:'Tetrahedral',       w:'98.0',  h:'sp³',   a:'~109.5°', d:'—',      g:'Tetrahedral around P — sp³ hybridised phosphorus',                         x:'Triprotic acid (Ka1>>Ka2>>Ka3). Phosphodiester bonds in DNA/RNA backbone.'},
+    {key:'in-hf',      pname:'hydrogen fluoride',     f:'HF',     n:'Hydrogen Fluoride',    s:'Linear',            w:'20.01', h:'sp³',   a:'—',       d:'1.82 D', g:'Linear diatomic — strongest H-bond donor among haloacids',                  x:'HF is a weak acid (Ka=6.8×10⁻⁴) despite F being most electronegative — H-bond network resists ionisation. Etches glass via SiO₂ + 4HF → SiF₄.'},
+    {key:'in-hcl',     pname:'hydrogen chloride',     f:'HCl',    n:'Hydrogen Chloride',    s:'Linear',            w:'36.46', h:'sp³',   a:'—',       d:'1.08 D', g:'Linear diatomic — polar covalent bond, strong acid in water',               x:'HCl is a strong acid (fully ionised in water). Bond polarity: δ+H–Clδ−. Stronger acid than HF despite lower electronegativity of Cl — HF resists ionisation due to H-bonding.'},
+    {key:'in-becl2',   pname:'beryllium chloride',    f:'BeCl₂',  n:'Beryllium Chloride',   s:'Linear',            w:'79.91', h:'sp',    a:'180°',    d:'0 D',    g:'Linear — sp hybridised Be, no lone pairs, only 2 bond pairs',               x:'BeCl₂ is electron deficient (only 4 electrons around Be). Acts as Lewis acid. In solid state forms polymeric chain via Cl lone pair bridges.'},
+    {key:'in-nf3',     pname:'nitrogen trifluoride',  f:'NF₃',    n:'Nitrogen Trifluoride', s:'Pyramidal',         w:'71.0',  h:'sp³',   a:'102.5°',  d:'0.24 D', g:'Trigonal Pyramidal — like NH₃ but F pulls e-density away from N',           x:'NF₃ bond angle 102.5° < NH₃ 107° — F pulls electron density away, reducing lone pair repulsion. Classic NEET comparison with NH₃.'},
+    {key:'in-of2',     pname:'oxygen difluoride',     f:'OF₂',    n:'Oxygen Difluoride',    s:'Bent',              w:'54.0',  h:'sp³',   a:'102°',    d:'0.30 D', g:'Bent — 2 lone pairs on O, F pulls e-density reducing angle to 102°',        x:'OF₂ bond angle 102° < H₂O 104.5° — F more electronegative than H, pulls bonding pairs further from O. Unusual: O oxidation state = +2 here.'},
+    {key:'in-clf3',    pname:'chlorine trifluoride',  f:'ClF₃',   n:'Chlorine Trifluoride', s:'T-shaped',          w:'92.45', h:'sp³d',  a:'87.5°',   d:'0.6 D',  g:'T-shaped — 5 electron pairs (sp³d), 2 lone pairs equatorial',               x:'ClF₃ is T-shaped NOT trigonal planar — lone pairs occupy equatorial positions (less repulsion). Angle 87.5° < 90° due to lone pair compression. Key JEE Advanced question.'},
+    {key:'in-xef2',    pname:'xenon difluoride',      f:'XeF₂',   n:'Xenon Difluoride',     s:'Linear',            w:'169.3', h:'sp³d',  a:'180°',    d:'0 D',    g:'Linear — 5 electron pairs (sp³d), 3 lone pairs equatorial, 2 F axial',      x:'XeF₂ linear: 3 lone pairs arrange equatorially, F atoms axially. First noble gas compound (1962). Used in semiconductor etching.'},
+    {key:'in-so2',     pname:'sulfur dioxide',        f:'SO₂',    n:'Sulfur Dioxide',       s:'Bent',              w:'64.06', h:'sp²',   a:'119°',    d:'1.63 D', g:'Bent — sp² S with 1 lone pair, resonance between S=O bonds',               x:'SO₂ resonance: both S–O bonds equal (143 pm). Cause of acid rain. Bleaching agent — decolourises litmus (not permanent like Cl₂).'},
+    {key:'in-so3',     pname:'sulfur trioxide',       f:'SO₃',    n:'Sulfur Trioxide',      s:'Trigonal Planar',   w:'80.06', h:'sp²',   a:'120°',    d:'0 D',    g:'Trigonal Planar — sp² S, 3 equivalent S–O bonds via resonance',             x:'SO₃ + H₂O → H₂SO₄. Contact process: 2SO₂ + O₂ ⇌ 2SO₃ (V₂O₅ catalyst). Dipole = 0 despite polar bonds — symmetry cancels them.'},
+    {key:'in-pcl3',    pname:'phosphorus trichloride',f:'PCl₃',   n:'PCl₃',                 s:'Pyramidal',         w:'137.3', h:'sp³',   a:'100°',    d:'0.97 D', g:'Trigonal Pyramidal — 1 lone pair on P, angle 100°',                        x:'PCl₃ angle 100° < NH₃ 107° — P larger atom, lone pair less compact. Reacts with water: PCl₃ + 3H₂O → H₃PO₃ + 3HCl.'},
+    {key:'in-no2',     pname:'nitrogen dioxide',      f:'NO₂',    n:'Nitrogen Dioxide',     s:'Bent',              w:'46.01', h:'sp²',   a:'134°',    d:'0.32 D', g:'Bent — sp², 1 unpaired electron on N (radical), angle 134°',               x:'NO₂ angle 134° > 120° — unpaired electron takes less space than lone pair. Brown fumes. Dimerises → N₂O₄. JEE: odd-electron molecule.'},
+    {key:'in-o3',      pname:'ozone',                 f:'O₃',     n:'Ozone',                s:'Bent',              w:'48.0',  h:'sp²',   a:'117°',    d:'0.53 D', g:'Bent — sp² central O, resonance between two O–O bonds',                    x:'O₃ resonance: equal O–O bonds (128 pm). Absorbs UV in stratosphere. Starch-iodide paper turns blue in presence of O₃. Stronger oxidiser than O₂.'},
+    {key:'in-h2o2',    pname:'hydrogen peroxide',     f:'H₂O₂',  n:'Hydrogen Peroxide',    s:'Non-planar Bent',   w:'34.01', h:'sp³',   a:'111°',    d:'2.26 D', g:'Non-planar — dihedral angle ~112°, O–O single bond, 2 lone pairs per O',   x:'H₂O₂ is both oxidiser AND reducer. Decomposes: 2H₂O₂ → 2H₂O + O₂ (MnO₂ catalyst). Oxidation state of O = –1 (unusual — between 0 and –2).'},
+    {key:'in-n2o',     pname:'nitrous oxide',         f:'N₂O',    n:'Nitrous Oxide',        s:'Linear',            w:'44.01', h:'sp',    a:'180°',    d:'0.17 D', g:'Linear — sp, resonance N=N=O and N≡N–O structures',                       x:'N₂O (laughing gas) — anaesthetic & greenhouse gas (300× CO₂ potency). Asymmetric linear → non-zero dipole despite linearity. JEE: distinguish from CO₂ (symmetric, dipole=0).'},
+    {key:'in-diborane',pname:'diborane',              f:'B₂H₆',   n:'Diborane',             s:'Bridged',           w:'27.67', h:'sp³',   a:'97°',     d:'0 D',    g:'Banana bonds — 2 bridging H shared between B via 3-centre 2-electron bonds', x:'B₂H₆ three-centre two-electron bonds — electron deficient. No lone pairs yet acts as Lewis acid. B₂H₆ + 6H₂O → 2B(OH)₃ + 6H₂. Key JEE structure.'},
+    {key:'in-ph3',     pname:'phosphine',             f:'PH₃',    n:'Phosphine',            s:'Pyramidal',         w:'34.0',  h:'sp³',   a:'93.5°',   d:'0.58 D', g:'Trigonal Pyramidal — lone pair on P, angle 93.5° (near 90°)',               x:'PH₃ angle 93.5° ≈ 90° — P uses nearly pure p-orbitals. Much weaker base than NH₃ — lone pair in large diffuse orbital. Compare: NH₃ 107°, PH₃ 93.5°, AsH₃ 91.8°.'},
+    {key:'in-carbonic',pname:'carbonic acid',         f:'H₂CO₃',  n:'Carbonic Acid',        s:'Trigonal Planar',   w:'62.03', h:'sp²',   a:'120°',    d:'—',      g:'Trigonal planar around C (sp²) — 3 groups around carbonyl carbon',         x:'CO₂ + H₂O ⇌ H₂CO₃. Diprotic weak acid. Carbonate buffer (pH 7.35–7.45) regulates blood pH — crucial NEET Biology + Chemistry crossover.'},
+  ],
+  organic2: [
+    {key:'org-eth',    pname:'ethene',               f:'C₂H₄',   n:'Ethene',               s:'Trigonal Planar',   w:'28.05', h:'sp²',   a:'120°',    d:'0 D',    g:'Trigonal planar — sp² carbons, C=C (σ + π bond)',                          x:'C=C π bond prevents rotation → cis/trans isomers. Ethene is plant hormone (fruit ripening). Br₂ decolourisation = unsaturation test. Addition polymerisation → polyethylene.'},
+    {key:'org-ethy',   pname:'ethyne',               f:'C₂H₂',   n:'Ethyne',               s:'Linear',            w:'26.04', h:'sp',    a:'180°',    d:'0 D',    g:'Linear — sp carbons, C≡C triple bond (σ + 2π bonds)',                      x:'C≡C: sp hybridised, linear. Terminal H is acidic (pKa~25) — reacts Na → sodium acetylide. Oxyacetylene flame 3500°C. Markovnikov addition with HBr → CH₃CHBr₂.'},
+    {key:'org-chloro', pname:'chloroform',           f:'CHCl₃',  n:'Chloroform',           s:'Tetrahedral',       w:'119.4', h:'sp³',   a:'~109.5°', d:'1.15 D', g:'Tetrahedral C — 3 Cl atoms pull e-density, giving net dipole',              x:'CHCl₃ was first anaesthetic (1847). Iodoform test: CHI₃ yellow ppt identifies CH₃CO– group (methyl ketones, ethanol). Reacts NaOH → dichlorocarbene.'},
+    {key:'org-ccl4',   pname:'carbon tetrachloride', f:'CCl₄',   n:'Carbon Tetrachloride', s:'Tetrahedral',       w:'153.8', h:'sp³',   a:'109.5°',  d:'0 D',    g:'Tetrahedral — 4 identical C–Cl bonds, perfect symmetry → dipole = 0',      x:'CCl₄ dipole = 0 despite 4 polar C–Cl bonds — symmetry cancels all. Classic NEET MCQ. Compare with CHCl₃ (dipole ≠ 0). Ozone-depleting substance.'},
+    {key:'org-urea',   pname:'urea',                 f:'CO(NH₂)₂',n:'Urea',               s:'Trigonal Planar',   w:'60.06', h:'sp²',   a:'~120°',   d:'4.56 D', g:'Trigonal planar carbonyl C (sp²) — resonance across N–C=O',               x:'First organic compound from inorganic source (Wöhler 1828) — disproved vitalism. Nitrogenous waste in mammals. Fertiliser (46% N). Denaturation of proteins at high concentration.'},
   ]
 };
 
@@ -1887,7 +1914,7 @@ function initKeyboard() {
       e.preventDefault();
       document.getElementById('mol-in').focus();
     }
-    if (e.key === 'Escape') { closeMod(); closeDrawer(); }
+    if (e.key === 'Escape') { closeDrawer(); }
   });
 
   document.getElementById('mol-in').addEventListener('keypress', e => {
@@ -3725,5 +3752,208 @@ window.addEventListener('resize', () => {
   if (pmodeOn) document.body.dataset.pmodeDevice = getDeviceType();
 });
 </script>
+
+<!-- ══ CHEMSPHERE ADDITIONS ══════════════════════════════ -->
+
+<!-- TOKEN ACCESS OVERLAY -->
+<div id="cs-token-overlay" style="
+  display:none;position:fixed;inset:0;z-index:9000;
+  background:rgba(2,8,23,0.97);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:24px;font-family:'Space Grotesk',sans-serif;">
+  <div style="max-width:380px;width:100%;text-align:center;">
+    <div style="font-size:2.5rem;margin-bottom:8px;">🔬</div>
+    <h2 id="cs-inst-name-token" style="color:#22d3ee;font-size:1.3rem;font-weight:700;margin-bottom:6px;">ChemSphere</h2>
+    <p style="color:#64748b;font-size:0.82rem;margin-bottom:28px;line-height:1.6;">
+      Enter your access token to unlock full content.<br>Tokens are provided by your institute.
+    </p>
+    <input id="cs-token-input" type="text" placeholder="e.g. CSP-RSA-001"
+      style="width:100%;padding:12px 16px;background:#0f172a;border:1px solid #1e293b;
+      border-radius:8px;color:#e2e8f0;font-size:1rem;margin-bottom:12px;
+      outline:none;text-align:center;letter-spacing:0.1em;text-transform:uppercase;"
+      oninput="this.value=this.value.toUpperCase()"
+    />
+    <div id="cs-token-err" style="color:#f87171;font-size:0.78rem;margin-bottom:10px;min-height:18px;"></div>
+    <button onclick="csVerifyToken()" style="
+      width:100%;padding:12px;background:linear-gradient(135deg,#0891b2,#22d3ee);
+      border:none;border-radius:8px;color:#fff;font-size:1rem;font-weight:700;
+      cursor:pointer;margin-bottom:16px;">
+      Access ChemSphere →
+    </button>
+    <div style="border-top:1px solid #1e293b;padding-top:14px;margin-top:4px;">
+      <p style="color:#334155;font-size:0.72rem;margin-bottom:8px;">
+        Token provided by your institute coordinator
+      </p>
+      <p style="color:#1e293b;font-size:0.65rem;">
+        ChemSphere · Licensed Educational Tool · chemsphere.in
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div id="cs-footer" style="
+  background:#020817;border-top:1px solid #1e293b;
+  padding:10px 20px;display:flex;align-items:center;
+  justify-content:space-between;flex-wrap:wrap;gap:8px;
+  font-size:0.68rem;color:#334155;font-family:monospace;">
+  <span id="cs-footer-inst">© ChemSphere by Praveen · Bastar, Chhattisgarh</span>
+  <span style="display:flex;gap:16px;align-items:center;">
+    <span>3Dmol.js · NCI Cactus · PubChem</span>
+    <a href="mailto:praveen@chemsphere.in" style="color:#22d3ee;text-decoration:none;">
+      📧 License enquiry
+    </a>
+  </span>
+</div>
+
+<script>
+/* ══ INSTITUTE BRANDING ══════════════════════════ */
+(function(){
+  const params = new URLSearchParams(window.location.search);
+  const inst = params.get('institute');
+  if (inst) {
+    const decoded = decodeURIComponent(inst);
+    // Header h1
+    const h1 = document.querySelector('.lt h1');
+    if (h1) h1.textContent = decoded + ' · ChemSphere';
+    // Token overlay
+    const tn = document.getElementById('cs-inst-name-token');
+    if (tn) tn.textContent = decoded;
+    // Footer
+    const fi = document.getElementById('cs-footer-inst');
+    if (fi) fi.textContent = '© ChemSphere · Licensed to ' + decoded;
+    // Intro title
+    const it = document.querySelector('.intro-title');
+    if (it) it.textContent = 'ChemSphere';
+    const ib = document.querySelector('.intro-badge');
+    if (ib) ib.textContent = decoded + ' · Powered by ChemSphere';
+    document.title = decoded + ' · ChemSphere';
+  }
+})();
+
+/* ══ TOKEN SYSTEM ════════════════════════════════ */
+// Hardcoded valid tokens — move to Supabase when ready
+const CS_VALID_TOKENS = [
+  'CSP-DEMO-001','CSP-DEMO-002','CSP-DEMO-003',
+  'CSP-DEMO-004','CSP-DEMO-005','CSP-DEMO-006',
+  'CSP-DEMO-007','CSP-DEMO-008','CSP-DEMO-009','CSP-DEMO-010',
+  'CSP-FREE-ALL'  // master demo token — share publicly
+];
+const CS_FREE_KEYS = ['vsepr-h2o','vsepr-ch4','vsepr-nh3']; // free without token
+
+function csCheckAccess() {
+  const params = new URLSearchParams(window.location.search);
+
+  // ── MODE CHECK ──────────────────────────────────────
+  // Token screen ONLY appears when ?mode=institute is in URL
+  // Public links (portfolio, recruiters, international) = always open
+  const isInstituteMode = params.get('mode') === 'institute';
+
+  if (!isInstituteMode) {
+    // Public mode — full access, no token needed
+    csGrantAccess('public');
+    return;
+  }
+
+  // ── INSTITUTE MODE ───────────────────────────────────
+  // Check URL bypass first
+  if (params.get('access') === 'full') { csGrantAccess('url'); return; }
+
+  // Check saved token in browser
+  const saved = localStorage.getItem('cs_token');
+  if (saved && CS_VALID_TOKENS.includes(saved)) { csGrantAccess(saved); return; }
+
+  // Show token screen
+  document.getElementById('cs-token-overlay').style.display = 'flex';
+}
+
+function csVerifyToken() {
+  const val = document.getElementById('cs-token-input').value.trim().toUpperCase();
+  const err = document.getElementById('cs-token-err');
+  if (!val) { err.textContent = 'Please enter your token.'; return; }
+  if (CS_VALID_TOKENS.includes(val)) {
+    localStorage.setItem('cs_token', val);
+    csGrantAccess(val);
+  } else {
+    err.textContent = '✗ Invalid token. Contact your institute coordinator.';
+    document.getElementById('cs-token-input').style.borderColor = '#f87171';
+    setTimeout(()=>{ document.getElementById('cs-token-input').style.borderColor='#1e293b'; }, 2000);
+  }
+}
+
+function csGrantAccess(token) {
+  document.getElementById('cs-token-overlay').style.display = 'none';
+  localStorage.setItem('cs_token', token);
+  console.log('ChemSphere: Full access granted.');
+}
+
+function csFreeAccess() {
+  localStorage.setItem('cs_free', '1');
+  document.getElementById('cs-token-overlay').style.display = 'none';
+  console.log('ChemSphere: Free access mode.');
+}
+
+// Run on load
+window.addEventListener('DOMContentLoaded', csCheckAccess);
+// Allow Enter key in token input
+document.addEventListener('DOMContentLoaded', function(){
+  const inp = document.getElementById('cs-token-input');
+  if (inp) inp.addEventListener('keydown', function(e){ if(e.key==='Enter') csVerifyToken(); });
+});
+
+/* ══ PUBCHEM + WIKIPEDIA FALLBACK ════════════════ */
+// Called when a searched molecule has no local DB entry
+async function csGetFallbackInfo(moleculeName) {
+  const panel = document.getElementById('pinf') || document.querySelector('.info-panel');
+  if (!panel) return;
+
+  // Show loading state in key insight area
+  const xi = document.getElementById('pxi') || document.querySelector('[id*="xi"]');
+  if (xi) xi.textContent = 'Loading info from PubChem...';
+
+  try {
+    // PubChem: get CID from name
+    const cidResp = await fetch(
+      `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/${encodeURIComponent(moleculeName)}/cids/JSON`
+    );
+    if (!cidResp.ok) throw new Error('PubChem name lookup failed');
+    const cidData = await cidResp.json();
+    const cid = cidData.IdentifierList?.CID?.[0];
+    if (!cid) throw new Error('No CID found');
+
+    // PubChem: get properties
+    const propResp = await fetch(
+      `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${cid}/property/MolecularFormula,MolecularWeight,IUPACName,XLogP/JSON`
+    );
+    const propData = await propResp.json();
+    const props = propData.PropertyTable?.Properties?.[0] || {};
+
+    // Wikipedia: get summary
+    let wikiSummary = '';
+    try {
+      const wResp = await fetch(
+        `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(moleculeName)}`
+      );
+      const wData = await wResp.json();
+      wikiSummary = wData.extract ? wData.extract.split('.').slice(0,2).join('.') + '.' : '';
+    } catch(e) { /* wiki optional */ }
+
+    // Update info panels with fetched data
+    const fw = document.getElementById('pfw') || document.querySelector('[id*="fw"]');
+    const fh = document.getElementById('pfh') || document.querySelector('[id*="fh"]');
+
+    if (fw && props.MolecularWeight) fw.textContent = props.MolecularWeight + ' g/mol';
+    if (fh && props.IUPACName) fh.textContent = props.IUPACName;
+    if (xi) xi.textContent = wikiSummary || 'Source: PubChem CID ' + cid + '. Search for ' + moleculeName + ' on PubChem for full data.';
+
+  } catch(err) {
+    if (xi) xi.textContent = 'Tip: Search "' + moleculeName + ' NEET JEE" for exam-specific information. 3D structure powered by NCI Cactus.';
+  }
+}
+
+// Expose globally so existing search code can call it
+window.csGetFallbackInfo = csGetFallbackInfo;
+</script>
+
 </body>
 </html>
