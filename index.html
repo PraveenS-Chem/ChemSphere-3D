@@ -3851,7 +3851,10 @@ window.addEventListener('resize', () => {
   const params = new URLSearchParams(window.location.search);
   const inst = params.get('institute');
   if (inst) {
-    const decoded = decodeURIComponent(inst);
+    // GitHub Pages strips spaces from URLs even when encoded.
+    // Convention: use underscores in the URL, decode them as spaces here.
+    // e.g. ?institute=Raipur_Science_Academy → "Raipur Science Academy"
+    const decoded = decodeURIComponent(inst).replace(/_/g, ' ');
     // Header h1
     const h1 = document.querySelector('.lt h1');
     if (h1) h1.textContent = decoded + ' · ChemSphere';
