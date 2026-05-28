@@ -164,12 +164,13 @@ header{
 .fctv{font-size:10px;color:var(--mu);line-height:1.65}
 
 /* ─── VIEWER ─────────────────────────────────────────── */
-.vw{flex:1;position:relative;background:var(--bg);overflow:hidden;min-width:0;contain:strict}
+/* contain:strict removed — it causes 0×0 WebGL context on Android Chrome
+   desktop mode by preventing layout dimensions from propagating correctly */
+.vw{flex:1;position:relative;background:var(--bg);overflow:hidden;min-width:0}
 /* p3d fills the whole viewer area */
 #p3d{position:absolute;inset:0;display:block;overflow:hidden}
-/* c3d: let 3Dmol control canvas sizing - do NOT set 100% here, 
-   3Dmol appends its own canvas and we resize it via viewer.resize() */
-#c3d{position:absolute;inset:0;width:100%;height:100%}
+/* c3d: explicit 100% so 3Dmol always gets a non-zero bounding box */
+#c3d{position:absolute;inset:0;width:100%;height:100%;display:block}
 
 #p2d{display:none;position:absolute;inset:0;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:var(--bg);padding:16px}
 #p2d.on{display:flex}
@@ -1278,8 +1279,12 @@ body.pmode #pmode-nav-dock { display: flex }
 body.pmode #edu-right-panel { display: none !important }
 /* Pmode mobile: hide bottom sheet too */
 body.pmode #edu-bottom-sheet { display: none !important }
+/* cs-footer: fixed position, hidden on mobile (bottom tab bar handles it) */
+#cs-footer { display: none !important; }
+@media (min-width: 768px) {
+  #cs-footer { display: flex !important; }
+}
 </style>
-</head>
 <body>
 
 <!-- ─── INTRO / LANDING SCREEN ───────────────────────────── -->
@@ -1938,39 +1943,69 @@ function initViewer() {
   dmol = true;
   ls.innerHTML = '<span class="lok">✓ 3Dmol.js ready</span><span class="lok">✓ NCI Cactus API</span>';
 
-  // Double rAF: ensures browser has completed a real paint cycle before
-  // we read layout dimensions (prevents WebGL 0×0 context on Android Chrome)
-  requestAnimationFrame(() => requestAnimationFrame(() => {
+  // Use a helper that waits until the viewer element has a real non-zero size
+  // before creating the WebGL context. This fixes the 0×0 canvas bug on
+  // Android Chrome in desktop mode (and any other deferred-layout scenario).
+  function createViewerWhenReady(attempt) {
+    attempt = attempt || 1;
     const vwEl = document.getElementById('vw');
     const c3d  = document.getElementById('c3d');
+    const W = vwEl.clientWidth  || vwEl.offsetWidth;
+    const H = vwEl.clientHeight || vwEl.offsetHeight;
 
-    // Stamp explicit px dimensions so WebGL gets a non-zero context
-    const W = vwEl.clientWidth  || vwEl.offsetWidth  || window.innerWidth  - 300;
-    const H = vwEl.clientHeight || vwEl.offsetHeight || window.innerHeight - 56;
+    if (W < 10 || H < 10) {
+      // Element not laid out yet — retry up to 30 times (~1.5 s total)
+      if (attempt < 30) {
+        setTimeout(() => createViewerWhenReady(attempt + 1), 50);
+      } else {
+        // Last-resort fallback: use window dimensions minus sidebar
+        const FW = window.innerWidth  - 300;
+        const FH = window.innerHeight - 56;
+        c3d.style.width  = FW + 'px';
+        c3d.style.height = FH + 'px';
+        tryCreate();
+      }
+      return;
+    }
+
+    // Stamp explicit px so WebGL context gets a definite non-zero size
     c3d.style.width  = W + 'px';
     c3d.style.height = H + 'px';
+    tryCreate();
 
-    try {
-      viewer = $3Dmol.createViewer(c3d, { backgroundColor:'#060810', antialias:true });
-      requestAnimationFrame(() => {
-        c3d.style.width  = '';
-        c3d.style.height = '';
-        viewer.resize();
-        // Extra 300ms safety for Android Chrome desktop-mode viewport lag
-        setTimeout(() => {
+    function tryCreate() {
+      try {
+        viewer = $3Dmol.createViewer(c3d, { backgroundColor:'#060810', antialias:true });
+        // Clear the forced size — let CSS take over — then resize
+        requestAnimationFrame(() => {
+          c3d.style.width  = '';
+          c3d.style.height = '';
           viewer.resize();
           viewer.render();
           ROT.attachListeners();
-          window._viewerReady = true; // triggers _onViewerReady callback if queued
-        }, 300);
-      });
-    } catch(err) {
-      console.error('3Dmol init failed:', err);
-      dmol = false;
-      ls.innerHTML = '<span class="lfl">✗ 3Dmol error: ' + err.message + '</span>';
-      window._viewerReady = true;
+          window._viewerReady = true;
+
+          // Belt-and-suspenders: resize again after 600 ms for desktop-mode lag
+          setTimeout(() => { viewer.resize(); viewer.render(); }, 600);
+
+          // Install ResizeObserver so canvas always fills the pane on window resize
+          if (typeof ResizeObserver !== 'undefined') {
+            new ResizeObserver(() => {
+              if (viewer) { viewer.resize(); viewer.render(); }
+            }).observe(vwEl);
+          }
+        });
+      } catch(err) {
+        console.error('3Dmol init failed:', err);
+        dmol = false;
+        ls.innerHTML = '<span class="lfl">✗ 3Dmol error: ' + err.message + '</span>';
+        window._viewerReady = true;
+      }
     }
-  }));
+  }
+
+  // Kick off after two rAF cycles (ensures first paint is done)
+  requestAnimationFrame(() => requestAnimationFrame(() => createViewerWhenReady(1)));
 }
 
 /* ════════════════════════════════════════
@@ -2253,13 +2288,16 @@ async function do3D(query, tk) {
   viewer.zoom(0.85);
   viewer.render();
 
-  // Chrome: canvas stays black unless we resize+render in next paint cycle
+  // Ensure canvas is correctly sized before and after render
+  // (Android Chrome desktop mode may not have resized the GL context yet)
   requestAnimationFrame(() => {
     viewer.resize();
     viewer.render();
-    ROT.attachListeners(); // safe to call repeatedly — guards against double-attach
-    ROT.paused = false;    // new molecule — always start rotating immediately
+    ROT.attachListeners();
+    ROT.paused = false;
     ROT.start();
+    // Second resize after a short delay for desktop-mode viewport lag
+    setTimeout(() => { viewer.resize(); viewer.render(); }, 400);
   });
 }
 
@@ -3757,9 +3795,9 @@ window.addEventListener('resize', () => {
 
 <!-- TOKEN ACCESS OVERLAY -->
 <div id="cs-token-overlay" style="
-  display:none;position:fixed;inset:0;z-index:9000;
+  position:fixed;inset:0;z-index:9000;
   background:rgba(2,8,23,0.97);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  display:none;flex-direction:column;align-items:center;justify-content:center;
   padding:24px;font-family:'Space Grotesk',sans-serif;">
   <div style="max-width:380px;width:100%;text-align:center;">
     <div style="font-size:2.5rem;margin-bottom:8px;">🔬</div>
@@ -3793,8 +3831,9 @@ window.addEventListener('resize', () => {
 
 <!-- FOOTER -->
 <div id="cs-footer" style="
+  position:fixed;bottom:0;left:0;right:0;z-index:200;
   background:#020817;border-top:1px solid #1e293b;
-  padding:10px 20px;display:flex;align-items:center;
+  padding:6px 20px;display:flex;align-items:center;
   justify-content:space-between;flex-wrap:wrap;gap:8px;
   font-size:0.68rem;color:#334155;font-family:monospace;">
   <span id="cs-footer-inst">© ChemSphere by Praveen · Bastar, Chhattisgarh</span>
@@ -3864,7 +3903,8 @@ function csCheckAccess() {
   if (saved && CS_VALID_TOKENS.includes(saved)) { csGrantAccess(saved); return; }
 
   // Show token screen
-  document.getElementById('cs-token-overlay').style.display = 'flex';
+  const overlay = document.getElementById('cs-token-overlay');
+  overlay.style.display = 'flex';
 }
 
 function csVerifyToken() {
