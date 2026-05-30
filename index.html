@@ -3793,41 +3793,7 @@ window.addEventListener('resize', () => {
 
 <!-- ══ CHEMSPHERE ADDITIONS ══════════════════════════════ -->
 
-<!-- TOKEN ACCESS OVERLAY -->
-<div id="cs-token-overlay" style="
-  position:fixed;inset:0;z-index:9000;
-  background:rgba(2,8,23,0.97);
-  display:none;flex-direction:column;align-items:center;justify-content:center;
-  padding:24px;font-family:'Space Grotesk',sans-serif;">
-  <div style="max-width:380px;width:100%;text-align:center;">
-    <div style="font-size:2.5rem;margin-bottom:8px;">🔬</div>
-    <h2 id="cs-inst-name-token" style="color:#22d3ee;font-size:1.3rem;font-weight:700;margin-bottom:6px;">ChemSphere</h2>
-    <p style="color:#64748b;font-size:0.82rem;margin-bottom:28px;line-height:1.6;">
-      Enter your access token to unlock full content.<br>Tokens are provided by your institute.
-    </p>
-    <input id="cs-token-input" type="text" placeholder="e.g. CSP-RSA-001"
-      style="width:100%;padding:12px 16px;background:#0f172a;border:1px solid #1e293b;
-      border-radius:8px;color:#e2e8f0;font-size:1rem;margin-bottom:12px;
-      outline:none;text-align:center;letter-spacing:0.1em;text-transform:uppercase;"
-      oninput="this.value=this.value.toUpperCase()"
-    />
-    <div id="cs-token-err" style="color:#f87171;font-size:0.78rem;margin-bottom:10px;min-height:18px;"></div>
-    <button onclick="csVerifyToken()" style="
-      width:100%;padding:12px;background:linear-gradient(135deg,#0891b2,#22d3ee);
-      border:none;border-radius:8px;color:#fff;font-size:1rem;font-weight:700;
-      cursor:pointer;margin-bottom:16px;">
-      Access ChemSphere →
-    </button>
-    <div style="border-top:1px solid #1e293b;padding-top:14px;margin-top:4px;">
-      <p style="color:#334155;font-size:0.72rem;margin-bottom:8px;">
-        Token provided by your institute coordinator
-      </p>
-      <p style="color:#1e293b;font-size:0.65rem;">
-        ChemSphere · Licensed Educational Tool · chemsphere.in
-      </p>
-    </div>
-  </div>
-</div>
+<!-- Token overlay removed — fully public access -->
 
 <!-- FOOTER -->
 <div id="cs-footer" style="
@@ -3846,103 +3812,9 @@ window.addEventListener('resize', () => {
 </div>
 
 <script>
-/* ══ INSTITUTE BRANDING ══════════════════════════ */
-(function(){
-  const params = new URLSearchParams(window.location.search);
-  const inst = params.get('institute');
-  if (inst) {
-    // GitHub Pages strips spaces from URLs even when encoded.
-    // Convention: use underscores in the URL, decode them as spaces here.
-    // e.g. ?institute=Raipur_Science_Academy → "Raipur Science Academy"
-    const decoded = decodeURIComponent(inst).replace(/_/g, ' ');
-    // Header h1
-    const h1 = document.querySelector('.lt h1');
-    if (h1) h1.textContent = decoded + ' · ChemSphere';
-    // Token overlay
-    const tn = document.getElementById('cs-inst-name-token');
-    if (tn) tn.textContent = decoded;
-    // Footer
-    const fi = document.getElementById('cs-footer-inst');
-    if (fi) fi.textContent = '© ChemSphere · Licensed to ' + decoded;
-    // Intro title
-    const it = document.querySelector('.intro-title');
-    if (it) it.textContent = 'ChemSphere';
-    const ib = document.querySelector('.intro-badge');
-    if (ib) ib.textContent = decoded + ' · Powered by ChemSphere';
-    document.title = decoded + ' · ChemSphere';
-  }
-})();
+/* ══ INSTITUTE BRANDING — removed with token system ══ */
 
-/* ══ TOKEN SYSTEM ════════════════════════════════ */
-// Hardcoded valid tokens — move to Supabase when ready
-const CS_VALID_TOKENS = [
-  'CSP-DEMO-001','CSP-DEMO-002','CSP-DEMO-003',
-  'CSP-DEMO-004','CSP-DEMO-005','CSP-DEMO-006',
-  'CSP-DEMO-007','CSP-DEMO-008','CSP-DEMO-009','CSP-DEMO-010',
-  'CSP-FREE-ALL'  // master demo token — share publicly
-];
-const CS_FREE_KEYS = ['vsepr-h2o','vsepr-ch4','vsepr-nh3']; // free without token
-
-function csCheckAccess() {
-  const params = new URLSearchParams(window.location.search);
-
-  // ── MODE CHECK ──────────────────────────────────────
-  // Token screen ONLY appears when ?mode=institute is in URL
-  // Public links (portfolio, recruiters, international) = always open
-  const isInstituteMode = params.get('mode') === 'institute';
-
-  if (!isInstituteMode) {
-    // Public mode — full access, no token needed
-    csGrantAccess('public');
-    return;
-  }
-
-  // ── INSTITUTE MODE ───────────────────────────────────
-  // Check URL bypass first
-  if (params.get('access') === 'full') { csGrantAccess('url'); return; }
-
-  // Check saved token in browser
-  const saved = localStorage.getItem('cs_token');
-  if (saved && CS_VALID_TOKENS.includes(saved)) { csGrantAccess(saved); return; }
-
-  // Show token screen
-  const overlay = document.getElementById('cs-token-overlay');
-  overlay.style.display = 'flex';
-}
-
-function csVerifyToken() {
-  const val = document.getElementById('cs-token-input').value.trim().toUpperCase();
-  const err = document.getElementById('cs-token-err');
-  if (!val) { err.textContent = 'Please enter your token.'; return; }
-  if (CS_VALID_TOKENS.includes(val)) {
-    localStorage.setItem('cs_token', val);
-    csGrantAccess(val);
-  } else {
-    err.textContent = '✗ Invalid token. Contact your institute coordinator.';
-    document.getElementById('cs-token-input').style.borderColor = '#f87171';
-    setTimeout(()=>{ document.getElementById('cs-token-input').style.borderColor='#1e293b'; }, 2000);
-  }
-}
-
-function csGrantAccess(token) {
-  document.getElementById('cs-token-overlay').style.display = 'none';
-  localStorage.setItem('cs_token', token);
-  console.log('ChemSphere: Full access granted.');
-}
-
-function csFreeAccess() {
-  localStorage.setItem('cs_free', '1');
-  document.getElementById('cs-token-overlay').style.display = 'none';
-  console.log('ChemSphere: Free access mode.');
-}
-
-// Run on load
-window.addEventListener('DOMContentLoaded', csCheckAccess);
-// Allow Enter key in token input
-document.addEventListener('DOMContentLoaded', function(){
-  const inp = document.getElementById('cs-token-input');
-  if (inp) inp.addEventListener('keydown', function(e){ if(e.key==='Enter') csVerifyToken(); });
-});
+/* ══ ACCESS: fully public — no token required ════ */
 
 /* ══ PUBCHEM + WIKIPEDIA FALLBACK ════════════════ */
 // Called when a searched molecule has no local DB entry
