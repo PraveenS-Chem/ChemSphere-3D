@@ -1284,6 +1284,225 @@ body.pmode #edu-bottom-sheet { display: none !important }
 @media (min-width: 768px) {
   #cs-footer { display: flex !important; }
 }
+
+/* ════════════════════════════════════════
+   QUIZ PANEL — integrated inside .vw
+════════════════════════════════════════ */
+#quiz-panel {
+  display:none;position:fixed;
+  top:var(--HH);left:0;right:0;bottom:0;
+  z-index:20;
+  background:var(--bg);overflow-y:auto;overflow-x:hidden;
+}
+#quiz-panel.on { display:block }
+
+/* Quiz panel inner page wrapper */
+.qp-page { max-width:860px;margin:0 auto;padding:20px 18px 80px;position:relative;z-index:1 }
+
+/* Correct & wrong variables (quiz-specific) */
+:root {
+  --correct:#00e5b4;
+  --wrong:#ff4757;
+  --warn:#ffa502;
+  --gold:#ffd700;
+  --radius:12px;
+}
+
+/* ── Hub hero ── */
+.hub-hero{text-align:center;padding:24px 0 20px;position:relative}
+.hub-eyebrow{font-family:var(--fn);font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--tea);margin-bottom:12px;opacity:.8}
+.hub-title{font-size:clamp(28px,5vw,48px);font-weight:800;line-height:1.1;background:linear-gradient(135deg,#fff 30%,var(--tea) 70%,var(--acc));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:10px}
+.hub-sub{font-size:13px;color:var(--mu);line-height:1.6;max-width:440px;margin:0 auto 24px}
+.hub-stats{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:28px}
+.hstat{background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:12px 20px;text-align:center;min-width:90px}
+.hstat-val{font-family:var(--fn);font-size:20px;font-weight:700;color:var(--tea);line-height:1}
+.hstat-lbl{font-size:9px;color:var(--di);font-family:var(--fn);letter-spacing:1.5px;text-transform:uppercase;margin-top:4px}
+
+/* ── Mode cards ── */
+.hub-modes-label{font-family:var(--fn);font-size:8px;letter-spacing:2.5px;text-transform:uppercase;color:var(--di);text-align:center;margin-bottom:12px;display:flex;align-items:center;gap:8px;justify-content:center}
+.hub-modes-label::before,.hub-modes-label::after{content:'';flex:1;max-width:60px;height:1px;background:var(--bd)}
+.mode-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-bottom:26px}
+.mode-card{background:var(--s2);border:2px solid var(--bd);border-radius:var(--radius);padding:16px 14px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;text-align:left}
+.mode-card::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .2s}
+.mode-card.m-quick::before{background:linear-gradient(135deg,rgba(74,143,255,.07),transparent)}
+.mode-card.m-chapter::before{background:linear-gradient(135deg,rgba(0,229,180,.07),transparent)}
+.mode-card.m-exam::before{background:linear-gradient(135deg,rgba(255,107,53,.07),transparent)}
+.mode-card.m-blitz::before{background:linear-gradient(135deg,rgba(255,215,0,.07),transparent)}
+.mode-card:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.35)}
+.mode-card:hover::before{opacity:1}
+.mode-card.m-quick:hover{border-color:rgba(74,143,255,.4)}
+.mode-card.m-chapter:hover{border-color:rgba(0,229,180,.4)}
+.mode-card.m-exam:hover{border-color:rgba(255,107,53,.4)}
+.mode-card.m-blitz:hover{border-color:rgba(255,215,0,.4)}
+.mode-icon{font-size:24px;margin-bottom:8px;display:block}
+.mode-name{font-size:13px;font-weight:700;color:#fff;margin-bottom:3px}
+.mode-desc{font-size:9px;color:var(--mu);line-height:1.5;font-family:var(--fn)}
+.mode-badge{display:inline-block;margin-top:7px;font-family:var(--fn);font-size:8px;padding:2px 8px;border-radius:4px;letter-spacing:.5px}
+.m-quick .mode-badge{background:rgba(74,143,255,.12);color:var(--acc);border:1px solid rgba(74,143,255,.2)}
+.m-chapter .mode-badge{background:rgba(0,229,180,.1);color:var(--tea);border:1px solid rgba(0,229,180,.2)}
+.m-exam .mode-badge{background:rgba(255,107,53,.1);color:var(--org);border:1px solid rgba(255,107,53,.2)}
+.m-blitz .mode-badge{background:rgba(255,215,0,.1);color:var(--gold);border:1px solid rgba(255,215,0,.2)}
+
+/* ── Hub filter ── */
+.hub-filter{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:10px}
+.filt-btn{font-size:10px;font-family:var(--fn);padding:5px 12px;border-radius:20px;border:1px solid var(--bd);color:var(--mu);background:transparent;transition:all .15s;cursor:pointer}
+.filt-btn:hover{border-color:var(--bhi);color:var(--tx)}
+.filt-btn.on{border-color:var(--acc);color:var(--acc);background:rgba(74,143,255,.07)}
+
+/* ── Pitch banner ── */
+.pitch{background:linear-gradient(135deg,rgba(74,143,255,.06),rgba(0,229,180,.04));border:1px solid rgba(0,229,180,.15);border-radius:12px;padding:16px 18px;margin-top:10px;display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.pitch-icon{font-size:26px;flex-shrink:0;margin-top:2px}
+.pitch-body{flex:1}
+.pitch-title{font-size:13px;font-weight:700;color:#fff;margin-bottom:4px}
+.pitch-text{font-size:11px;color:var(--mu);line-height:1.65}
+.pitch-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.pitch-tag{font-family:var(--fn);font-size:8px;padding:3px 9px;border-radius:4px;letter-spacing:.5px;border:1px solid var(--bd);color:var(--di)}
+.sep{height:1px;background:var(--bd);margin:20px 0}
+
+/* ── Quiz screen ── */
+#qz-quiz{display:none}
+.qbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.qbar-left{display:flex;align-items:center;gap:10px}
+.qmode-tag{font-family:var(--fn);font-size:8px;letter-spacing:2px;text-transform:uppercase;padding:4px 10px;border-radius:5px}
+.qinfo{font-family:var(--fn);font-size:10px;color:var(--mu)}
+.qbar-right{display:flex;align-items:center;gap:10px}
+.score-pill{font-family:var(--fn);font-size:11px;padding:5px 12px;border-radius:20px;background:var(--s2);border:1px solid var(--bd);color:var(--tea);display:flex;align-items:center;gap:6px}
+.score-sep{color:var(--di)}
+.exit-btn{font-family:var(--fn);font-size:9px;padding:5px 11px;border-radius:6px;border:1px solid var(--bd);color:var(--mu);background:transparent;transition:all .15s;cursor:pointer}
+.exit-btn:hover{border-color:rgba(255,71,87,.4);color:#ff4757}
+.qprogress{height:3px;background:var(--s3);border-radius:2px;margin-bottom:20px;overflow:hidden}
+.qpbar{height:100%;background:linear-gradient(90deg,var(--acc),var(--tea));border-radius:2px;transition:width .4s ease}
+.timer-wrap{margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.timer-label{font-family:var(--fn);font-size:10px;color:var(--mu);min-width:36px}
+.timer-track{flex:1;height:5px;background:var(--s3);border-radius:3px;overflow:hidden}
+.timer-fill{height:100%;background:var(--tea);border-radius:3px;transition:width .25s linear,background .3s}
+.timer-fill.warn{background:var(--warn)}
+.timer-fill.danger{background:var(--wrong)}
+.qcard{background:var(--s1);border:1px solid var(--bhi);border-radius:14px;padding:22px 20px;margin-bottom:16px;animation:qcardIn .3s cubic-bezier(.34,1.56,.64,1)}
+@keyframes qcardIn{from{opacity:0;transform:translateY(12px)}}
+.q-meta{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.q-num{font-family:var(--fn);font-size:9px;color:var(--di);letter-spacing:1.5px;text-transform:uppercase}
+.q-tag{font-family:var(--fn);font-size:8px;padding:2px 8px;border-radius:4px;letter-spacing:.5px;background:rgba(74,143,255,.08);color:var(--acc);border:1px solid rgba(74,143,255,.15)}
+.q-tag.geo{background:rgba(0,229,180,.06);color:var(--tea);border-color:rgba(0,229,180,.18)}
+.q-tag.fact{background:rgba(255,107,53,.06);color:var(--org);border-color:rgba(255,107,53,.18)}
+.q-tag.hard{background:rgba(255,71,87,.06);color:#ff4757;border-color:rgba(255,71,87,.18)}
+.q-stem{font-size:15px;font-weight:600;line-height:1.55;color:#fff;margin-bottom:6px}
+.q-formula{font-family:var(--fn);font-size:13px;color:var(--acc);background:rgba(74,143,255,.05);border:1px solid rgba(74,143,255,.12);border-radius:7px;padding:6px 12px;margin-bottom:16px;display:inline-block}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+@media(max-width:520px){.opts{grid-template-columns:1fr}}
+.opt{background:var(--s2);border:2px solid var(--bd);border-radius:10px;padding:12px 14px;cursor:pointer;transition:all .18s;text-align:left;display:flex;align-items:center;gap:10px;font-size:12px;color:var(--tx);line-height:1.4;font-family:var(--fs)}
+.opt:hover:not(.disabled){border-color:rgba(74,143,255,.4);background:rgba(74,143,255,.05);transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,0,0,.25)}
+.opt.disabled{cursor:default}
+.opt-letter{width:24px;height:24px;border-radius:6px;flex-shrink:0;background:var(--s3);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-family:var(--fn);font-size:9px;font-weight:700;color:var(--di);transition:all .18s}
+.opt:hover:not(.disabled) .opt-letter{background:rgba(74,143,255,.15);border-color:rgba(74,143,255,.35);color:var(--acc)}
+.opt.correct{border-color:var(--correct)!important;background:rgba(0,229,180,.07)!important}
+.opt.correct .opt-letter{background:rgba(0,229,180,.2);border-color:var(--correct);color:var(--correct)}
+.opt.wrong{border-color:var(--wrong)!important;background:rgba(255,71,87,.07)!important}
+.opt.wrong .opt-letter{background:rgba(255,71,87,.2);border-color:var(--wrong);color:var(--wrong)}
+.feedback{background:var(--s2);border-radius:10px;padding:14px 16px;margin-top:12px;display:none;animation:fbIn .25s ease;border-left:3px solid var(--correct)}
+.feedback.show{display:block}
+.feedback.wrong-fb{border-left-color:var(--wrong)}
+@keyframes fbIn{from{opacity:0;transform:translateY(-6px)}}
+.fb-header{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.fb-icon{font-size:16px}
+.fb-verdict{font-family:var(--fn);font-size:10px;font-weight:700;letter-spacing:.5px}
+.fb-verdict.ok{color:var(--correct)}
+.fb-verdict.err{color:var(--wrong)}
+.fb-text{font-size:12px;color:var(--mu);line-height:1.65}
+.fb-neet{display:inline-block;margin-top:8px;font-family:var(--fn);font-size:9px;padding:3px 9px;border-radius:5px;background:rgba(255,107,53,.08);color:var(--org);border:1px solid rgba(255,107,53,.2)}
+.qactions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px;flex-wrap:wrap}
+.btn-skip{font-family:var(--fn);font-size:10px;padding:9px 18px;border-radius:8px;border:1px solid var(--bd);color:var(--mu);background:transparent;transition:all .15s;cursor:pointer}
+.btn-skip:hover{border-color:var(--bhi);color:var(--tx)}
+.btn-next{font-family:var(--fn);font-size:11px;padding:9px 22px;border-radius:8px;background:var(--acc);color:#fff;font-weight:700;transition:all .2s;box-shadow:0 0 20px rgba(74,143,255,.3);display:none;cursor:pointer}
+.btn-next:hover{background:#6aaeff;box-shadow:0 0 24px rgba(74,143,255,.45)}
+.btn-next.show{display:block}
+
+/* ── Results ── */
+#qz-results{display:none}
+.res-wrap{text-align:center;padding:32px 0 18px}
+.res-ring{width:120px;height:120px;border-radius:50%;border:4px solid var(--s3);margin:0 auto 18px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative}
+.res-ring svg{position:absolute;inset:0;transform:rotate(-90deg)}
+.res-ring circle{fill:none;stroke-width:5;stroke-linecap:round}
+.ring-bg{stroke:var(--s3)}
+.ring-fg{stroke:var(--tea);transition:stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1)}
+.res-pct{font-family:var(--fn);font-size:26px;font-weight:700;color:#fff;line-height:1}
+.res-label{font-family:var(--fn);font-size:8px;color:var(--di);letter-spacing:1.5px;text-transform:uppercase;margin-top:3px}
+.res-verdict{font-size:20px;font-weight:800;margin-bottom:6px}
+.res-sub{font-size:13px;color:var(--mu);margin-bottom:24px}
+.res-stats{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:24px}
+.rstat{background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:12px 18px;text-align:center;min-width:80px}
+.rstat-val{font-family:var(--fn);font-size:22px;font-weight:700;line-height:1}
+.rstat-lbl{font-size:8px;color:var(--di);font-family:var(--fn);letter-spacing:1.5px;text-transform:uppercase;margin-top:4px}
+.rstat.c .rstat-val{color:var(--correct)}
+.rstat.w .rstat-val{color:var(--wrong)}
+.rstat.s .rstat-val{color:var(--warn)}
+.rstat.t .rstat-val{color:var(--acc)}
+.lb-bar{background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.lb-icon{font-size:22px}
+.lb-info{flex:1}
+.lb-title{font-size:12px;font-weight:700;color:#fff;margin-bottom:2px}
+.lb-detail{font-family:var(--fn);font-size:9px;color:var(--mu)}
+.lb-score{font-family:var(--fn);font-size:18px;font-weight:700;color:var(--gold)}
+.review-label{font-family:var(--fn);font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--di);margin:18px 0 10px;display:flex;align-items:center;gap:8px}
+.review-label::after{content:'';flex:1;height:1px;background:var(--bd)}
+.review-item{background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:12px 14px;margin-bottom:8px;text-align:left}
+.review-item.corr{border-left:3px solid var(--correct)}
+.review-item.wron{border-left:3px solid var(--wrong)}
+.review-item.skip{border-left:3px solid var(--warn)}
+.ri-q{font-size:12px;color:var(--tx);margin-bottom:6px;line-height:1.5}
+.ri-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:4px}
+.ri-chip{font-family:var(--fn);font-size:9px;padding:2px 8px;border-radius:4px}
+.ri-chip.corr{background:rgba(0,229,180,.1);color:var(--correct);border:1px solid rgba(0,229,180,.2)}
+.ri-chip.wron{background:rgba(255,71,87,.1);color:var(--wrong);border:1px solid rgba(255,71,87,.2)}
+.ri-chip.skip{background:rgba(255,165,2,.1);color:var(--warn);border:1px solid rgba(255,165,2,.2)}
+.ri-exp{font-size:11px;color:var(--mu);line-height:1.6;margin-top:6px}
+.res-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:24px}
+.btn-redo{font-family:var(--fn);font-size:11px;padding:10px 22px;border-radius:8px;border:1px solid var(--bd);color:var(--mu);background:transparent;transition:all .15s;cursor:pointer}
+.btn-redo:hover{border-color:var(--bhi);color:var(--tx)}
+.btn-new{font-family:var(--fn);font-size:11px;padding:10px 22px;border-radius:8px;background:var(--acc);color:#fff;font-weight:700;transition:all .2s;box-shadow:0 0 20px rgba(74,143,255,.3);cursor:pointer}
+.btn-new:hover{background:#6aaeff}
+.btn-open-vis{font-family:var(--fn);font-size:11px;padding:10px 22px;border-radius:8px;border:1px solid rgba(0,229,180,.3);color:var(--tea);background:rgba(0,229,180,.05);transition:all .15s;cursor:pointer}
+.btn-open-vis:hover{background:rgba(0,229,180,.1)}
+
+/* ── Modal (inside quiz panel) ── */
+.qz-modal-overlay{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:16px}
+.qz-modal-overlay.v{display:flex}
+.qz-modal{background:var(--s1);border:1px solid var(--bhi);border-radius:14px;width:100%;max-width:440px;max-height:85dvh;overflow-y:auto;padding:24px;animation:modIn .25s cubic-bezier(.34,1.56,.64,1)}
+@keyframes modIn{from{opacity:0;transform:scale(.95) translateY(10px)}}
+.mod-title{font-size:16px;font-weight:800;color:#fff;margin-bottom:4px}
+.mod-sub{font-family:var(--fn);font-size:9px;color:var(--mu);margin-bottom:18px}
+.mod-label{font-family:var(--fn);font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--di);margin-bottom:7px;margin-top:14px;display:flex;align-items:center;gap:6px}
+.mod-label:first-child{margin-top:0}
+.mod-label::after{content:'';flex:1;height:1px;background:var(--bd)}
+.mod-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px}
+.mod-opt{font-size:10px;font-family:var(--fn);padding:5px 12px;border-radius:6px;border:1px solid var(--bd);color:var(--mu);background:transparent;transition:all .15s;cursor:pointer}
+.mod-opt:hover{border-color:var(--bhi);color:var(--tx)}
+.mod-opt.on{border-color:var(--acc);color:var(--acc);background:rgba(74,143,255,.07)}
+.mod-start{width:100%;margin-top:18px;padding:12px;border-radius:8px;background:var(--acc);color:#fff;font-family:var(--fn);font-size:12px;font-weight:700;letter-spacing:.5px;transition:all .2s;box-shadow:0 0 20px rgba(74,143,255,.3);cursor:pointer}
+.mod-start:hover{background:#6aaeff;box-shadow:0 0 28px rgba(74,143,255,.45)}
+.mod-cancel{width:100%;margin-top:7px;padding:9px;border-radius:8px;border:1px solid var(--bd);color:var(--mu);background:transparent;font-family:var(--fn);font-size:10px;transition:all .15s;cursor:pointer}
+.mod-cancel:hover{border-color:var(--bhi);color:var(--tx)}
+
+/* ── Streak toast ── */
+.streak-toast{position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-20px);z-index:600;background:rgba(0,0,0,.9);border:1px solid var(--gold);border-radius:10px;padding:10px 20px;font-family:var(--fn);font-size:12px;color:var(--gold);opacity:0;pointer-events:none;transition:all .3s;white-space:nowrap;box-shadow:0 0 20px rgba(255,215,0,.2)}
+.streak-toast.v{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* confetti */
+.confetti-piece{position:fixed;pointer-events:none;z-index:1000;width:7px;height:7px;border-radius:1px;animation:confettiFall linear forwards}
+@keyframes confettiFall{0%{opacity:1;transform:translateY(0) rotate(0deg)}100%{opacity:0;transform:translateY(110dvh) rotate(720deg)}}
+
+/* btbar: wider for 5 tabs */
+@media(max-width:767px){
+  .bti .bt{font-size:8px}
+  .bti .bt span{font-size:8px}
+}
+/* On desktop quiz panel bottom padding for footer */
+@media(min-width:768px){
+  #quiz-panel { bottom:28px }
+}
+@media(max-width:767px){
+  #quiz-panel { bottom:var(--BH) }
+}
 </style>
 <body>
 
@@ -1353,6 +1572,7 @@ body.pmode #edu-bottom-sheet { display: none !important }
     <button class="dtab on"  id="d3d"    onclick="setMode('3d')">3D Model</button>
     <button class="dtab"     id="d2d"    onclick="setMode('2d')">2D Structure</button>
     <button class="dtab"     id="dpr"    onclick="setMode('props')">Properties</button>
+    <button class="dtab"     id="dqz"    onclick="setMode('quiz')" style="color:var(--org);border-color:rgba(255,107,53,.25)">⚡ Quiz</button>
   </div>
 
   <div class="hr">
@@ -1734,6 +1954,10 @@ body.pmode #edu-bottom-sheet { display: none !important }
     <button class="bt" id="bpr" onclick="setMode('props')" aria-label="Molecular Properties view">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
       <span>Props</span>
+    </button>
+    <button class="bt" id="bqz" onclick="setMode('quiz')" aria-label="Quiz mode" style="color:var(--org)">
+      <svg viewBox="0 0 24 24" aria-hidden="true" style="stroke:currentColor"><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg>
+      <span>Quiz</span>
     </button>
     <button class="bt" id="bmol" onclick="togDrawer()" aria-label="Browse molecules">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
@@ -3870,5 +4094,701 @@ async function csGetFallbackInfo(moleculeName) {
 window.csGetFallbackInfo = csGetFallbackInfo;
 </script>
 
+<!-- ══ CHEMSPHERE QUIZ PANEL ══════════════════════════════ -->
+<!-- Integrated quiz mode — lives inside .vw as a full-overlay panel -->
+<div id="quiz-panel">
+  <div class="streak-toast" id="streak-toast">🔥 <span id="streak-text"></span></div>
+
+  <div class="qp-page">
+
+    <!-- ── HUB ── -->
+    <div id="qz-hub">
+      <div class="hub-hero">
+        <div class="hub-eyebrow">ChemSphere Quiz Engine</div>
+        <h2 class="hub-title">Test Your<br>Chemistry.</h2>
+        <p class="hub-sub">Adaptive NEET &amp; JEE practice — geometry, hybridization, bond angles, facts &amp; more. Same molecules as the 3D visualizer.</p>
+        <div class="hub-stats">
+          <div class="hstat"><div class="hstat-val" id="stat-q">50+</div><div class="hstat-lbl">Questions</div></div>
+          <div class="hstat"><div class="hstat-val" id="stat-mol">40+</div><div class="hstat-lbl">Molecules</div></div>
+          <div class="hstat"><div class="hstat-val" id="stat-best" style="color:var(--gold)">—</div><div class="hstat-lbl">Best Score</div></div>
+          <div class="hstat"><div class="hstat-val" id="stat-done">0</div><div class="hstat-lbl">Quizzes Done</div></div>
+        </div>
+      </div>
+
+      <div class="hub-modes-label">Choose a Mode</div>
+      <div class="mode-grid">
+        <button class="mode-card m-quick"   onclick="qzOpenSettings('quick')">
+          <span class="mode-icon">⚡</span>
+          <div class="mode-name">Quick Fire</div>
+          <div class="mode-desc">10 random questions from all topics. 20 sec per question.</div>
+          <span class="mode-badge">10 Questions · Timed</span>
+        </button>
+        <button class="mode-card m-chapter" onclick="qzOpenSettings('chapter')">
+          <span class="mode-icon">📖</span>
+          <div class="mode-name">Chapter Drill</div>
+          <div class="mode-desc">Focus on one chapter: VSEPR, Organic, Inorganic, or Biomolecules.</div>
+          <span class="mode-badge">Custom · Chapter Focus</span>
+        </button>
+        <button class="mode-card m-exam"    onclick="qzOpenSettings('exam')">
+          <span class="mode-icon">🎯</span>
+          <div class="mode-name">Exam Sim</div>
+          <div class="mode-desc">Full 20-question mixed set. Mirrors NEET/JEE MCQ format.</div>
+          <span class="mode-badge">20 Questions · Full Test</span>
+        </button>
+        <button class="mode-card m-blitz"   onclick="qzOpenSettings('blitz')">
+          <span class="mode-icon">🏆</span>
+          <div class="mode-name">Blitz Mode</div>
+          <div class="mode-desc">8 questions, 8 seconds each. Maximum speed.</div>
+          <span class="mode-badge">8 Sec · High Stakes</span>
+        </button>
+      </div>
+
+      <div class="hub-filter" id="hub-filter">
+        <button class="filt-btn on" data-cat="all"       onclick="qzPickFilt('all',this)">All Topics</button>
+        <button class="filt-btn"    data-cat="vsepr"     onclick="qzPickFilt('vsepr',this)">VSEPR</button>
+        <button class="filt-btn"    data-cat="organic"   onclick="qzPickFilt('organic',this)">Organic</button>
+        <button class="filt-btn"    data-cat="organic2"  onclick="qzPickFilt('organic2',this)">Organic+</button>
+        <button class="filt-btn"    data-cat="biomol"    onclick="qzPickFilt('biomol',this)">Bio</button>
+        <button class="filt-btn"    data-cat="inorganic" onclick="qzPickFilt('inorganic',this)">Inorganic</button>
+      </div>
+
+      <div class="sep"></div>
+
+      <div class="pitch">
+        <div class="pitch-icon">🧪</div>
+        <div class="pitch-body">
+          <div class="pitch-title">Integrated with ChemSphere 3D Visualizer</div>
+          <div class="pitch-text">Every question links to the 3D model you can see in the viewer. Molecular geometry, lone pairs, bond angles, and dipole moments come alive — turning memorization into genuine understanding. Switch to the 3D tab anytime to review a molecule.</div>
+          <div class="pitch-tags">
+            <span class="pitch-tag">NEET 2025</span>
+            <span class="pitch-tag">JEE Advanced</span>
+            <span class="pitch-tag">VSEPR Theory</span>
+            <span class="pitch-tag">Hybridization</span>
+            <span class="pitch-tag">Organic Chemistry</span>
+            <span class="pitch-tag">Inorganic</span>
+          </div>
+        </div>
+      </div>
+    </div><!-- /#qz-hub -->
+
+    <!-- ── QUIZ SCREEN ── -->
+    <div id="qz-quiz">
+      <div class="qbar">
+        <div class="qbar-left">
+          <span class="qmode-tag" id="qmode-tag" style="background:rgba(74,143,255,.1);color:var(--acc);border:1px solid rgba(74,143,255,.2);font-family:var(--fn);font-size:8px;padding:3px 9px;border-radius:5px;letter-spacing:1px;text-transform:uppercase"></span>
+          <span class="qinfo" id="qinfo"></span>
+        </div>
+        <div class="qbar-right">
+          <div class="score-pill" id="score-pill">
+            <span id="score-correct">0</span><span class="score-sep">/</span>
+            <span id="score-total">0</span>
+            <span style="font-size:9px;color:var(--mu);margin-left:2px">correct</span>
+          </div>
+          <button class="exit-btn" onclick="qzExitQuiz()">✕ Exit</button>
+        </div>
+      </div>
+      <div class="qprogress"><div class="qpbar" id="qpbar" style="width:0%"></div></div>
+      <div class="timer-wrap" id="timer-wrap" style="display:none">
+        <span class="timer-label" id="timer-num">20s</span>
+        <div class="timer-track"><div class="timer-fill" id="timer-fill" style="width:100%"></div></div>
+      </div>
+      <div class="qcard" id="qcard">
+        <div class="q-meta">
+          <span class="q-num" id="q-num"></span>
+          <span class="q-tag" id="q-tag"></span>
+          <span class="q-tag hard" id="q-diff" style="display:none"></span>
+        </div>
+        <div class="q-stem" id="q-stem"></div>
+        <div class="q-formula" id="q-formula" style="display:none"></div>
+        <div class="opts" id="opts"></div>
+        <div class="feedback" id="feedback">
+          <div class="fb-header"><span class="fb-icon" id="fb-icon"></span><span class="fb-verdict" id="fb-verdict"></span></div>
+          <div class="fb-text" id="fb-text"></div>
+          <span class="fb-neet" id="fb-neet" style="display:none"></span>
+        </div>
+      </div>
+      <div class="qactions">
+        <button class="btn-skip" id="btn-skip" onclick="qzSkipQ()">Skip →</button>
+        <button class="btn-next" id="btn-next" onclick="qzNextQ()">Next Question →</button>
+      </div>
+    </div><!-- /#qz-quiz -->
+
+    <!-- ── RESULTS SCREEN ── -->
+    <div id="qz-results">
+      <div class="res-wrap">
+        <div class="res-ring">
+          <svg width="120" height="120" viewBox="0 0 120 120">
+            <circle class="ring-bg" cx="60" cy="60" r="52" stroke-width="6"/>
+            <circle class="ring-fg" id="ring-fg" cx="60" cy="60" r="52" stroke-width="6" stroke-dasharray="326.7" stroke-dashoffset="326.7"/>
+          </svg>
+          <div class="res-pct" id="res-pct">0%</div>
+          <div class="res-label">Score</div>
+        </div>
+        <div class="res-verdict" id="res-verdict"></div>
+        <div class="res-sub" id="res-sub"></div>
+      </div>
+      <div class="lb-bar">
+        <span class="lb-icon">🏆</span>
+        <div class="lb-info">
+          <div class="lb-title" id="lb-title">Session Best</div>
+          <div class="lb-detail" id="lb-detail"></div>
+        </div>
+        <span class="lb-score" id="lb-score"></span>
+      </div>
+      <div class="res-stats">
+        <div class="rstat c"><div class="rstat-val" id="r-correct">0</div><div class="rstat-lbl">Correct</div></div>
+        <div class="rstat w"><div class="rstat-val" id="r-wrong">0</div><div class="rstat-lbl">Wrong</div></div>
+        <div class="rstat s"><div class="rstat-val" id="r-skip">0</div><div class="rstat-lbl">Skipped</div></div>
+        <div class="rstat t"><div class="rstat-val" id="r-time">—</div><div class="rstat-lbl">Avg Time</div></div>
+      </div>
+      <div class="review-label">Question Review</div>
+      <div id="review-list"></div>
+      <div class="res-actions">
+        <button class="btn-redo" onclick="qzRedoQuiz()">↺ Retry</button>
+        <button class="btn-open-vis" onclick="setMode('3d')">↗ Open 3D Visualizer</button>
+        <button class="btn-new" onclick="qzGoHub()">New Quiz →</button>
+      </div>
+      <div style="margin-top:22px">
+        <div class="pitch">
+          <div class="pitch-icon">💡</div>
+          <div class="pitch-body">
+            <div class="pitch-title">Struggling with geometry questions?</div>
+            <div class="pitch-text">Click "Open 3D Visualizer" above to see every molecule you got wrong. Seeing bond angles and lone pairs in 3D makes geometry unforgettable. Try rotating H₂O, NH₃, or SF₆ and watch the shapes click into place.</div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /#qz-results -->
+
+  </div><!-- /.qp-page -->
+</div><!-- /#quiz-panel -->
+
+<!-- ── QUIZ SETTINGS MODAL ── -->
+<div class="qz-modal-overlay" id="qz-modal">
+  <div class="qz-modal">
+    <div class="mod-title" id="mod-title">Quick Fire</div>
+    <div class="mod-sub" id="mod-sub">Configure your quiz</div>
+    <div id="mod-chapter-row" style="display:none">
+      <div class="mod-label">Chapter</div>
+      <div class="mod-row" id="mod-cats">
+        <button class="mod-opt on" data-val="all"       onclick="qzSelOpt(this,'cat')">All</button>
+        <button class="mod-opt"    data-val="vsepr"     onclick="qzSelOpt(this,'cat')">VSEPR</button>
+        <button class="mod-opt"    data-val="organic"   onclick="qzSelOpt(this,'cat')">Organic</button>
+        <button class="mod-opt"    data-val="organic2"  onclick="qzSelOpt(this,'cat')">Organic+</button>
+        <button class="mod-opt"    data-val="biomol"    onclick="qzSelOpt(this,'cat')">Bio</button>
+        <button class="mod-opt"    data-val="inorganic" onclick="qzSelOpt(this,'cat')">Inorganic</button>
+      </div>
+    </div>
+    <div class="mod-label">Question Type</div>
+    <div class="mod-row" id="mod-types">
+      <button class="mod-opt on"   data-val="all"    onclick="qzSelOpt(this,'type')">All Types</button>
+      <button class="mod-opt"      data-val="geo"    onclick="qzSelOpt(this,'type')">Geometry</button>
+      <button class="mod-opt"      data-val="hyb"    onclick="qzSelOpt(this,'type')">Hybridization</button>
+      <button class="mod-opt"      data-val="angle"  onclick="qzSelOpt(this,'type')">Bond Angle</button>
+      <button class="mod-opt"      data-val="dipole" onclick="qzSelOpt(this,'type')">Dipole</button>
+      <button class="mod-opt"      data-val="fact"   onclick="qzSelOpt(this,'type')">Exam Facts</button>
+    </div>
+    <div class="mod-label">Difficulty</div>
+    <div class="mod-row" id="mod-diff">
+      <button class="mod-opt on"   data-val="all"    onclick="qzSelOpt(this,'diff')">All</button>
+      <button class="mod-opt"      data-val="easy"   onclick="qzSelOpt(this,'diff')">Easy</button>
+      <button class="mod-opt"      data-val="medium" onclick="qzSelOpt(this,'diff')">Medium</button>
+      <button class="mod-opt"      data-val="hard"   onclick="qzSelOpt(this,'diff')">Hard</button>
+    </div>
+    <button class="mod-start" onclick="qzStartQuiz()">Start Quiz →</button>
+    <button class="mod-cancel" onclick="qzCloseModal()">Cancel</button>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════
+   QUIZ MODE INTEGRATION — ChemSphere
+   All functions prefixed qz* to avoid
+   collisions with the main app's setMode()
+════════════════════════════════════════ */
+
+/* ── Patch setMode() to handle 'quiz' ── */
+const _origSetMode = window.setMode || function(){};
+window.setMode = function(m) {
+  if (m === 'quiz') {
+    // Hide/show quiz panel and disable normal viewer panels
+    document.getElementById('quiz-panel').classList.add('on');
+    // Sync header tabs
+    document.querySelectorAll('.dtab').forEach(t => t.classList.remove('on'));
+    const dqz = document.getElementById('dqz');
+    if (dqz) dqz.classList.add('on');
+    // Sync mobile bottom tabs
+    ['b3d','b2d','bpr','bmol'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('on');
+    });
+    const bqz = document.getElementById('bqz');
+    if (bqz) bqz.classList.add('on');
+    // Update hub stats
+    qzUpdateHubStats();
+    return;
+  }
+  // For any non-quiz mode, hide the quiz panel
+  document.getElementById('quiz-panel').classList.remove('on');
+  const dqz = document.getElementById('dqz');
+  if (dqz) dqz.classList.remove('on');
+  const bqz = document.getElementById('bqz');
+  if (bqz) bqz.classList.remove('on');
+  _origSetMode(m);
+};
+
+/* ── Show a sub-screen within the quiz panel ── */
+function qzShow(screen) {
+  ['qz-hub','qz-quiz','qz-results'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = (id === screen) ? 'block' : 'none';
+  });
+  const panel = document.getElementById('quiz-panel');
+  if (panel) panel.scrollTop = 0;
+}
+
+/* ════════════════════════════════════════
+   MOLECULE DATABASE (mirror of main DB)
+════════════════════════════════════════ */
+const QZ_MOLS = {
+  vsepr: [
+    {key:'vsepr-h2o',  f:'H₂O',   n:'Water',                  s:'Bent',              w:'18.02',  h:'sp³',   a:'104.5°', d:'1.85 D',  diff:'easy'},
+    {key:'vsepr-co2',  f:'CO₂',   n:'Carbon Dioxide',         s:'Linear',            w:'44.01',  h:'sp',    a:'180°',   d:'0 D',     diff:'easy'},
+    {key:'vsepr-bf3',  f:'BF₃',   n:'Boron Trifluoride',      s:'Trigonal Planar',   w:'67.81',  h:'sp²',   a:'120°',   d:'0 D',     diff:'easy'},
+    {key:'vsepr-ch4',  f:'CH₄',   n:'Methane',                s:'Tetrahedral',       w:'16.04',  h:'sp³',   a:'109.5°', d:'0 D',     diff:'easy'},
+    {key:'vsepr-nh3',  f:'NH₃',   n:'Ammonia',                s:'Trigonal Pyramidal',w:'17.03',  h:'sp³',   a:'107°',   d:'1.47 D',  diff:'easy'},
+    {key:'vsepr-pcl5', f:'PCl₅',  n:'PCl₅',                   s:'Trig. Bipyramidal', w:'208.2',  h:'sp³d',  a:'90°/120°',d:'0 D',    diff:'hard'},
+    {key:'vsepr-sf6',  f:'SF₆',   n:'Sulfur Hexafluoride',    s:'Octahedral',        w:'146.1',  h:'sp³d²', a:'90°',    d:'0 D',     diff:'medium'},
+    {key:'vsepr-xef4', f:'XeF₄',  n:'Xenon Tetrafluoride',    s:'Square Planar',     w:'207.3',  h:'sp³d²', a:'90°',    d:'0 D',     diff:'hard'},
+  ],
+  organic: [
+    {key:'org-benz',   f:'C₆H₆',  n:'Benzene',                s:'Hexagonal',         w:'78.11',  h:'sp²',   a:'120°',   d:'0 D',     diff:'easy'},
+    {key:'org-etoh',   f:'C₂H₅OH',n:'Ethanol',                s:'Tetrahedral C',     w:'46.07',  h:'sp³',   a:'109.5°', d:'1.69 D',  diff:'easy'},
+    {key:'org-acet',   f:'C₃H₆O', n:'Acetone',                s:'Trigonal Planar',   w:'58.08',  h:'sp²',   a:'~120°',  d:'2.91 D',  diff:'medium'},
+    {key:'org-acac',   f:'CH₃COOH',n:'Acetic Acid',           s:'Planar –COOH',      w:'60.05',  h:'sp²',   a:'~120°',  d:'1.74 D',  diff:'medium'},
+    {key:'org-form',   f:'CH₂O',  n:'Formaldehyde',           s:'Trigonal Planar',   w:'30.03',  h:'sp²',   a:'~120°',  d:'2.33 D',  diff:'medium'},
+  ],
+  organic2: [
+    {key:'org-eth',    f:'C₂H₄',  n:'Ethene',                 s:'Trigonal Planar',   w:'28.05',  h:'sp²',   a:'120°',   d:'0 D',     diff:'easy'},
+    {key:'org-ethy',   f:'C₂H₂',  n:'Ethyne',                 s:'Linear',            w:'26.04',  h:'sp',    a:'180°',   d:'0 D',     diff:'easy'},
+    {key:'org-chloro', f:'CHCl₃', n:'Chloroform',             s:'Tetrahedral',       w:'119.4',  h:'sp³',   a:'~109.5°',d:'1.15 D',  diff:'medium'},
+    {key:'org-ccl4',   f:'CCl₄',  n:'Carbon Tetrachloride',   s:'Tetrahedral',       w:'153.8',  h:'sp³',   a:'109.5°', d:'0 D',     diff:'medium'},
+    {key:'org-urea',   f:'CO(NH₂)₂',n:'Urea',                 s:'Trigonal Planar',   w:'60.06',  h:'sp²',   a:'~120°',  d:'4.56 D',  diff:'hard'},
+  ],
+  biomol: [
+    {key:'bio-gluc',   f:'C₆H₁₂O₆',n:'Glucose',              s:'Pyranose Ring',     w:'180.2',  h:'sp³',   a:'109.5°', d:'—',       diff:'medium'},
+    {key:'bio-aden',   f:'C₅H₅N₅', n:'Adenine',              s:'Planar Bicyclic',   w:'135.1',  h:'sp²',   a:'~120°',  d:'—',       diff:'hard'},
+    {key:'bio-chol',   f:'C₂₇H₄₆O',n:'Cholesterol',          s:'Steroid Core',      w:'386.7',  h:'sp³',   a:'109.5°', d:'—',       diff:'hard'},
+    {key:'bio-alan',   f:'C₃H₇NO₂',n:'Alanine',              s:'Tetrahedral',       w:'89.09',  h:'sp³',   a:'109.5°', d:'—',       diff:'medium'},
+  ],
+  inorganic: [
+    {key:'in-h2so4',   f:'H₂SO₄', n:'Sulfuric Acid',          s:'Tetrahedral',       w:'98.08',  h:'sp³',   a:'109.5°', d:'—',       diff:'medium'},
+    {key:'in-hno3',    f:'HNO₃',  n:'Nitric Acid',            s:'Trigonal Planar',   w:'63.01',  h:'sp²',   a:'~120°',  d:'—',       diff:'medium'},
+    {key:'in-nf3',     f:'NF₃',   n:'Nitrogen Trifluoride',   s:'Pyramidal',         w:'71.0',   h:'sp³',   a:'102.5°', d:'0.24 D',  diff:'hard'},
+    {key:'in-of2',     f:'OF₂',   n:'Oxygen Difluoride',      s:'Bent',              w:'54.0',   h:'sp³',   a:'102°',   d:'0.30 D',  diff:'hard'},
+    {key:'in-clf3',    f:'ClF₃',  n:'Chlorine Trifluoride',   s:'T-shaped',          w:'92.45',  h:'sp³d',  a:'87.5°',  d:'0.6 D',   diff:'hard'},
+    {key:'in-xef2',    f:'XeF₂',  n:'Xenon Difluoride',       s:'Linear',            w:'169.3',  h:'sp³d',  a:'180°',   d:'0 D',     diff:'hard'},
+    {key:'in-so2',     f:'SO₂',   n:'Sulfur Dioxide',         s:'Bent',              w:'64.06',  h:'sp²',   a:'119°',   d:'1.63 D',  diff:'medium'},
+    {key:'in-so3',     f:'SO₃',   n:'Sulfur Trioxide',        s:'Trigonal Planar',   w:'80.06',  h:'sp²',   a:'120°',   d:'0 D',     diff:'medium'},
+    {key:'in-no2',     f:'NO₂',   n:'Nitrogen Dioxide',       s:'Bent',              w:'46.01',  h:'sp²',   a:'134°',   d:'0.32 D',  diff:'hard'},
+    {key:'in-o3',      f:'O₃',    n:'Ozone',                  s:'Bent',              w:'48.0',   h:'sp²',   a:'117°',   d:'0.53 D',  diff:'medium'},
+    {key:'in-h2o2',    f:'H₂O₂',  n:'Hydrogen Peroxide',      s:'Non-planar Bent',   w:'34.01',  h:'sp³',   a:'111°',   d:'2.26 D',  diff:'hard'},
+    {key:'in-becl2',   f:'BeCl₂', n:'Beryllium Chloride',     s:'Linear',            w:'79.91',  h:'sp',    a:'180°',   d:'0 D',     diff:'medium'},
+    {key:'in-ph3',     f:'PH₃',   n:'Phosphine',              s:'Pyramidal',         w:'34.0',   h:'sp³',   a:'93.5°',  d:'0.58 D',  diff:'hard'},
+    {key:'in-pcl3',    f:'PCl₃',  n:'PCl₃',                   s:'Pyramidal',         w:'137.3',  h:'sp³',   a:'100°',   d:'0.97 D',  diff:'hard'},
+    {key:'in-diborane',f:'B₂H₆',  n:'Diborane',               s:'Bridged',           w:'27.67',  h:'sp³',   a:'97°',    d:'0 D',     diff:'hard'},
+  ]
+};
+
+/* ── Question bank builder ── */
+function qzBuildBank(filterCat='all', filterType='all', filterDiff='all') {
+  let mols = [];
+  const cats = filterCat === 'all' ? Object.keys(QZ_MOLS) : [filterCat];
+  cats.forEach(c => { if (QZ_MOLS[c]) mols.push(...QZ_MOLS[c]); });
+  if (filterDiff !== 'all') mols = mols.filter(m => m.diff === filterDiff);
+
+  const bank = [];
+  const qTypes = {
+    geo:    m => ({stem:`What is the molecular geometry (VSEPR shape) of ${m.n}?`,   formula:m.f, answer:m.s, distractors:qzGeoD(m.s),  explain:`${m.n} (${m.f}) has ${m.h} hybridization. The VSEPR geometry is ${m.s} with bond angle ${m.a}.`, neet:null, tag:'geo',   diff:m.diff, mol:m}),
+    hyb:    m => ({stem:`What is the hybridization of the central atom in ${m.n}?`,    formula:m.f, answer:m.h, distractors:qzHybD(m.h),   explain:`The central atom in ${m.n} (${m.f}) is ${m.h} hybridized. Shape: ${m.s}, bond angle: ${m.a}.`, neet:null, tag:'hyb',   diff:m.diff, mol:m}),
+    angle:  m => ({stem:`What is the bond angle in ${m.n}?`,                           formula:m.f, answer:m.a, distractors:qzAngD(m.a),   explain:`${m.n} has a bond angle of ${m.a}. It is ${m.h} hybridized with ${m.s} geometry.`, neet:null, tag:'angle', diff:m.diff, mol:m}),
+    dipole: m => ({stem:`Which best describes the dipole moment of ${m.n}?`,           formula:m.f, answer:m.d==='0 D'?'Zero (non-polar)':`Non-zero (${m.d})`, distractors:qzDipD(m.d), explain:`${m.n}: dipole = ${m.d}. Geometry: ${m.s}.`, neet:null, tag:'dipole', diff:m.diff, mol:m}),
+  };
+  const types = filterType === 'all' ? ['geo','hyb','angle','dipole'] : [filterType];
+
+  mols.forEach(m => {
+    types.forEach(t => {
+      if (qTypes[t]) {
+        const q = qTypes[t](m);
+        if (q) bank.push(q);
+      }
+    });
+    if (filterType === 'all' || filterType === 'fact') {
+      const f = QZ_FACTS.find(q => q.mol === m.n || q.mol === m.f);
+      if (f) {
+        const all = [f.a, ...f.opts.slice(0,3)];
+        qzShuffle(all);
+        bank.push({stem:f.q, formula:f.f, answer:f.a, distractors:all, explain:f.exp, neet:f.neet, tag:'fact', diff:f.diff, mol:m});
+      }
+    }
+  });
+  return bank;
+}
+
+function qzGeoD(c) {
+  const pool=['Linear','Bent','Trigonal Planar','Tetrahedral','Trigonal Pyramidal','Octahedral','Square Planar','Trig. Bipyramidal','T-shaped','Hexagonal','Pyranose Ring','Bridged','Non-planar Bent','Planar Bicyclic','Steroid Core'];
+  return qzDistract(c,pool);
+}
+function qzHybD(c) { return qzDistract(c,['sp','sp²','sp³','sp³d','sp³d²','sp³d³']); }
+function qzAngD(c) {
+  const pool=['90°','93.5°','97°','100°','102°','102.5°','104.5°','107°','109.5°','111°','117°','119°','120°','134°','180°','90°/120°','~120°','~109.5°','87.5°'];
+  return qzDistract(c,pool.filter(x=>x!==c));
+}
+function qzDipD(d) {
+  const correct=d==='0 D'?'Zero (non-polar)':`Non-zero (${d})`;
+  return qzDistract(correct,['Zero (non-polar)','Non-zero — highly polar (>2 D)','Non-zero — slightly polar (<1 D)','Cannot be determined','Non-zero (1.85 D)','Non-zero (2.91 D)']);
+}
+function qzDistract(correct,pool) {
+  const opts=pool.filter(x=>x!==correct);
+  qzShuffle(opts);
+  const all=[correct,...opts.slice(0,3)];
+  qzShuffle(all);
+  return all;
+}
+
+/* ── Fact questions ── */
+const QZ_FACTS = [
+  {mol:'H₂O',  f:'H₂O',  q:'In H₂O, why is the bond angle 104.5° and NOT 109.5°?', a:'Lone pair–bond pair repulsion on O reduces the angle', opts:['H–O bonds are weaker than in ideal geometry','O is sp² hybridized','H atoms repel each other strongly'], exp:'Two lone pairs on O in H₂O exert greater repulsion than bond pairs, compressing the H–O–H angle from the ideal tetrahedral 109.5° to 104.5°.', neet:'Classic NEET VSEPR question — lone pair repulsion order: LP–LP > LP–BP > BP–BP.',diff:'easy'},
+  {mol:'CO₂',  f:'CO₂',  q:'CO₂ has two polar C=O bonds yet its net dipole is zero. Why?', a:'Linear geometry — the two bond dipoles cancel by symmetry', opts:['C–O bonds are non-polar','C and O have the same electronegativity','The molecule is ionic'], exp:'CO₂ is linear (sp hybridized). The two C=O dipoles point in exactly opposite directions and cancel, giving a net dipole of zero despite each bond being polar.', neet:'Classic NEET trap — symmetric linear molecules can have ZERO net dipole. Compare with H₂O (bent, non-zero dipole).', diff:'easy'},
+  {mol:'NH₃',  f:'NH₃',  q:'Which process produces NH₃ from N₂ and H₂ at ~500°C and ~200 atm?', a:'Haber Process', opts:['Contact Process','Ostwald Process','Solvay Process'], exp:'The Haber Process: N₂ + 3H₂ ⇌ 2NH₃, using Fe catalyst at ~500°C and ~200 atm.', neet:'Contact Process makes H₂SO₄; Ostwald Process makes HNO₃; Haber Process makes NH₃.', diff:'easy'},
+  {mol:'BF₃',  f:'BF₃',  q:'BF₃ acts as a Lewis acid because it has:', a:'An empty p-orbital on boron that accepts electron pairs', opts:['Lone pairs on F that can donate electrons','Three polar B–F bonds','A net dipole moment'], exp:'B in BF₃ is sp² hybridized with an empty unhybridized p-orbital. This makes it electron-deficient and a strong Lewis acid.', neet:'BF₃ + NH₃ → F₃B–NH₃ (Lewis acid-base adduct). Important for JEE.', diff:'medium'},
+  {mol:'SF₆',  f:'SF₆',  q:'SF₆ is approximately how many times more potent a greenhouse gas than CO₂?', a:'23,500 times', opts:['100 times','1,000 times','50,000 times'], exp:'SF₆ has a global warming potential (GWP) of ~23,500 over 100 years, making it one of the most potent greenhouse gases.', neet:'Know that SF₆ = octahedral, sp³d², bond angle 90°, dipole = 0.', diff:'medium'},
+  {mol:'XeF₄', f:'XeF₄', q:'XeF₄ is square planar despite having 6 electron pairs. Where do the 2 lone pairs sit?', a:'Opposite each other (trans) in axial positions', opts:['Both in equatorial positions','One axial, one equatorial','Randomly distributed'], exp:'XeF₄ has sp³d² hybridization with 4 bond pairs and 2 lone pairs. The lone pairs take the two axial positions (trans to each other).', neet:'KEY JEE: sp³d² can give octahedral (0 LP), square planar (2 LP trans), or other shapes.', diff:'hard'},
+  {mol:'Benzene',f:'C₆H₆',q:'Benzene satisfies Hückel\'s rule because it has:', a:'6 π electrons (4n+2, n=1)', opts:['4 π electrons','8 π electrons','3 alternating double bonds only'], exp:'Hückel\'s rule: aromatic if 4n+2 π electrons in a planar conjugated ring. Benzene has 6 π electrons (n=1).', neet:'Aromatic: 4n+2 π e⁻. Benzene n=1 → 6. Naphthalene n=2 → 10.', diff:'medium'},
+  {mol:'NF₃',  f:'NF₃',  q:'NF₃ bond angle (102.5°) is SMALLER than NH₃ (107°) because:', a:'F pulls bonding electrons away from N, reducing lone pair–bond pair repulsion', opts:['F is larger than H and takes more space','N uses sp² hybridization in NF₃','N–F bonds are longer than N–H bonds'], exp:'In NF₃, F\'s high electronegativity pulls the bonding pair away from N, increasing the lone pair\'s relative electron density and compressing the bond angle.', neet:'Classic NEET comparison: NH₃ 107° > NF₃ 102.5°. Reason: electronegativity of F vs H.', diff:'hard'},
+  {mol:'Ozone', f:'O₃',  q:'Ozone (O₃) decolourises moist starch-iodide paper. This confirms:', a:'O₃ is a stronger oxidising agent than O₂', opts:['O₃ is acidic','O₃ bleaches permanently like Cl₂','O₃ has a linear structure'], exp:'O₃ oxidises I⁻ to I₂ (starch turns blue), confirming it is a powerful oxidising agent. O₃ absorbs UV in the stratosphere.', neet:'O₃ test: starch-iodide paper turns blue. SO₂ bleaching is reversible. Cl₂ bleaching is permanent.', diff:'medium'},
+  {mol:'Urea',  f:'CO(NH₂)₂',q:'Urea was the first organic compound synthesized from an inorganic source. Who did this?', a:'Friedrich Wöhler (1828)', opts:['Antoine Lavoisier','Louis Pasteur','Dmitri Mendeleev'], exp:'In 1828, Friedrich Wöhler accidentally synthesized urea from ammonium cyanate, disproving the "vital force theory."', neet:'Wöhler 1828: NH₄CNO → CO(NH₂)₂. First synthesis of organic from inorganic. Disproved vitalism.', diff:'medium'},
+  {mol:'H₂O₂', f:'H₂O₂', q:'In H₂O₂, what is the unusual oxidation state of oxygen?', a:'−1', opts:['0','−2','+1'], exp:'In H₂O₂, oxygen is in the −1 oxidation state (between 0 in O₂ and −2 in H₂O). H₂O₂ acts as BOTH oxidising agent AND reducing agent.', neet:'H₂O₂ oxidation state O = −1. Unique: acts as both oxidiser and reducer. Decomposes with MnO₂.', diff:'hard'},
+  {mol:'Diborane',f:'B₂H₆',q:'The bridging bonds in B₂H₆ (diborane) are called:', a:'Three-centre two-electron (banana) bonds', opts:['Normal covalent bonds','Coordinate (dative) bonds','van der Waals interactions'], exp:'B₂H₆ has two bridging H atoms each forming a 3-centre 2-electron "banana bond" shared between two B atoms.', neet:'B₂H₆ = electron deficient compound. 3-centre 2-electron bonds. B₂H₆ + 6H₂O → 2B(OH)₃ + 6H₂.', diff:'hard'},
+  {mol:'ClF₃',  f:'ClF₃', q:'ClF₃ is T-shaped (not trigonal planar) because:', a:'Lone pairs occupy equatorial positions to minimize repulsion', opts:['Cl uses sp² hybridization','F atoms are too large for planar arrangement','ClF₃ actually IS trigonal planar'], exp:'ClF₃ has 5 electron pairs (sp³d). The 2 lone pairs prefer equatorial positions (more space, less repulsion). This gives a T-shape.', neet:'KEY JEE: Lone pairs prefer equatorial in tbp. ClF₃ T-shaped (87.5°). Not trigonal planar!', diff:'hard'},
+  {mol:'CCl₄',  f:'CCl₄', q:'CCl₄ has four polar C–Cl bonds yet its net dipole is zero because:', a:'Tetrahedral symmetry causes all four bond dipoles to cancel exactly', opts:['C–Cl bonds are actually non-polar','The molecule is linear','Carbon is sp hybridized'], exp:'In CCl₄, the four C–Cl bond dipoles arranged tetrahedrally cancel exactly. Compare with CHCl₃ where replacing one Cl with H breaks symmetry → non-zero dipole.', neet:'CCl₄ dipole = 0 (symmetric tetrahedral). CHCl₃ dipole ≠ 0 (asymmetric). Classic NEET MCQ!', diff:'medium'},
+];
+
+/* ── State ── */
+let qzMode     = 'quick';
+let qzBank     = [];
+let qzIdx      = 0;
+let qzCorrect  = 0;
+let qzWrong    = 0;
+let qzSkipped  = 0;
+let qzLog      = [];
+let qzTimer    = null;
+let qzTimerVal = 20;
+let qzTimerMax = 20;
+let qzStart    = 0;
+let qzTotalMs  = 0;
+let qzStreak   = 0;
+let qzBest     = parseInt(localStorage.getItem('cs_best') || '0');
+let qzDone     = parseInt(localStorage.getItem('cs_done') || '0');
+let qzLastSettings = {cat:'all', type:'all', diff:'all'};
+
+const QZ_MODE_CFG = {
+  quick:   {label:'Quick Fire',   count:10, time:20, color:'var(--acc)',  bg:'rgba(74,143,255,.1)'},
+  chapter: {label:'Chapter Drill',count:15, time:30, color:'var(--tea)',  bg:'rgba(0,229,180,.1)'},
+  exam:    {label:'Exam Sim',     count:20, time:0,  color:'var(--org)',  bg:'rgba(255,107,53,.1)'},
+  blitz:   {label:'Blitz',        count:8,  time:8,  color:'var(--gold)', bg:'rgba(255,215,0,.1)'},
+};
+
+/* ── Hub ── */
+let qzHubCat = 'all';
+function qzPickFilt(cat, btn) {
+  qzHubCat = cat;
+  document.querySelectorAll('.filt-btn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  document.querySelectorAll('#mod-cats .mod-opt').forEach(b => b.classList.toggle('on', b.dataset.val === cat));
+  qzLastSettings.cat = cat;
+}
+function qzUpdateHubStats() {
+  const best = document.getElementById('stat-best');
+  const done = document.getElementById('stat-done');
+  if (best) best.textContent = qzBest ? qzBest + '%' : '—';
+  if (done) done.textContent = qzDone;
+}
+
+/* ── Modal ── */
+function qzOpenSettings(mode) {
+  qzMode = mode;
+  const cfg = QZ_MODE_CFG[mode];
+  document.getElementById('qz-modal').classList.add('v');
+  document.getElementById('mod-title').textContent = cfg.label;
+  document.getElementById('mod-sub').textContent = `${cfg.count} questions · ${cfg.time > 0 ? cfg.time + 's per question' : 'untimed'}`;
+  document.getElementById('mod-chapter-row').style.display = (mode === 'chapter') ? 'block' : 'none';
+  qzSelOptVal('cat', qzLastSettings.cat);
+  qzSelOptVal('type', qzLastSettings.type);
+  qzSelOptVal('diff', qzLastSettings.diff);
+}
+function qzCloseModal() {
+  document.getElementById('qz-modal').classList.remove('v');
+}
+function qzSelOpt(btn, group) {
+  const parent = btn.closest('.mod-row');
+  parent.querySelectorAll('.mod-opt').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  qzLastSettings[group] = btn.dataset.val;
+}
+function qzSelOptVal(group, val) {
+  const map = {cat:'mod-cats', type:'mod-types', diff:'mod-diff'};
+  const parent = document.getElementById(map[group]);
+  if (!parent) return;
+  parent.querySelectorAll('.mod-opt').forEach(b => b.classList.toggle('on', b.dataset.val === val));
+}
+
+/* ── Start ── */
+function qzStartQuiz() {
+  qzCloseModal();
+  const cfg = QZ_MODE_CFG[qzMode];
+  let bank = qzBuildBank(qzLastSettings.cat, qzLastSettings.type, qzLastSettings.diff);
+  if (!bank.length) bank = qzBuildBank('all','all','all');
+  qzShuffle(bank);
+  qzBank    = bank.slice(0, cfg.count);
+  qzIdx     = 0; qzCorrect = 0; qzWrong = 0; qzSkipped = 0;
+  qzLog     = []; qzStreak = 0; qzTotalMs = 0;
+  qzShow('qz-quiz');
+  qzRenderQ();
+}
+
+/* ── Render question ── */
+function qzRenderQ() {
+  if (qzIdx >= qzBank.length) { qzShowResults(); return; }
+  const q = qzBank[qzIdx];
+  const cfg = QZ_MODE_CFG[qzMode];
+
+  document.getElementById('qpbar').style.width = ((qzIdx / qzBank.length) * 100) + '%';
+  document.getElementById('qinfo').textContent = `Q${qzIdx+1} of ${qzBank.length}`;
+  document.getElementById('score-correct').textContent = qzCorrect;
+  document.getElementById('score-total').textContent   = qzIdx;
+
+  const modeTag = document.getElementById('qmode-tag');
+  modeTag.textContent  = cfg.label;
+  modeTag.style.background = cfg.bg;
+  modeTag.style.color  = cfg.color;
+
+  document.getElementById('q-num').textContent  = `Q${qzIdx+1} / ${qzBank.length}`;
+  const tagEl = document.getElementById('q-tag');
+  tagEl.textContent = {geo:'Geometry',hyb:'Hybridization',angle:'Bond Angle',dipole:'Dipole',fact:'Exam Fact'}[q.tag] || q.tag;
+  tagEl.className   = 'q-tag ' + (q.tag==='fact'?'fact':q.tag==='geo'?'geo':'');
+  const diffEl = document.getElementById('q-diff');
+  if (q.diff==='hard') { diffEl.textContent='HARD'; diffEl.style.display=''; }
+  else diffEl.style.display='none';
+
+  document.getElementById('q-stem').textContent = q.stem;
+  const fEl = document.getElementById('q-formula');
+  if (q.formula) { fEl.textContent = q.formula; fEl.style.display=''; }
+  else fEl.style.display='none';
+
+  const optsEl = document.getElementById('opts');
+  optsEl.innerHTML = '';
+  ['A','B','C','D'].forEach((letter, i) => {
+    if (!q.distractors[i]) return;
+    const btn = document.createElement('button');
+    btn.className = 'opt';
+    btn.innerHTML = `<span class="opt-letter">${letter}</span>${q.distractors[i]}`;
+    btn.dataset.val = q.distractors[i];
+    btn.onclick = () => qzAnswer(q.distractors[i], q);
+    optsEl.appendChild(btn);
+  });
+
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback'; fb.style.display='none';
+  document.getElementById('btn-next').classList.remove('show');
+  document.getElementById('btn-skip').style.display='';
+
+  const tw = document.getElementById('timer-wrap');
+  clearInterval(qzTimer);
+  if (cfg.time > 0) {
+    tw.style.display = '';
+    qzTimerMax = cfg.time; qzTimerVal = cfg.time;
+    document.getElementById('timer-num').textContent = cfg.time + 's';
+    const fill = document.getElementById('timer-fill');
+    fill.style.width = '100%';
+    fill.className = 'timer-fill';
+    qzStart = performance.now();
+    qzTimer = setInterval(() => {
+      qzTimerVal--;
+      const pct = (qzTimerVal / qzTimerMax) * 100;
+      fill.style.width = pct + '%';
+      document.getElementById('timer-num').textContent = qzTimerVal + 's';
+      if (qzTimerVal <= Math.ceil(qzTimerMax*0.25)) fill.className='timer-fill danger';
+      else if (qzTimerVal <= Math.ceil(qzTimerMax*0.5)) fill.className='timer-fill warn';
+      if (qzTimerVal <= 0) { clearInterval(qzTimer); qzAnswer(null, q, true); }
+    }, 1000);
+  } else {
+    tw.style.display = 'none';
+    qzStart = performance.now();
+  }
+}
+
+/* ── Answer ── */
+function qzAnswer(chosen, q, timeout=false) {
+  clearInterval(qzTimer);
+  const elapsed = performance.now() - qzStart;
+  qzTotalMs += elapsed;
+  const correct = !timeout && chosen === q.answer;
+
+  document.querySelectorAll('.opt').forEach(b => {
+    b.classList.add('disabled');
+    b.onclick = null;
+    if (b.dataset.val === q.answer) b.classList.add('correct');
+    else if (b.dataset.val === chosen) b.classList.add('wrong');
+  });
+
+  if (correct) { qzCorrect++; qzStreak++; if (qzStreak >= 3) qzShowStreak(qzStreak); }
+  else { qzWrong++; qzStreak = 0; }
+
+  qzLog.push({q, chosen, correct, skipped:false, ms:elapsed});
+
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback show' + (correct ? '' : ' wrong-fb');
+  fb.style.display = '';
+  document.getElementById('fb-icon').textContent = timeout ? '⏱' : correct ? '✅' : '❌';
+  const verdict = document.getElementById('fb-verdict');
+  verdict.textContent = timeout ? "TIME'S UP" : correct ? 'CORRECT' : 'INCORRECT';
+  verdict.className   = 'fb-verdict ' + (correct ? 'ok' : 'err');
+  let txt = timeout ? `The correct answer was: ${q.answer}. ${q.explain}` : !correct ? `Correct answer: ${q.answer}. ${q.explain}` : q.explain;
+  document.getElementById('fb-text').textContent = txt;
+  const neetEl = document.getElementById('fb-neet');
+  if (q.neet) { neetEl.textContent = '⚡ ' + q.neet; neetEl.style.display=''; }
+  else neetEl.style.display='none';
+
+  document.getElementById('btn-next').classList.add('show');
+  document.getElementById('btn-skip').style.display='none';
+}
+
+function qzSkipQ() {
+  clearInterval(qzTimer);
+  const elapsed = performance.now() - qzStart;
+  qzTotalMs += elapsed;
+  qzSkipped++; qzStreak = 0;
+  qzLog.push({q:qzBank[qzIdx], chosen:null, correct:false, skipped:true, ms:elapsed});
+  qzIdx++;
+  qzRenderQ();
+}
+
+function qzNextQ() { qzIdx++; qzRenderQ(); }
+
+function qzExitQuiz() {
+  clearInterval(qzTimer);
+  qzShow('qz-hub');
+}
+
+/* ── Streak toast ── */
+function qzShowStreak(n) {
+  const t = document.getElementById('streak-toast');
+  document.getElementById('streak-text').textContent =
+    n >= 5 ? `${n} in a row! You're on fire!` : n === 4 ? `${n} streak! Keep going!` : `${n} correct in a row!`;
+  t.classList.add('v');
+  setTimeout(() => t.classList.remove('v'), 2200);
+}
+
+/* ── Results ── */
+function qzShowResults() {
+  clearInterval(qzTimer);
+  const total = qzBank.length;
+  const pct   = Math.round((qzCorrect / total) * 100);
+
+  qzDone++;
+  localStorage.setItem('cs_done', qzDone);
+  if (pct > qzBest) { qzBest = pct; localStorage.setItem('cs_best', qzBest); }
+  qzUpdateHubStats();
+
+  const circumference = 2 * Math.PI * 52;
+  setTimeout(() => {
+    const ring = document.getElementById('ring-fg');
+    ring.style.strokeDashoffset = circumference * (1 - pct/100);
+    ring.style.stroke = pct >= 80 ? 'var(--correct)' : pct >= 50 ? 'var(--warn)' : 'var(--wrong)';
+  }, 200);
+
+  document.getElementById('res-pct').textContent = pct + '%';
+
+  let verdict, sub;
+  if (pct >= 90)      { verdict='🏆 Outstanding!';    sub="Perfect NEET preparation. You're ready!"; qzSpawnConfetti(); }
+  else if (pct >= 75) { verdict='⭐ Excellent!';        sub='Strong performance. Keep it up!'; }
+  else if (pct >= 60) { verdict='👍 Good Job!';          sub='Above average. Review the incorrect ones.'; }
+  else if (pct >= 40) { verdict='📚 Keep Studying!';     sub='Review the 3D visualizer for geometry concepts.'; }
+  else                { verdict='🔬 Back to Basics';     sub='Open the 3D visualizer to learn the molecules.'; }
+
+  document.getElementById('res-verdict').textContent = verdict;
+  document.getElementById('res-sub').textContent     = sub;
+  document.getElementById('r-correct').textContent   = qzCorrect;
+  document.getElementById('r-wrong').textContent     = qzWrong;
+  document.getElementById('r-skip').textContent      = qzSkipped;
+  const avgMs = qzLog.length ? Math.round(qzTotalMs / qzLog.length / 1000) : 0;
+  document.getElementById('r-time').textContent      = avgMs + 's';
+  document.getElementById('lb-title').textContent    = pct >= qzBest ? '🎉 New Best Score!' : 'Session Best';
+  document.getElementById('lb-detail').textContent   = `${qzCorrect}/${total} correct · ${QZ_MODE_CFG[qzMode].label}`;
+  document.getElementById('lb-score').textContent    = pct + '%';
+
+  const list = document.getElementById('review-list');
+  list.innerHTML = '';
+  qzLog.forEach((entry, i) => {
+    const {q, chosen, correct, skipped} = entry;
+    const cls = skipped ? 'skip' : correct ? 'corr' : 'wron';
+    const div = document.createElement('div');
+    div.className = 'review-item ' + cls;
+    div.innerHTML = `<div class="ri-q">Q${i+1}: ${q.stem}</div>
+      <div class="ri-row">
+        <span class="ri-chip ${cls}">${skipped ? '⏭ Skipped' : correct ? '✅ ' + chosen : '❌ ' + (chosen||'No answer')}</span>
+        ${!correct && !skipped ? `<span class="ri-chip corr">✓ ${q.answer}</span>` : ''}
+      </div>
+      <div class="ri-exp">${q.explain}</div>`;
+    list.appendChild(div);
+  });
+
+  qzShow('qz-results');
+}
+
+function qzRedoQuiz() {
+  qzIdx=0; qzCorrect=0; qzWrong=0; qzSkipped=0; qzLog=[]; qzStreak=0; qzTotalMs=0;
+  qzShuffle(qzBank);
+  qzShow('qz-quiz');
+  qzRenderQ();
+}
+
+function qzGoHub() { qzShow('qz-hub'); qzUpdateHubStats(); }
+
+/* ── Confetti ── */
+function qzSpawnConfetti() {
+  const colors=['#4a8fff','#00e5b4','#ff6b35','#ffd700','#ff4757'];
+  for (let i=0;i<55;i++) {
+    const el=document.createElement('div');
+    el.className='confetti-piece';
+    el.style.left=Math.random()*100+'vw';
+    el.style.top='-10px';
+    el.style.background=colors[Math.floor(Math.random()*colors.length)];
+    el.style.animationDuration=(1.5+Math.random()*2)+'s';
+    el.style.animationDelay=Math.random()*.8+'s';
+    el.style.borderRadius=Math.random()>.5?'50%':'2px';
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),3800);
+  }
+}
+
+/* ── Util ── */
+function qzShuffle(arr) {
+  for (let i=arr.length-1;i>0;i--) {
+    const j=Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
+}
+
+/* ── Init ── */
+document.addEventListener('DOMContentLoaded', () => {
+  qzUpdateHubStats();
+  qzShow('qz-hub');
+  document.getElementById('qz-modal').addEventListener('click', function(e) {
+    if (e.target === this) qzCloseModal();
+  });
+});
+</script>
 </body>
 </html>
