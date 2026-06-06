@@ -2587,61 +2587,156 @@ async function do3D(query, tk) {
 }
 
 /* ════════════════════════════════════════
-   2D SVG — SmilesDrawer (browser-native, no server)
-   Strategy:
-   1. Fetch SMILES from NCI Cactus (same origin we already use)
-   2. Render into <canvas id="sd-canvas"> using SmilesDrawer dark theme
-   3. Provide button zoom + pinch-to-zoom on mobile
-   Cache fetched SMILES per query to avoid redundant round-trips.
-════════════════════════════════════════ */
-const _smilesCache = new Map();   // query → SMILES string
+   2D SVG — SmilesDrawer v2.x
+   ─────────────────────────────────────
+   ROOT CAUSE OF ORIGINAL BUG (fixed here):
+   The previous code used SmilesDrawer v2.x but called the v1 API:
+     SmilesDrawer.parse(smiles, successCb, errorCb)   ← v1 callback style
+   In v2, parse() is Promise-based and ignores callback arguments entirely.
+   The inner Promise therefore never resolved → catch block fired → "unavailable".
 
-// SmilesDrawer instance — created lazily once the lib is confirmed loaded
-let _sdDrawer = null;
-function getSdDrawer() {
-  if (_sdDrawer) return _sdDrawer;
-  if (typeof SmilesDrawer === 'undefined') return null;
-  _sdDrawer = new SmilesDrawer.Drawer({
-    width:  500,
-    height: 380,
-    bondThickness:   1.6,
-    fontSizeLarge:   8,
-    fontSizeSmall:   6,
-    shortBondLength: 0.80,
-    bondLength:      28,
-    atomVisualization: 'default',
-    themes: {
-      dark: {
-        C:    '#dde8ff',  // atom text — matches --tx
-        O:    '#ff6b6b',
-        N:    '#4a8fff',
-        F:    '#00e5b4',
-        CL:   '#00e5b4',
-        BR:   '#ff9944',
-        I:    '#aa44ff',
-        P:    '#ff9944',
-        S:    '#ffd700',
-        B:    '#ffaa44',
-        SI:   '#aaaaff',
-        H:    '#5a6e96',
-        BACKGROUND: 'transparent',
-      }
-    },
-    theme: 'dark',
-  });
-  return _sdDrawer;
+   FIX — two-part:
+   1. Use SmilesDrawer.SmiDrawer (v2 high-level class) which accepts a raw
+      SMILES string directly, no separate parse() step needed.
+   2. Embed a SMILES lookup table for all 43 DB molecules so no Cactus
+      round-trip is needed for known molecules (eliminates CORS/mobile fetch
+      failures as a secondary failure path). Unknown searched molecules still
+      fall back to Cactus.
+════════════════════════════════════════ */
+
+/* ── Embedded SMILES for all DB molecules ──────────────────────────────── */
+const SMILES_DB = {
+  'water':                    'O',
+  'carbon dioxide':           'O=C=O',
+  'boron trifluoride':        'FB(F)F',
+  'methane':                  'C',
+  'ammonia':                  'N',
+  'phosphorus pentachloride': 'ClP(Cl)(Cl)(Cl)Cl',
+  'sulfur hexafluoride':      'FS(F)(F)(F)(F)F',
+  'xenon tetrafluoride':      'F[Xe](F)(F)F',
+  'benzene':                  'c1ccccc1',
+  'ethanol':                  'CCO',
+  'acetone':                  'CC(=O)C',
+  'acetic acid':              'CC(=O)O',
+  'formaldehyde':             'C=O',
+  'glucose':                  'OC[C@H]1OC(O)[C@H](O)[C@@H](O)[C@@H]1O',
+  'adenine':                  'Nc1ncnc2[nH]cnc12',
+  'cholesterol':              'CC(C)CCCC(C)[C@H]1CC[C@@H]2[C@@H]1CC=C3C[C@@H](O)CC[C@]23C',
+  'alanine':                  'C[C@H](N)C(=O)O',
+  'sulfuric acid':            'OS(=O)(=O)O',
+  'nitric acid':              'O[N+](=O)[O-]',
+  'phosphoric acid':          'OP(=O)(O)O',
+  'hydrogen fluoride':        'F',
+  'hydrogen chloride':        'Cl',
+  'beryllium chloride':       'Cl[Be]Cl',
+  'nitrogen trifluoride':     'FN(F)F',
+  'oxygen difluoride':        'FOF',
+  'chlorine trifluoride':     'F[Cl](F)F',
+  'xenon difluoride':         'F[Xe]F',
+  'sulfur dioxide':           'O=S=O',
+  'sulfur trioxide':          'O=S(=O)=O',
+  'phosphorus trichloride':   'ClP(Cl)Cl',
+  'nitrogen dioxide':         'O=[N]=O',
+  'ozone':                    '[O-][O+]=O',
+  'hydrogen peroxide':        'OO',
+  'nitrous oxide':            '[N-]=[N+]=O',
+  'diborane':                 '[BH2]1[H][BH2]1',
+  'phosphine':                '[PH3]',
+  'carbonic acid':            'OC(=O)O',
+  'ethene':                   'C=C',
+  'ethyne':                   'C#C',
+  'chloroform':               'ClC(Cl)Cl',
+  'carbon tetrachloride':     'ClC(Cl)(Cl)Cl',
+  'urea':                     'NC(=O)N',
+};
+
+/* ── SmilesDrawer options (shared between all renders) ─────────────────── */
+const SD_OPTIONS = {
+  width:           500,
+  height:          380,
+  bondThickness:   1.6,
+  fontSizeLarge:   8,
+  fontSizeSmall:   6,
+  shortBondLength: 0.85,
+  bondLength:      30,
+  themes: {
+    dark: {
+      C:          '#dde8ff',
+      O:          '#ff6b6b',
+      N:          '#4a8fff',
+      F:          '#00e5b4',
+      CL:         '#00e5b4',
+      BR:         '#ff9944',
+      I:          '#aa44ff',
+      P:          '#ff9944',
+      S:          '#ffd700',
+      B:          '#ffaa44',
+      SI:         '#aaaaff',
+      H:          '#5a6e96',
+      BACKGROUND: 'transparent',
+    }
+  }
+};
+
+/* ── SMILES resolution: DB lookup first, Cactus fallback ───────────────── */
+const _smilesCache = new Map();
+
+async function resolveSmiles(query) {
+  // 1. Embedded DB (instant, no network)
+  const key = query.toLowerCase().trim();
+  if (SMILES_DB[key]) {
+    console.log(`[ChemSphere 2D] SMILES from DB for "${query}":`, SMILES_DB[key]);
+    return SMILES_DB[key];
+  }
+  // 2. Session cache
+  if (_smilesCache.has(query)) {
+    console.log(`[ChemSphere 2D] SMILES from cache for "${query}":`, _smilesCache.get(query));
+    return _smilesCache.get(query);
+  }
+  // 3. Cactus API fallback for user-searched molecules
+  console.log(`[ChemSphere 2D] Fetching SMILES from Cactus for "${query}"…`);
+  const smiles = await cactus(query, 'smiles');
+  console.log(`[ChemSphere 2D] Cactus returned SMILES for "${query}":`, smiles);
+  _smilesCache.set(query, smiles);
+  return smiles;
 }
 
-// Zoom state — scale factor applied via CSS transform on the canvas
+/* ── Core render — uses SmilesDrawer v2 SmiDrawer high-level API ────────
+   v2 BREAKING CHANGE: SmilesDrawer.parse() is now Promise-based.
+   The v1 callback signature parse(smiles, successCb, errorCb) no longer works.
+   Correct v2 pattern: new SmilesDrawer.SmiDrawer(opts).draw(smiles, '#id', 'dark')
+   SmiDrawer.draw() handles parse + render internally and returns a Promise.
+─────────────────────────────────────────────────────────────────────────── */
+async function _sdRender(smiles, canvasEl) {
+  console.log(`[ChemSphere 2D] Rendering SMILES:`, smiles);
+
+  if (typeof SmilesDrawer === 'undefined') {
+    throw new Error('SmilesDrawer library not loaded');
+  }
+
+  // Give the canvas a stable id if it doesn't have one (SmiDrawer needs '#id' selector)
+  if (!canvasEl.id) canvasEl.id = 'sd-canvas';
+
+  // SmilesDrawer v2: SmiDrawer is the high-level class that accepts raw SMILES
+  const sd = new SmilesDrawer.SmiDrawer(SD_OPTIONS);
+
+  // draw() returns a Promise in v2 — await it
+  await sd.draw(smiles, '#' + canvasEl.id, 'dark', false);
+
+  console.log(`[ChemSphere 2D] Render SUCCESS for:`, smiles);
+}
+
+/* ── Zoom state ─────────────────────────────────────────────────────────── */
 const _sdZoom = { scale: 1, min: 0.5, max: 3.0, step: 0.25 };
+
 function _sdApplyZoom() {
   const c = document.getElementById('sd-canvas');
   if (!c) return;
-  c.style.transform = `scale(${_sdZoom.scale})`;
+  c.style.transform       = `scale(${_sdZoom.scale})`;
   c.style.transformOrigin = 'center center';
-  // Give the frame a fixed height so overflow:hidden clips cleanly
   const natural = c.offsetHeight / _sdZoom.scale;
-  c.parentElement.style.height = Math.min(natural * _sdZoom.scale, window.innerHeight * 0.65) + 'px';
+  c.parentElement.style.height =
+    Math.min(natural * _sdZoom.scale, window.innerHeight * 0.65) + 'px';
   document.getElementById('sd-zreset').textContent =
     _sdZoom.scale === 1 ? '1:1' : Math.round(_sdZoom.scale * 100) + '%';
 }
@@ -2651,7 +2746,6 @@ function _sdZoomBy(delta) {
   _sdApplyZoom();
 }
 
-// Wire up zoom buttons once DOM is ready
 function _sdInitZoomButtons() {
   const zi = document.getElementById('sd-zin');
   const zo = document.getElementById('sd-zout');
@@ -2664,26 +2758,24 @@ function _sdInitZoomButtons() {
   }
 }
 
-// Pinch-to-zoom on touch devices
 function _sdInitPinch() {
   const canvas = document.getElementById('sd-canvas');
   if (!canvas || canvas._sdPinch) return;
   let initDist = null, initScale = 1;
   canvas.addEventListener('touchstart', e => {
     if (e.touches.length === 2) {
-      const dx = e.touches[0].clientX - e.touches[1].clientX;
-      const dy = e.touches[0].clientY - e.touches[1].clientY;
-      initDist  = Math.hypot(dx, dy);
+      initDist  = Math.hypot(e.touches[0].clientX - e.touches[1].clientX,
+                             e.touches[0].clientY - e.touches[1].clientY);
       initScale = _sdZoom.scale;
     }
   }, { passive: true });
   canvas.addEventListener('touchmove', e => {
     if (e.touches.length === 2 && initDist) {
       e.preventDefault();
-      const dx = e.touches[0].clientX - e.touches[1].clientX;
-      const dy = e.touches[0].clientY - e.touches[1].clientY;
-      const dist = Math.hypot(dx, dy);
-      _sdZoom.scale = Math.min(_sdZoom.max, Math.max(_sdZoom.min, initScale * (dist / initDist)));
+      const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX,
+                              e.touches[0].clientY - e.touches[1].clientY);
+      _sdZoom.scale = Math.min(_sdZoom.max,
+                     Math.max(_sdZoom.min, initScale * (dist / initDist)));
       _sdApplyZoom();
     }
   }, { passive: false });
@@ -2691,58 +2783,53 @@ function _sdInitPinch() {
   canvas._sdPinch = true;
 }
 
+/* ── Main entry point called by go() ────────────────────────────────────── */
 async function load2D(query) {
   const frame  = document.getElementById('f2d');
   const sp     = document.getElementById('sp2');
   const lbl    = document.getElementById('l2d');
   const canvas = document.getElementById('sd-canvas');
 
-  // Reset state
+  console.log(`[ChemSphere 2D] load2D called for: "${query}"`);
+
+  // Reset UI state
+  // Remove any previous error div that was injected into the frame
+  frame.querySelectorAll('.sd-err').forEach(el => el.remove());
   frame.classList.remove('rdy');
   frame.style.height = '';
-  sp.style.display  = 'block';
-  lbl.textContent   = 'Generating 2D structure…';
-  _sdZoom.scale = 1;
+  sp.style.display   = 'block';
+  lbl.textContent    = 'Generating 2D structure…';
+  _sdZoom.scale      = 1;
 
-  // Ensure zoom buttons are wired
   _sdInitZoomButtons();
 
-  // Check if SmilesDrawer loaded
-  const drawer = getSdDrawer();
-  if (!drawer) {
-    sp.style.display = 'none';
-    lbl.textContent  = '2D renderer not loaded — refresh to retry.';
-    return;
-  }
-
   try {
-    // 1. Get SMILES — use cache to avoid re-fetching
-    let smiles = _smilesCache.get(query);
-    if (!smiles) {
-      smiles = await cactus(query, 'smiles');
-      _smilesCache.set(query, smiles);
-    }
+    // Step 1: Resolve SMILES (DB → cache → Cactus)
+    const smiles = await resolveSmiles(query);
 
-    // 2. Parse & render via SmilesDrawer
-    await new Promise((resolve, reject) => {
-      SmilesDrawer.parse(smiles, tree => {
-        drawer.draw(tree, canvas, 'dark', false);
-        resolve();
-      }, err => reject(new Error(err)));
-    });
+    if (!smiles || !smiles.trim()) throw new Error('Empty SMILES returned');
 
-    // 3. Success — show frame
+    // Step 2: Render
+    await _sdRender(smiles, canvas);
+
+    // Step 3: Show frame
     frame.classList.add('rdy');
     sp.style.display = 'none';
-    lbl.textContent  = `${query} · SMILES · SVG`;
+    lbl.textContent  = `${query} · 2D · SVG`;
     _sdApplyZoom();
     _sdInitPinch();
 
   } catch (err) {
-    // Fallback: show a friendly error inside the frame rather than hiding it
+    console.error(`[ChemSphere 2D] FAILED for "${query}":`, err);
     sp.style.display = 'none';
-    canvas.width = 0; canvas.height = 0; // clear canvas
-    frame.innerHTML += `<div class="sd-err"><span>⬡</span>2D structure unavailable for <strong>${query}</strong>.<br>Try searching by IUPAC name or common name.</div>`;
+    // Clear any partial canvas draw
+    const ctx = canvas.getContext('2d');
+    if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Show error inside frame (frame becomes visible)
+    const errDiv = document.createElement('div');
+    errDiv.className = 'sd-err';
+    errDiv.innerHTML = `<span>⬡</span>2D structure unavailable for <strong>${query}</strong>.<br>Try a common name or IUPAC name.`;
+    frame.appendChild(errDiv);
     frame.classList.add('rdy');
     lbl.textContent = '2D structure unavailable';
   }
