@@ -2457,10 +2457,8 @@ function setMode(mode) {
 
   if (window.innerWidth < 768) closeMolScreen();
 
-  if (curQ) {
-    if (mode === '2d')    load2D(curQ);
-    if (mode === 'props') loadProps(curQ, curMeta);
-  }
+  // Panels are pre-loaded by go() for all modes simultaneously.
+  // No lazy load needed here — switching tabs is instant.
 }
 
 /* ════════════════════════════════════════
@@ -2527,12 +2525,25 @@ async function go(query, meta) {
     const iupac = await cactus(query, 'iupac_name').catch(() => null);
     if (tk !== token) return;
 
-    // Render for current mode
-    if      (curMode === '3d')    await do3D(query, tk);
-    else if (curMode === '2d')    await load2D(query);
-    else if (curMode === 'props') await loadProps(query, meta);
-
+    // ── Load ALL panels simultaneously ────────────────────────────────────
+    // Each panel loads independently in parallel so switching tabs is instant.
+    // do3D / load2D / loadProps each check (tk !== token) internally where
+    // needed; we suppress individual panel errors silently — only the active
+    // panel error is surfaced to the user.
+    const results = await Promise.allSettled([
+      do3D(query, tk),
+      load2D(query),
+      loadProps(query, meta),
+    ]);
     if (tk !== token) return;
+
+    // Surface error only if the ACTIVE panel failed
+    const panelIdx = { '3d': 0, '2d': 1, 'props': 2 };
+    const activeIdx = panelIdx[curMode] ?? 0;
+    if (results[activeIdx].status === 'rejected') {
+      throw results[activeIdx].reason;
+    }
+    // ─────────────────────────────────────────────────────────────────────
 
     // Fill sidebar info card
     if (meta) fillInfo(meta);
@@ -2673,9 +2684,11 @@ async function do3D(query, tk) {
 
   // ── Ionic compound detection & repair ──────────────────────────────────
   const { disconnected, atomCount, bondCount } = parseSdfConnectivity(sdf);
+  let isIonic = false;
   if (disconnected) {
-    console.log(`[ChemSphere 3D] Ionic/disconnected SDF detected for "${query}" — atoms:${atomCount} bonds:${bondCount}. Rebuilding ion-pair geometry.`);
+    console.log(`[ChemSphere 3D] Ionic SDF for "${query}" — atoms:${atomCount} bonds:${bondCount}`);
     sdf = rebuildIonicSdf(sdf);
+    isIonic = true;
     toast('Ionic compound — showing ion pair', 'k');
   }
   // ───────────────────────────────────────────────────────────────────────
@@ -2683,9 +2696,15 @@ async function do3D(query, tk) {
   viewer.stopAnimate();
   viewer.clear();
   model = viewer.addModel(sdf, 'sdf');
-  applyStyle();
+
+  if (isIonic) {
+    applyIonicStyle();
+  } else {
+    applyStyle();
+  }
+
   viewer.zoomTo();
-  viewer.zoom(0.85);
+  viewer.zoom(0.75);
   viewer.render();
 
   requestAnimationFrame(() => {
@@ -2737,14 +2756,11 @@ const SMILES_DB = {
   'oxygen difluoride':        'FOF',
   'sulfur dioxide':           'O=S=O',
   'sulfur trioxide':          'O=S(=O)=O',
-  'phosphorus trichloride':   'ClP(Cl)Cl',
   'hydrogen peroxide':        'OO',
   'nitrous oxide':            '[N-]=[N+]=O',
   'carbonic acid':            'OC(=O)O',
   'ethene':                   'C=C',
   'ethyne':                   'C#C',
-  'chloroform':               'ClC(Cl)Cl',
-  'carbon tetrachloride':     'ClC(Cl)(Cl)Cl',
   'urea':                     'NC(=O)N',
 };
 
@@ -2935,10 +2951,157 @@ const STATIC_SVG = (() => {
       `);
     })(),
 
+    /* ── Tetrahedral halomethanes (SmilesDrawer fails on multi-Cl SMILES) ── */
+
+    'chloroform': (() => {
+      // CHCl3 — tetrahedral: H on top, 3 Cl in trigonal base
+      // 2D projection: C centre, H up, Cl at 210°/330°/90°+offset shown as wedge/dash
+      // Simplified flat projection: C centre, H at top, 3 Cl arranged below
+      const d = 92;
+      return svg(`
+        ${bond(cx, cy, cx, cy-d)}
+        ${bond(cx, cy, cx-d*0.87, cy+d*0.5)}
+        ${bond(cx, cy, cx+d*0.87, cy+d*0.5)}
+        ${bond(cx, cy, cx, cy+d*0.4)}
+        ${atom(cx, cy, Cw, 'C', 22)}
+        ${atom(cx, cy-d-12, Hw, 'H', 18)}
+        ${atom(cx-d*0.87-14, cy+d*0.5, Fg, 'Cl', 24)}
+        ${atom(cx+d*0.87+14, cy+d*0.5, Fg, 'Cl', 24)}
+        ${atom(cx, cy+d*0.4+28, Fg, 'Cl', 24)}
+        ${geo('Tetrahedral · sp³ · 109.5°')}
+      `);
+    })(),
+
+    'carbon tetrachloride': (() => {
+      // CCl4 — tetrahedral: C centre, 4 Cl
+      const d = 95;
+      return svg(`
+        ${bond(cx, cy, cx, cy-d)}
+        ${bond(cx, cy, cx-d*0.87, cy+d*0.5)}
+        ${bond(cx, cy, cx+d*0.87, cy+d*0.5)}
+        ${bond(cx, cy, cx, cy+d*0.55)}
+        ${atom(cx, cy, Cw, 'C', 22)}
+        ${atom(cx, cy-d-14, Fg, 'Cl', 24)}
+        ${atom(cx-d*0.87-14, cy+d*0.5, Fg, 'Cl', 24)}
+        ${atom(cx+d*0.87+14, cy+d*0.5, Fg, 'Cl', 24)}
+        ${atom(cx, cy+d*0.55+28, Fg, 'Cl', 24)}
+        ${geo('Tetrahedral · sp³ · 109.5°')}
+      `);
+    })(),
+
+    'phosphorus trichloride': svg(`
+      ${bond(cx,cy,cx,cy-88)}
+      ${bond(cx,cy,cx-76,cy+50)} ${bond(cx,cy,cx+76,cy+50)}
+      ${atom(cx,cy,Pw,'P',24)}
+      ${atom(cx,cy-102,Fg,'Cl',24)}
+      ${atom(cx-90,cy+60,Fg,'Cl',24)} ${atom(cx+90,cy+60,Fg,'Cl',24)}
+      ${lp(cx,cy-26)}
+      ${geo('Trigonal Pyramidal · sp³ · 100°')}
+    `),
+
+    /* ── Radical / resonance molecules ────────────────────────────────── */
+
+    'nitrogen dioxide': svg(`
+      ${bond(cx,cy,cx-80,cy+55,bd,true)}
+      ${bond(cx,cy,cx+80,cy+55,bd,false)}
+      ${atom(cx,cy,Nb,'N',24)}
+      ${atom(cx-93,cy+65,'#ff6b6b','O',22)}
+      ${atom(cx+93,cy+65,'#ff6b6b','O',22)}
+      ${lp(cx-4,cy-30)}
+      <text x="${cx+10}" y="${cy-36}" font-family="'JetBrains Mono',monospace"
+            font-size="13" fill="#5a6e96" dominant-baseline="central">•</text>
+      ${geo('Bent · sp² · 134° · radical')}
+    `),
+
+    'ozone': svg(`
+      ${bond(cx,cy,cx-80,cy+55,bd,true)}
+      ${bond(cx,cy,cx+80,cy+55,bd,false)}
+      ${atom(cx,cy,'#ff6b6b','O',24)}
+      ${atom(cx-93,cy+65,'#ff6b6b','O',22)}
+      ${atom(cx+93,cy+65,'#ff6b6b','O',22)}
+      ${lp(cx-6,cy-28)} ${lp(cx+22,cy-10)}
+      ${geo('Bent · sp² · 117° · resonance')}
+    `),
+
   };
 })();
 
-/* ── SmilesDrawer options (shared between all renders) ─────────────────── */
+/* ── Generic ionic 2D renderer ─────────────────────────────────────────────
+   Intercepts disconnected SMILES (containing '.') BEFORE SmilesDrawer sees them.
+   Parses each fragment's atom symbol and charge, renders as styled ion labels
+   in ChemSphere's dark palette with proper charge superscripts.
+   Works for any ionic compound: NaOH, NaCl, KBr, MgO, CaCO3, etc.
+─────────────────────────────────────────────────────────────────────────── */
+function renderIonicSvg(smiles) {
+  // Parse each fragment from dot-separated SMILES
+  const fragments = smiles.split('.').map(f => f.trim()).filter(Boolean);
+
+  // Extract atom symbol and charge from a SMILES fragment
+  function parseFragment(frag) {
+    // Match bracket atoms: [Na+], [OH-], [Ca2+], [SO4 2-], [NH4+]
+    const bracketMatch = frag.match(/^\[([A-Z][a-z]?)(\d*)(H\d*)?([+-]\d*|[+-])?\]$/);
+    if (bracketMatch) {
+      const sym = bracketMatch[1];
+      const charge = bracketMatch[4] || '';
+      // Format charge: '+' → '⁺', '-' → '⁻', '2+' → '²⁺' etc
+      const chargeStr = charge
+        .replace('2+','²⁺').replace('3+','³⁺').replace('+','⁺')
+        .replace('2-','²⁻').replace('3-','³⁻').replace('-','⁻');
+      return { sym, chargeStr, isSimple: true };
+    }
+    // For multi-atom fragments like [OH-], CO3, etc — show condensed formula
+    // Strip brackets and charges to get readable formula
+    let formula = frag
+      .replace(/\[/g,'').replace(/\]/g,'')
+      .replace(/[0-9]?\+[0-9]?/g,'⁺').replace(/[0-9]?\-[0-9]?/g,'⁻')
+      .replace(/#/g,'').replace(/\//g,'').replace(/\\/g,'')
+      .replace(/\(/g,'').replace(/\)/g,'')
+      .replace(/=/g,'');
+    // Collapse atom+count for subscript display — keep as-is for SVG text
+    return { sym: formula, chargeStr: '', isSimple: false, raw: true };
+  }
+
+  const ions = fragments.map(parseFragment);
+  const n = ions.length;
+  const spacing = Math.min(160, 320 / n);
+  const startX = 250 - (spacing * (n - 1)) / 2;
+
+  // Colour map for common ions
+  const ionColour = sym => {
+    const s = sym.toUpperCase();
+    if (['NA','K','LI','CS','RB'].includes(s))  return '#aaaaff';  // alkali
+    if (['MG','CA','BA','SR'].includes(s))       return '#ffaa44';  // alkaline earth
+    if (['CL','BR','I','F'].includes(s))         return '#00e5b4';  // halide
+    if (s === 'O' || s.startsWith('O'))          return '#ff6b6b';  // oxide/hydroxide
+    if (s === 'N' || s.startsWith('N'))          return '#4a8fff';  // nitrogen
+    if (s === 'S' || s.startsWith('S'))          return '#ffd700';  // sulfur
+    return '#dde8ff';  // default
+  };
+
+  const ionSvgs = ions.map((ion, i) => {
+    const x = startX + i * spacing;
+    const col = ionColour(ion.sym);
+    const symLen = ion.sym.length;
+    const fontSize = symLen <= 2 ? 36 : symLen <= 4 ? 26 : 20;
+    const r = Math.max(28, symLen * 9);
+    return `
+      <circle cx="${x}" cy="190" r="${r}" fill="${col}" fill-opacity="0.12" stroke="${col}" stroke-width="1.2"/>
+      <text x="${x}" y="196" font-family="'JetBrains Mono',monospace" font-weight="700"
+            font-size="${fontSize}" fill="${col}" text-anchor="middle" dominant-baseline="central">${ion.sym}</text>
+      ${ion.chargeStr ? `<text x="${x+r-6}" y="${190-r+10}" font-size="18" fill="${col}"
+            font-family="'JetBrains Mono',monospace" font-weight="700" text-anchor="middle">${ion.chargeStr}</text>` : ''}
+      ${i < n-1 ? `<text x="${x + spacing/2}" y="196" font-size="22" fill="#3a4a6a"
+            text-anchor="middle" dominant-baseline="central" font-family="sans-serif">···</text>` : ''}
+    `;
+  }).join('');
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 380"
+               style="width:100%;height:auto;display:block;background:transparent">
+    ${ionSvgs}
+    <text x="250" y="340" font-family="'JetBrains Mono',monospace" font-size="11"
+          fill="#5a6e96" text-anchor="middle">Ionic compound · electrostatic attraction</text>
+  </svg>`;
+}
 const SD_OPTIONS = {
   width:           500,
   height:          380,
@@ -3109,6 +3272,26 @@ async function load2D(query) {
     canvas.style.display = 'block';
     const smiles = await resolveSmiles(query);
     if (!smiles || !smiles.trim()) throw new Error('Empty SMILES returned');
+
+    // ── PATH B1: Ionic intercept — dot-SMILES means disconnected fragments ─
+    // SmilesDrawer renders these as floating formula text (Na⁺  O⁻H).
+    // Instead show our ionic SVG with charge labels and electrostatic notation.
+    if (smiles.includes('.')) {
+      console.log(`[ChemSphere 2D] Ionic SMILES detected for "${query}":`, smiles);
+      canvas.style.display = 'none';
+      const svgDiv = document.createElement('div');
+      svgDiv.className = 'sd-static';
+      svgDiv.style.cssText = 'width:100%;padding:12px;box-sizing:border-box';
+      svgDiv.innerHTML = renderIonicSvg(smiles);
+      frame.insertBefore(svgDiv, frame.firstChild);
+      frame.classList.add('rdy');
+      sp.style.display = 'none';
+      lbl.textContent  = `${query} · 2D · Ionic`;
+      _sdInitPinch();
+      console.log(`[ChemSphere 2D] Ionic SVG render SUCCESS for "${query}"`);
+      return;
+    }
+
     await _sdRender(smiles, canvas);
     frame.classList.add('rdy');
     sp.style.display = 'none';
@@ -3232,7 +3415,6 @@ function applyStyle() {
   const s = document.getElementById('sty').value;
   const c = document.getElementById('col').value;
   if (s === 'sphere') {
-    // Hybrid "Atomic Size" mode: large spheres + thin sticks for connectivity
     model.setStyle({}, {
       sphere: { scale: 0.26, colorscheme: c },
       stick:  { radius: 0.10, colorscheme: c }
@@ -3242,6 +3424,67 @@ function applyStyle() {
   } else {
     model.setStyle({}, { stick: { radius: 0.18, colorscheme: c } });
   }
+  viewer.render();
+}
+
+/* ── Ionic 3D style ─────────────────────────────────────────────────────
+   For ionic compounds: render ALL atoms as large spheres with explicit
+   element colours so single-atom ions (Na⁺, K⁺, Ca²⁺, Cl⁻ etc.) are
+   clearly visible against the dark background.
+   Uses 3Dmol's per-element colour overrides.
+─────────────────────────────────────────────────────────────────────────── */
+function applyIonicStyle() {
+  if (!viewer || !model) return;
+
+  // Explicit bright colours for ions commonly invisible with default schemes
+  const ionColours = {
+    Na: 0xaaaaff,   // soft purple — alkali
+    K:  0xcc88ff,   // violet
+    Li: 0xcc4444,   // red-pink
+    Ca: 0x44cc88,   // green — alkaline earth
+    Mg: 0x22bb77,
+    Ba: 0x44aaff,
+    Fe: 0xff8844,   // orange
+    Cu: 0x44ccff,   // cyan
+    Zn: 0x88ccaa,
+    Al: 0xaaaacc,
+    // Anion-formers keep standard CPK
+    O:  0xff4444,
+    N:  0x4488ff,
+    Cl: 0x00e5b4,
+    F:  0x00e5b4,
+    S:  0xffdd00,
+    P:  0xff9900,
+    C:  0xddddff,
+    H:  0xffffff,
+  };
+
+  // Base style: large spheres for all atoms (makes single-atom ions visible)
+  model.setStyle({}, {
+    sphere: { scale: 0.55, colorscheme: 'Jmol' }
+  });
+
+  // Override colours per element with our bright palette
+  Object.entries(ionColours).forEach(([elem, color]) => {
+    model.setStyle({ elem }, {
+      sphere: { scale: 0.55, color }
+    });
+  });
+
+  // Covalent bonds within a fragment (e.g. O-H in OH⁻) — thin stick
+  model.setStyle({}, {
+    sphere: { scale: 0.55 },  // keep sphere
+    stick:  { radius: 0.12, colorscheme: 'Jmol' }
+  });
+
+  // Re-apply element colours on top of stick (stick doesn't erase sphere in 3Dmol)
+  Object.entries(ionColours).forEach(([elem, color]) => {
+    model.setStyle({ elem }, {
+      sphere: { scale: 0.55, color },
+      stick:  { radius: 0.12, color }
+    });
+  });
+
   viewer.render();
 }
 function togRot() {
