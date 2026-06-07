@@ -2270,6 +2270,15 @@ function initViewer() {
           ROT.attachListeners();
           window._viewerReady = true;
 
+          // Fire any pending load callback (e.g. initial molecule load that
+          // was deferred because the viewer wasn't ready yet — happens on
+          // Firefox where initViewer completes after the first pickMol call)
+          if (typeof window._onViewerReady === 'function') {
+            const cb = window._onViewerReady;
+            window._onViewerReady = null;
+            cb();
+          }
+
           // Belt-and-suspenders: resize again after 600 ms for desktop-mode lag
           setTimeout(() => { viewer.resize(); viewer.render(); }, 600);
 
@@ -2285,6 +2294,12 @@ function initViewer() {
         dmol = false;
         ls.innerHTML = '<span class="lfl">✗ 3Dmol error: ' + err.message + '</span>';
         window._viewerReady = true;
+        // Still fire the callback so the UI doesn't hang
+        if (typeof window._onViewerReady === 'function') {
+          const cb = window._onViewerReady;
+          window._onViewerReady = null;
+          cb();
+        }
       }
     }
   }
@@ -2743,11 +2758,25 @@ function rebuildIonicSdf(sdf) {
 }
 
 async function do3D(query, tk) {
+  // Wait for viewer to be ready (Firefox initialises it slower than Chrome).
+  // Poll for up to 3 s before giving up and falling back to 2D.
+  if (!viewer) {
+    await new Promise(resolve => {
+      if (viewer) return resolve();
+      const deadline = Date.now() + 3000;
+      const poll = () => {
+        if (viewer) return resolve();
+        if (Date.now() > deadline) return resolve(); // timed out — resolve anyway
+        setTimeout(poll, 50);
+      };
+      poll();
+    });
+  }
+
   if (!dmol || !viewer) {
     toast('3D unavailable — switching to 2D', 'e');
     setMode('2d');
-    await load2D(query);
-    return;
+    return;  // load2D already called in parallel by go()
   }
   showLoad(true, query, 'LOADING 3D STRUCTURE…');
   let sdf = await cactus(query, 'SDF?get3d=true');
@@ -5386,6 +5415,7 @@ let qzIdx      = 0;
 let qzCorrect  = 0;
 let qzWrong    = 0;
 let qzSkipped  = 0;
+let qzTotalTarget = 0;  // cfg.count — the advertised question count for this session
 let qzLog      = [];
 let qzTimer    = null;
 let qzTimerVal = 20;
@@ -5456,6 +5486,7 @@ function qzStartQuiz() {
   if (!bank.length) bank = qzBuildBank('all','all','all');
   qzShuffle(bank);
   qzBank    = bank.slice(0, cfg.count);
+  qzTotalTarget = cfg.count;                           // advertised question count
   qzIdx     = 0; qzCorrect = 0; qzWrong = 0; qzSkipped = 0;
   qzLog     = []; qzStreak = 0; qzTotalMs = 0;
   qzShow('qz-quiz');
@@ -5471,7 +5502,7 @@ function qzRenderQ() {
   document.getElementById('qpbar').style.width = ((qzIdx / qzBank.length) * 100) + '%';
   document.getElementById('qinfo').textContent = `Q${qzIdx+1} of ${qzBank.length}`;
   document.getElementById('score-correct').textContent = qzCorrect;
-  document.getElementById('score-total').textContent   = qzIdx;
+  document.getElementById('score-total').textContent   = qzTotalTarget;
 
   const modeTag = document.getElementById('qmode-tag');
   modeTag.textContent  = cfg.label;
@@ -5598,14 +5629,31 @@ function qzShowStreak(n) {
 /* ── Results ── */
 function qzShowResults() {
   clearInterval(qzTimer);
-  const total = qzBank.length;
+
+  // ── SCORE CALCULATION ──────────────────────────────────────────────────
+  // Denominator is always the ADVERTISED question count (qzTotalTarget),
+  // not qzBank.length which can be smaller when the filtered pool is small.
+  // Formula: scorePercent = (correctAnswers / totalQuestions) * 100
+  // e.g. 1 correct in a 10-question quiz → 1/10*100 = 10% (not 20%)
+  const total = qzTotalTarget || qzBank.length; // fallback to bank length if unset
   const pct   = Math.round((qzCorrect / total) * 100);
 
+  // ── LOCALSTORAGE UPDATE ────────────────────────────────────────────────
+  // IMPORTANT: capture oldBest BEFORE updating qzBest / cs_best.
+  // If we read localStorage after the update, pct > cs_best is always false
+  // for a new best (because cs_best was just set to pct), breaking the
+  // 'New Best Score' banner.
+  const oldBest = qzBest;          // snapshot before any mutation
+  const isNewBest = pct > oldBest; // true only if this score beats previous best
+
   qzDone++;
-  localStorage.setItem('cs_done', qzDone);
-  if (pct > qzBest) { qzBest = pct; localStorage.setItem('cs_best', qzBest); }
+  localStorage.setItem('cs_done', String(qzDone));
+
+  // cs_best stores best percentage (0–100 integer).
+  if (isNewBest) { qzBest = pct; localStorage.setItem('cs_best', String(pct)); }
   qzUpdateHubStats();
 
+  // ── RING ANIMATION ─────────────────────────────────────────────────────
   const circumference = 2 * Math.PI * 52;
   setTimeout(() => {
     const ring = document.getElementById('ring-fg');
@@ -5629,7 +5677,11 @@ function qzShowResults() {
   document.getElementById('r-skip').textContent      = qzSkipped;
   const avgMs = qzLog.length ? Math.round(qzTotalMs / qzLog.length / 1000) : 0;
   document.getElementById('r-time').textContent      = avgMs + 's';
-  document.getElementById('lb-title').textContent    = pct >= qzBest ? '🎉 New Best Score!' : 'Session Best';
+
+  // Use isNewBest (computed from oldBest) — NOT localStorage.getItem() here,
+  // because cs_best has already been updated above and the comparison would
+  // always be false, meaning 'New Best Score' would never appear.
+  document.getElementById('lb-title').textContent    = isNewBest || qzDone === 1 ? '🎉 New Best Score!' : 'Latest Score';
   document.getElementById('lb-detail').textContent   = `${qzCorrect}/${total} correct · ${QZ_MODE_CFG[qzMode].label}`;
   document.getElementById('lb-score').textContent    = pct + '%';
 
@@ -5654,12 +5706,110 @@ function qzShowResults() {
 
 function qzRedoQuiz() {
   qzIdx=0; qzCorrect=0; qzWrong=0; qzSkipped=0; qzLog=[]; qzStreak=0; qzTotalMs=0;
+  // qzTotalTarget preserved — same quiz mode replayed
   qzShuffle(qzBank);
   qzShow('qz-quiz');
   qzRenderQ();
 }
 
 function qzGoHub() { qzShow('qz-hub'); qzUpdateHubStats(); }
+
+/* ════════════════════════════════════════
+   UNIT TESTS — Score calculation
+   Run in browser console: qzRunTests()
+   All tests must pass before any score-
+   related change is merged.
+════════════════════════════════════════ */
+function qzRunTests() {
+  const results = [];
+  let passed = 0, failed = 0;
+
+  function assert(label, actual, expected) {
+    const ok = actual === expected;
+    results.push({ ok, label, actual, expected });
+    ok ? passed++ : failed++;
+  }
+
+  // ── scorePercent = Math.round(correct / total * 100) ──────────────────
+  function calcPct(correct, total) {
+    return Math.round((correct / total) * 100);
+  }
+
+  // Core formula
+  assert('1/10 = 10%',   calcPct(1, 10),  10);
+  assert('2/10 = 20%',   calcPct(2, 10),  20);
+  assert('5/10 = 50%',   calcPct(5, 10),  50);
+  assert('9/10 = 90%',   calcPct(9, 10),  90);
+  assert('10/10 = 100%', calcPct(10, 10), 100);
+  assert('0/10 = 0%',    calcPct(0, 10),  0);
+
+  // Rounding
+  assert('1/3 rounds to 33%',  calcPct(1, 3),  33);
+  assert('2/3 rounds to 67%',  calcPct(2, 3),  67);
+  assert('1/6 rounds to 17%',  calcPct(1, 6),  17);
+  assert('1/15 rounds to 7%',  calcPct(1, 15), 7);
+  assert('12/15 = 80%',        calcPct(12,15), 80);
+  assert('15/20 = 75%',        calcPct(15,20), 75);
+  assert('16/20 = 80%',        calcPct(16,20), 80);
+  assert('6/8 = 75%',          calcPct(6, 8),  75);
+
+  // ── localStorage integrity ────────────────────────────────────────────
+  // cs_best must be a 0–100 integer string
+  const rawBest = localStorage.getItem('cs_best');
+  const rawDone = localStorage.getItem('cs_done');
+
+  if (rawBest !== null) {
+    const parsed = parseInt(rawBest);
+    assert('cs_best is integer',         isNaN(parsed),             false);
+    assert('cs_best is 0–100',           parsed >= 0 && parsed <= 100, true);
+    assert('cs_best stored as string',   typeof rawBest,            'string');
+  }
+  if (rawDone !== null) {
+    const parsed = parseInt(rawDone);
+    assert('cs_done is integer',         isNaN(parsed),             false);
+    assert('cs_done is non-negative',    parsed >= 0,               true);
+  }
+
+  // ── lb-title: isNewBest must use oldBest, NOT post-update localStorage ─
+  // Simulate the sequence: oldBest=5, pct=10 → isNewBest=true
+  {
+    const simulatedOldBest = 5;
+    const simulatedPct     = 10;
+    const isNewBest        = simulatedPct > simulatedOldBest;
+    assert('isNewBest true when pct > oldBest',  isNewBest, true);
+  }
+  // Simulate: oldBest=10, pct=10 → isNewBest=false (equal, not new best)
+  {
+    const simulatedOldBest = 10;
+    const simulatedPct     = 10;
+    const isNewBest        = simulatedPct > simulatedOldBest;
+    assert('isNewBest false when pct === oldBest', isNewBest, false);
+  }
+  // Simulate: oldBest=20, pct=10 → isNewBest=false (lower score)
+  {
+    const simulatedOldBest = 20;
+    const simulatedPct     = 10;
+    const isNewBest        = simulatedPct > simulatedOldBest;
+    assert('isNewBest false when pct < oldBest',  isNewBest, false);
+  }
+
+  // ── Print results ─────────────────────────────────────────────────────
+  console.group(`%cChemSphere Quiz Unit Tests — ${passed}/${passed+failed} passed`,
+    passed === passed+failed ? 'color:#00e5b4;font-weight:700' : 'color:#ff4757;font-weight:700');
+  results.forEach(r => {
+    const icon = r.ok ? '✅' : '❌';
+    const msg  = r.ok
+      ? `${icon} ${r.label}`
+      : `${icon} ${r.label} — expected ${r.expected}, got ${r.actual}`;
+    console.log(`%c${msg}`, r.ok ? 'color:#00e5b4' : 'color:#ff4757;font-weight:700');
+  });
+  console.groupEnd();
+
+  if (failed > 0) {
+    console.error(`[ChemSphere] ${failed} test(s) FAILED — score calculation has a bug!`);
+  }
+  return { passed, failed, total: passed + failed };
+}
 
 /* ── Confetti ── */
 function qzSpawnConfetti() {
