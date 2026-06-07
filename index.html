@@ -2606,14 +2606,9 @@ async function do3D(query, tk) {
 
 /* ── Embedded SMILES for all DB molecules ──────────────────────────────── */
 const SMILES_DB = {
-  'water':                    'O',
+  /* Only molecules SmilesDrawer renders correctly (multi-atom, standard valence) */
   'carbon dioxide':           'O=C=O',
   'boron trifluoride':        'FB(F)F',
-  'methane':                  'C',
-  'ammonia':                  'N',
-  'phosphorus pentachloride': 'ClP(Cl)(Cl)(Cl)Cl',
-  'sulfur hexafluoride':      'FS(F)(F)(F)(F)F',
-  'xenon tetrafluoride':      'F[Xe](F)(F)F',
   'benzene':                  'c1ccccc1',
   'ethanol':                  'CCO',
   'acetone':                  'CC(=O)C',
@@ -2626,13 +2621,8 @@ const SMILES_DB = {
   'sulfuric acid':            'OS(=O)(=O)O',
   'nitric acid':              'O[N+](=O)[O-]',
   'phosphoric acid':          'OP(=O)(O)O',
-  'hydrogen fluoride':        'F',
-  'hydrogen chloride':        'Cl',
-  'beryllium chloride':       'Cl[Be]Cl',
   'nitrogen trifluoride':     'FN(F)F',
   'oxygen difluoride':        'FOF',
-  'chlorine trifluoride':     'F[Cl](F)F',
-  'xenon difluoride':         'F[Xe]F',
   'sulfur dioxide':           'O=S=O',
   'sulfur trioxide':          'O=S(=O)=O',
   'phosphorus trichloride':   'ClP(Cl)Cl',
@@ -2640,8 +2630,6 @@ const SMILES_DB = {
   'ozone':                    '[O-][O+]=O',
   'hydrogen peroxide':        'OO',
   'nitrous oxide':            '[N-]=[N+]=O',
-  'diborane':                 '[BH2]1[H][BH2]1',
-  'phosphine':                '[PH3]',
   'carbonic acid':            'OC(=O)O',
   'ethene':                   'C=C',
   'ethyne':                   'C#C',
@@ -2649,6 +2637,196 @@ const SMILES_DB = {
   'carbon tetrachloride':     'ClC(Cl)(Cl)Cl',
   'urea':                     'NC(=O)N',
 };
+
+/* ── Static SVG for all molecules SmilesDrawer cannot render correctly ───
+   Covers: (1) hypervalent/noble-gas atoms, (2) single-atom molecules,
+   (3) diatomics with no bond graph, (4) exotic bonding (diborane).
+   Geometry labels match NCERT/VSEPR content exactly.
+─────────────────────────────────────────────────────────────────────────── */
+const STATIC_SVG = (() => {
+  /* Palette */
+  const Cw = '#dde8ff';   // C / white-ish centre
+  const Fg = '#00e5b4';   // F, Cl
+  const Xp = '#aaaaff';   // Xe, noble gas
+  const Be = '#ffaa44';   // Be, B
+  const Pw = '#ff9944';   // P, S (warm)
+  const Hw = '#5a6e96';   // H, lone pairs, labels
+  const Nb = '#4a8fff';   // N, bonds
+  const bd = '#4a8fff';   // bond colour
+
+  const cx=250, cy=185;   // canvas centre
+
+  /* ── Helpers ── */
+  const svg = body =>
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 360"
+          style="width:100%;height:auto;display:block">
+       <style>.lbl{font-family:'JetBrains Mono',monospace;font-weight:700;
+         text-anchor:middle;dominant-baseline:central}
+         line{stroke-width:2.5;stroke-linecap:round}</style>
+       ${body}
+     </svg>`;
+
+  const atom = (x,y,col,sym,r=22) =>
+    `<circle cx="${x}" cy="${y}" r="${r}" fill="${col}" fill-opacity="0.15"
+             stroke="${col}" stroke-width="1.5"/>
+     <text x="${x}" y="${y}" class="lbl" font-size="17" fill="${col}">${sym}</text>`;
+
+  const bond = (x1,y1,x2,y2,col=bd) =>
+    `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}"/>`;
+
+  const dbl = (x1,y1,x2,y2,col=bd) => {
+    const dx=y2-y1, dy=x1-x2, len=Math.hypot(dx,dy)||1, ox=dx/len*3, oy=dy/len*3;
+    return `<line x1="${x1-ox}" y1="${y1-oy}" x2="${x2-ox}" y2="${y2-oy}" stroke="${col}"/>
+            <line x1="${x1+ox}" y1="${y1+oy}" x2="${x2+ox}" y2="${y2+oy}" stroke="${col}"/>`;
+  };
+
+  const lp = (x,y,col=Hw) =>
+    `<circle cx="${x-4}" cy="${y}" r="2.5" fill="${col}"/>
+     <circle cx="${x+4}" cy="${y}" r="2.5" fill="${col}"/>`;
+
+  const geo = txt =>
+    `<text x="${cx}" y="340" class="lbl" font-size="11" fill="${Hw}">${txt}</text>`;
+
+  /* ── Single atoms / diatomics ── */
+
+  const singleAtom = (col, sym, formula, label) => svg(`
+    ${atom(cx,cy,col,sym,32)}
+    <text x="${cx}" y="${cy+55}" class="lbl" font-size="13" fill="${Hw}">${formula}</text>
+    ${geo(label)}
+  `);
+
+  const diatomic = (col1,sym1,col2,sym2,formula,label,dblBond=false) => svg(`
+    ${dblBond ? dbl(cx-60,cy,cx+60,cy) : bond(cx-60,cy,cx+60,cy)}
+    ${atom(cx-72,cy,col1,sym1)} ${atom(cx+72,cy,col2,sym2)}
+    <text x="${cx}" y="${cy+55}" class="lbl" font-size="13" fill="${Hw}">${formula}</text>
+    ${geo(label)}
+  `);
+
+  return {
+
+    /* ── Single-atom / trivial molecules ─────────── */
+    'methane': svg(`
+      ${bond(cx,cy,cx,cy-80)} ${bond(cx,cy,cx,cy+80)}
+      ${bond(cx,cy,cx-80,cy)} ${bond(cx,cy,cx+80,cy)}
+      ${atom(cx,cy,Cw,'C',24)}
+      ${atom(cx,cy-92,Hw,'H',18)} ${atom(cx,cy+92,Hw,'H',18)}
+      ${atom(cx-92,cy,Hw,'H',18)} ${atom(cx+92,cy,Hw,'H',18)}
+      ${geo('Tetrahedral · sp³ · 109.5°')}
+    `),
+
+    'ammonia': svg(`
+      ${bond(cx,cy,cx,cy-85)}
+      ${bond(cx,cy,cx-74,cy+48)} ${bond(cx,cy,cx+74,cy+48)}
+      ${atom(cx,cy,Nb,'N',24)}
+      ${atom(cx,cy-97,Hw,'H',18)}
+      ${atom(cx-86,cy+56,Hw,'H',18)} ${atom(cx+86,cy+56,Hw,'H',18)}
+      ${lp(cx,cy-26)}
+      ${geo('Trigonal Pyramidal · sp³ · 107°')}
+    `),
+
+    'water': svg(`
+      ${bond(cx,cy,cx-70,cy+65)} ${bond(cx,cy,cx+70,cy+65)}
+      ${atom(cx,cy,'#ff6b6b','O',24)}
+      ${atom(cx-82,cy+75,Hw,'H',18)} ${atom(cx+82,cy+75,Hw,'H',18)}
+      ${lp(cx-18,cy-22)} ${lp(cx+18,cy-22)}
+      ${geo('Bent (V-shape) · sp³ · 104.5°')}
+    `),
+
+    'hydrogen fluoride': diatomic(Hw,'H',Fg,'F','H–F','Linear diatomic · sp³ · 180°'),
+    'hydrogen chloride': diatomic(Hw,'H',Fg,'Cl','H–Cl','Linear diatomic · sp³ · 180°'),
+    'phosphine': svg(`
+      ${bond(cx,cy,cx,cy-85)}
+      ${bond(cx,cy,cx-74,cy+48)} ${bond(cx,cy,cx+74,cy+48)}
+      ${atom(cx,cy,Pw,'P',24)}
+      ${atom(cx,cy-97,Hw,'H',18)}
+      ${atom(cx-86,cy+56,Hw,'H',18)} ${atom(cx+86,cy+56,Hw,'H',18)}
+      ${lp(cx,cy-26)}
+      ${geo('Trigonal Pyramidal · sp³ · 93.5°')}
+    `),
+
+    /* ── Hypervalent / noble-gas molecules ────────── */
+
+    'xenon tetrafluoride': svg(`
+      ${bond(cx,cy,cx,cy-90)} ${bond(cx,cy,cx,cy+90)}
+      ${bond(cx,cy,cx-90,cy)} ${bond(cx,cy,cx+90,cy)}
+      ${atom(cx,cy,Xp,'Xe',26)}
+      ${atom(cx,cy-102,Fg,'F')} ${atom(cx,cy+102,Fg,'F')}
+      ${atom(cx-102,cy,Fg,'F')} ${atom(cx+102,cy,Fg,'F')}
+      ${lp(cx-34,cy-10)} ${lp(cx+34,cy-10)}
+      ${geo('Square Planar · sp³d² · 90°')}
+    `),
+
+    'xenon difluoride': svg(`
+      ${bond(cx,cy,cx-110,cy)} ${bond(cx,cy,cx+110,cy)}
+      ${atom(cx,cy,Xp,'Xe',26)}
+      ${atom(cx-122,cy,Fg,'F')} ${atom(cx+122,cy,Fg,'F')}
+      ${lp(cx-6,cy-34)} ${lp(cx-6,cy+34)}
+      ${lp(cx+6,cy-34)} ${lp(cx+6,cy+34)}
+      ${geo('Linear · sp³d · 180°')}
+    `),
+
+    'sulfur hexafluoride': svg(`
+      ${bond(cx,cy,cx,cy-90)}   ${bond(cx,cy,cx,cy+90)}
+      ${bond(cx,cy,cx-90,cy)}   ${bond(cx,cy,cx+90,cy)}
+      ${bond(cx,cy,cx-55,cy-55)} ${bond(cx,cy,cx+55,cy+55)}
+      ${atom(cx,cy,'#ffd700','S',24)}
+      ${atom(cx,cy-102,Fg,'F')}  ${atom(cx,cy+102,Fg,'F')}
+      ${atom(cx-102,cy,Fg,'F')}  ${atom(cx+102,cy,Fg,'F')}
+      ${atom(cx-67,cy-67,Fg,'F')} ${atom(cx+67,cy+67,Fg,'F')}
+      ${geo('Octahedral · sp³d² · 90°')}
+    `),
+
+    'phosphorus pentachloride': svg(`
+      ${bond(cx,cy,cx,cy-90)}
+      ${bond(cx,cy,cx,cy+90)}
+      ${bond(cx,cy,cx-90,cy+26)}
+      ${bond(cx,cy,cx+90,cy+26)}
+      ${bond(cx,cy,cx,cy+52)}
+      ${atom(cx,cy,Pw,'P',24)}
+      ${atom(cx,cy-102,Fg,'Cl',26)}
+      ${atom(cx,cy+102,Fg,'Cl',26)}
+      ${atom(cx-104,cy+26,Fg,'Cl',26)}
+      ${atom(cx+104,cy+26,Fg,'Cl',26)}
+      ${atom(cx,cy+66,Fg,'Cl',26)}
+      ${geo('Trig. Bipyramidal · sp³d · 90°/120°')}
+    `),
+
+    'chlorine trifluoride': svg(`
+      ${bond(cx,cy,cx,cy-88)}
+      ${bond(cx,cy,cx,cy+88)}
+      ${bond(cx,cy,cx+88,cy)}
+      ${atom(cx,cy,Fg,'Cl',24)}
+      ${atom(cx,cy-100,Fg,'F')} ${atom(cx,cy+100,Fg,'F')}
+      ${atom(cx+100,cy,Fg,'F')}
+      ${lp(cx-30,cy-12)} ${lp(cx-30,cy+12)}
+      ${geo('T-shaped · sp³d · 87.5°')}
+    `),
+
+    'beryllium chloride': svg(`
+      ${bond(cx,cy,cx-110,cy)} ${bond(cx,cy,cx+110,cy)}
+      ${atom(cx,cy,Be,'Be',22)}
+      ${atom(cx-124,cy,Fg,'Cl',26)} ${atom(cx+124,cy,Fg,'Cl',26)}
+      ${geo('Linear · sp · 180°')}
+    `),
+
+    'diborane': (() => {
+      const B1x=cx-72, B2x=cx+72, By=cy;
+      const Hbx=cx, Hb1y=cy-50, Hb2y=cy+50;
+      return svg(`
+        ${bond(B1x,By,Hbx,Hb1y)} ${bond(B2x,By,Hbx,Hb1y)}
+        ${bond(B1x,By,Hbx,Hb2y)} ${bond(B2x,By,Hbx,Hb2y)}
+        ${bond(B1x,By,B1x-58,By-44)} ${bond(B1x,By,B1x-58,By+44)}
+        ${bond(B2x,By,B2x+58,By-44)} ${bond(B2x,By,B2x+58,By+44)}
+        ${atom(B1x,By,Be,'B',20)}   ${atom(B2x,By,Be,'B',20)}
+        ${atom(Hbx,Hb1y,Hw,'H',16)} ${atom(Hbx,Hb2y,Hw,'H',16)}
+        ${atom(B1x-68,By-50,Hw,'H',16)} ${atom(B1x-68,By+50,Hw,'H',16)}
+        ${atom(B2x+68,By-50,Hw,'H',16)} ${atom(B2x+68,By+50,Hw,'H',16)}
+        ${geo('3c-2e Banana bonds · sp³ B')}
+      `);
+    })(),
+
+  };
+})();
 
 /* ── SmilesDrawer options (shared between all renders) ─────────────────── */
 const SD_OPTIONS = {
@@ -2678,22 +2856,26 @@ const SD_OPTIONS = {
   }
 };
 
-/* ── SMILES resolution: DB lookup first, Cactus fallback ───────────────── */
+/* ── SMILES / SVG resolution ────────────────────────────────────────────
+   Priority: 1) static SVG (hypervalent molecules), 2) SMILES_DB,
+             3) session cache, 4) Cactus API fallback
+─────────────────────────────────────────────────────────────────────────── */
 const _smilesCache = new Map();
 
+function resolveStatic(query) {
+  return STATIC_SVG[query.toLowerCase().trim()] || null;
+}
+
 async function resolveSmiles(query) {
-  // 1. Embedded DB (instant, no network)
   const key = query.toLowerCase().trim();
   if (SMILES_DB[key]) {
     console.log(`[ChemSphere 2D] SMILES from DB for "${query}":`, SMILES_DB[key]);
     return SMILES_DB[key];
   }
-  // 2. Session cache
   if (_smilesCache.has(query)) {
     console.log(`[ChemSphere 2D] SMILES from cache for "${query}":`, _smilesCache.get(query));
     return _smilesCache.get(query);
   }
-  // 3. Cactus API fallback for user-searched molecules
   console.log(`[ChemSphere 2D] Fetching SMILES from Cactus for "${query}"…`);
   const smiles = await cactus(query, 'smiles');
   console.log(`[ChemSphere 2D] Cactus returned SMILES for "${query}":`, smiles);
@@ -2701,28 +2883,16 @@ async function resolveSmiles(query) {
   return smiles;
 }
 
-/* ── Core render — uses SmilesDrawer v2 SmiDrawer high-level API ────────
-   v2 BREAKING CHANGE: SmilesDrawer.parse() is now Promise-based.
-   The v1 callback signature parse(smiles, successCb, errorCb) no longer works.
-   Correct v2 pattern: new SmilesDrawer.SmiDrawer(opts).draw(smiles, '#id', 'dark')
-   SmiDrawer.draw() handles parse + render internally and returns a Promise.
+/* ── Core render — SmilesDrawer v2 SmiDrawer API ────────────────────────
+   Uses SmilesDrawer.SmiDrawer (high-level v2 class).
+   draw() accepts a raw SMILES string and returns a Promise.
 ─────────────────────────────────────────────────────────────────────────── */
 async function _sdRender(smiles, canvasEl) {
   console.log(`[ChemSphere 2D] Rendering SMILES:`, smiles);
-
-  if (typeof SmilesDrawer === 'undefined') {
-    throw new Error('SmilesDrawer library not loaded');
-  }
-
-  // Give the canvas a stable id if it doesn't have one (SmiDrawer needs '#id' selector)
+  if (typeof SmilesDrawer === 'undefined') throw new Error('SmilesDrawer not loaded');
   if (!canvasEl.id) canvasEl.id = 'sd-canvas';
-
-  // SmilesDrawer v2: SmiDrawer is the high-level class that accepts raw SMILES
   const sd = new SmilesDrawer.SmiDrawer(SD_OPTIONS);
-
-  // draw() returns a Promise in v2 — await it
   await sd.draw(smiles, '#' + canvasEl.id, 'dark', false);
-
   console.log(`[ChemSphere 2D] Render SUCCESS for:`, smiles);
 }
 
@@ -2792,9 +2962,9 @@ async function load2D(query) {
 
   console.log(`[ChemSphere 2D] load2D called for: "${query}"`);
 
-  // Reset UI state
-  // Remove any previous error div that was injected into the frame
-  frame.querySelectorAll('.sd-err').forEach(el => el.remove());
+  // Reset UI — remove previous static SVG or error injections
+  frame.querySelectorAll('.sd-err, .sd-static').forEach(el => el.remove());
+  canvas.style.display = 'block';
   frame.classList.remove('rdy');
   frame.style.height = '';
   sp.style.display   = 'block';
@@ -2804,15 +2974,32 @@ async function load2D(query) {
   _sdInitZoomButtons();
 
   try {
-    // Step 1: Resolve SMILES (DB → cache → Cactus)
+    // ── PATH A: static SVG for hypervalent / noble-gas molecules ──────────
+    const staticSvg = resolveStatic(query);
+    if (staticSvg) {
+      console.log(`[ChemSphere 2D] Using static SVG for "${query}"`);
+      // Hide the canvas, inject SVG div instead
+      canvas.style.display = 'none';
+      const ctx = canvas.getContext('2d');
+      if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const svgDiv = document.createElement('div');
+      svgDiv.className = 'sd-static';
+      svgDiv.style.cssText = 'width:100%;padding:12px;box-sizing:border-box';
+      svgDiv.innerHTML = staticSvg;
+      frame.insertBefore(svgDiv, frame.firstChild);
+      frame.classList.add('rdy');
+      sp.style.display = 'none';
+      lbl.textContent  = `${query} · 2D · SVG`;
+      _sdInitPinch();
+      console.log(`[ChemSphere 2D] Static SVG render SUCCESS for "${query}"`);
+      return;
+    }
+
+    // ── PATH B: SmilesDrawer for standard-valence molecules ───────────────
+    canvas.style.display = 'block';
     const smiles = await resolveSmiles(query);
-
     if (!smiles || !smiles.trim()) throw new Error('Empty SMILES returned');
-
-    // Step 2: Render
     await _sdRender(smiles, canvas);
-
-    // Step 3: Show frame
     frame.classList.add('rdy');
     sp.style.display = 'none';
     lbl.textContent  = `${query} · 2D · SVG`;
@@ -2822,10 +3009,9 @@ async function load2D(query) {
   } catch (err) {
     console.error(`[ChemSphere 2D] FAILED for "${query}":`, err);
     sp.style.display = 'none';
-    // Clear any partial canvas draw
+    canvas.style.display = 'none';
     const ctx = canvas.getContext('2d');
     if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
-    // Show error inside frame (frame becomes visible)
     const errDiv = document.createElement('div');
     errDiv.className = 'sd-err';
     errDiv.innerHTML = `<span>⬡</span>2D structure unavailable for <strong>${query}</strong>.<br>Try a common name or IUPAC name.`;
