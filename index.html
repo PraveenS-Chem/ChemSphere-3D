@@ -2553,7 +2553,113 @@ async function go(query, meta) {
 
 /* ════════════════════════════════════════
    3D RENDER
+   ─────────────────────────────────────
+   Ionic compound handling:
+   Cactus returns disconnected SDF for salts/ionic compounds (NaOH, NaCl, etc.)
+   — the Na⁺ and OH⁻ appear as separate unconnected fragments far apart or at
+   the origin, rendering as floating spheres with no bond visible.
+   
+   Fix: parseSdfConnectivity() detects disconnected SDFs.
+   If disconnected → rebuildIonicSdf() repositions fragment centroids at a
+   chemically realistic ion-pair distance (~2.3 Å) so the compound displays
+   as a proper ion pair, and shows a toast label.
 ════════════════════════════════════════ */
+
+/* Detect whether an SDF contains disconnected fragments.
+   SDF counts line (4th line): chars 0-2 = atom count, 3-5 = bond count.
+   If bond_count < atom_count - 1 the molecule graph is not fully connected. */
+function parseSdfConnectivity(sdf) {
+  const lines = sdf.split('\n');
+  // Find the counts line — it's the 4th line of each molblock
+  // (lines 0-2 are header, line 3 is counts)
+  const countsLine = lines[3] || '';
+  const atomCount = parseInt(countsLine.substring(0, 3).trim()) || 0;
+  const bondCount = parseInt(countsLine.substring(3, 6).trim()) || 0;
+  const disconnected = atomCount > 1 && bondCount < atomCount - 1;
+  return { atomCount, bondCount, disconnected };
+}
+
+/* Reposition all atoms in a disconnected SDF so fragment centroids sit
+   ION_DIST apart along the X axis, centred at origin.
+   Returns a new SDF string. */
+function rebuildIonicSdf(sdf) {
+  const ION_DIST = 2.3; // Å — typical Na-O ionic distance
+  const lines = sdf.split('\n');
+  const countsLine = lines[3] || '';
+  const atomCount = parseInt(countsLine.substring(0, 3).trim()) || 0;
+
+  // Parse atom block (lines 4 … 4+atomCount-1)
+  // SDF atom line: xxxxx.xxxxyyyyy.yyyyzzzzz.zzzz aaaddcccssshhhbbbvvvHHHrrriiimmmnnneee
+  const atomLines = lines.slice(4, 4 + atomCount);
+  const atoms = atomLines.map(l => ({
+    x: parseFloat(l.substring(0, 10)),
+    y: parseFloat(l.substring(10, 20)),
+    z: parseFloat(l.substring(20, 30)),
+    rest: l.substring(30),
+    line: l,
+  }));
+
+  if (atomCount === 0) return sdf; // nothing to do
+
+  // Identify disconnected fragments via union-find on bond block
+  const bondStart = 4 + atomCount;
+  const bondCountN = parseInt(countsLine.substring(3, 6).trim()) || 0;
+  const bondLines = lines.slice(bondStart, bondStart + bondCountN);
+  const parent = Array.from({length: atomCount}, (_, i) => i);
+  function find(x) { return parent[x] === x ? x : (parent[x] = find(parent[x])); }
+  function union(a, b) { parent[find(a)] = find(b); }
+  bondLines.forEach(bl => {
+    const a = parseInt(bl.substring(0, 3).trim()) - 1;
+    const b = parseInt(bl.substring(3, 6).trim()) - 1;
+    if (a >= 0 && b >= 0) union(a, b);
+  });
+
+  // Group atoms by fragment root
+  const frags = new Map();
+  atoms.forEach((at, i) => {
+    const root = find(i);
+    if (!frags.has(root)) frags.set(root, []);
+    frags.get(root).push(i);
+  });
+  const fragList = [...frags.values()];
+  if (fragList.length < 2) return sdf; // already connected — nothing to do
+
+  // Compute centroid of each fragment
+  const centroids = fragList.map(idxs => {
+    const n = idxs.length;
+    return {
+      x: idxs.reduce((s, i) => s + atoms[i].x, 0) / n,
+      y: idxs.reduce((s, i) => s + atoms[i].y, 0) / n,
+      z: idxs.reduce((s, i) => s + atoms[i].z, 0) / n,
+    };
+  });
+
+  // Place fragment centroids symmetrically on X axis
+  const totalFrags = fragList.length;
+  const newAtomLines = [...atomLines]; // will be overwritten
+  fragList.forEach((idxs, fi) => {
+    const targetX = (fi - (totalFrags - 1) / 2) * ION_DIST;
+    const dx = targetX - centroids[fi].x;
+    const dy = -centroids[fi].y;
+    const dz = -centroids[fi].z;
+    idxs.forEach(i => {
+      const a = atoms[i];
+      const nx = (a.x + dx).toFixed(4).padStart(10);
+      const ny = (a.y + dy).toFixed(4).padStart(10);
+      const nz = (a.z + dz).toFixed(4).padStart(10);
+      newAtomLines[i] = `${nx}${ny}${nz}${a.rest}`;
+    });
+  });
+
+  // Reconstruct SDF
+  const rebuilt = [
+    ...lines.slice(0, 4),
+    ...newAtomLines,
+    ...lines.slice(4 + atomCount),
+  ].join('\n');
+  return rebuilt;
+}
+
 async function do3D(query, tk) {
   if (!dmol || !viewer) {
     toast('3D unavailable — switching to 2D', 'e');
@@ -2562,8 +2668,17 @@ async function do3D(query, tk) {
     return;
   }
   showLoad(true, query, 'LOADING 3D STRUCTURE…');
-  const sdf = await cactus(query, 'SDF?get3d=true');
+  let sdf = await cactus(query, 'SDF?get3d=true');
   if (tk !== token) return;
+
+  // ── Ionic compound detection & repair ──────────────────────────────────
+  const { disconnected, atomCount, bondCount } = parseSdfConnectivity(sdf);
+  if (disconnected) {
+    console.log(`[ChemSphere 3D] Ionic/disconnected SDF detected for "${query}" — atoms:${atomCount} bonds:${bondCount}. Rebuilding ion-pair geometry.`);
+    sdf = rebuildIonicSdf(sdf);
+    toast('Ionic compound — showing ion pair', 'k');
+  }
+  // ───────────────────────────────────────────────────────────────────────
 
   viewer.stopAnimate();
   viewer.clear();
@@ -2573,15 +2688,12 @@ async function do3D(query, tk) {
   viewer.zoom(0.85);
   viewer.render();
 
-  // Ensure canvas is correctly sized before and after render
-  // (Android Chrome desktop mode may not have resized the GL context yet)
   requestAnimationFrame(() => {
     viewer.resize();
     viewer.render();
     ROT.attachListeners();
     ROT.paused = false;
     ROT.start();
-    // Second resize after a short delay for desktop-mode viewport lag
     setTimeout(() => { viewer.resize(); viewer.render(); }, 400);
   });
 }
@@ -2626,8 +2738,6 @@ const SMILES_DB = {
   'sulfur dioxide':           'O=S=O',
   'sulfur trioxide':          'O=S(=O)=O',
   'phosphorus trichloride':   'ClP(Cl)Cl',
-  'nitrogen dioxide':         'O=[N]=O',
-  'ozone':                    '[O-][O+]=O',
   'hydrogen peroxide':        'OO',
   'nitrous oxide':            '[N-]=[N+]=O',
   'carbonic acid':            'OC(=O)O',
