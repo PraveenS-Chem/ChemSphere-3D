@@ -3,55 +3,55 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>ChemSphere â€” Free 3D Molecular Visualizer for NEET & JEE</title>
+<title>ChemSphere — Free 3D Molecular Visualizer for NEET & JEE</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://3dmol.csb.pitt.edu/build/3Dmol-min.js" defer></script>
 <script src="https://unpkg.com/smiles-drawer@2.1.7/dist/smiles-drawer.min.js"></script>
 <link rel="stylesheet" href="styles.css">
 <body>
 
-<!-- â”€â”€â”€ INTRO / LANDING SCREEN â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+<!-- ─── INTRO / LANDING SCREEN ───────────────────────────── -->
 <!-- Hidden from returning users via sessionStorage flag -->
 <div id="intro-screen">
   <div class="intro-glow"></div>
   <div class="intro-logo">CS</div>
   <div class="intro-title">ChemSphere</div>
-  <div class="intro-sub">Free 3D molecular visualizer for NEET &amp; JEE â€” Search any molecule instantly</div>
+  <div class="intro-sub">Free 3D molecular visualizer for NEET &amp; JEE — Search any molecule instantly</div>
   <div class="intro-bullets">
-    <div class="intro-bullet"><span>ðŸ”¬</span> Interactive 3D molecules</div>
-    <div class="intro-bullet"><span>ðŸ§¬</span> 2D Structures</div>
-    <div class="intro-bullet"><span>ðŸ“Š</span> Molecular properties</div>
-    <div class="intro-bullet"><span>ðŸŽ¯</span> NEET &amp; JEE focused</div>
+    <div class="intro-bullet"><span>🔬</span> Interactive 3D molecules</div>
+    <div class="intro-bullet"><span>🧬</span> 2D Structures</div>
+    <div class="intro-bullet"><span>📊</span> Molecular properties</div>
+    <div class="intro-bullet"><span>🎯</span> NEET &amp; JEE focused</div>
   </div>
   <div class="intro-btns">
-    <button class="intro-btn-primary" onclick="enterApp(false)">Start Exploring â†’</button>
+    <button class="intro-btn-primary" onclick="enterApp(false)">Start Exploring →</button>
     <button class="intro-btn-secondary" onclick="enterApp(true)">Load Demo Molecules</button>
   </div>
   <!-- Featured molecule quick-load cards -->
   <div class="intro-featured">
     <div class="intro-feat-label">Featured Molecules</div>
     <div class="intro-feat-row">
-      <button class="intro-feat-card" onclick="enterApp(false);setTimeout(()=>showcasePick('vsepr-h2o'),1600)"><span>Hâ‚‚O</span>Water</button>
-      <button class="intro-feat-card" onclick="enterApp(false);setTimeout(()=>showcasePick('org-benz'),1600)"><span>Câ‚†Hâ‚†</span>Benzene</button>
-      <button class="intro-feat-card" onclick="enterApp(false);setTimeout(()=>showcasePick('bio-chol'),1600)"><span>Câ‚‚â‚‡Hâ‚„â‚†O</span>Cholesterol</button>
-      <button class="intro-feat-card" onclick="enterApp(false);setTimeout(()=>showcasePick('vsepr-sf6'),1600)"><span>SFâ‚†</span>SFâ‚†</button>
-      <button class="intro-feat-card" onclick="enterApp(false);setTimeout(()=>showcasePick('bio-gluc'),1600)"><span>Câ‚†Hâ‚â‚‚Oâ‚†</span>Glucose</button>
+      <button class="intro-feat-card" onclick="enterApp(false);setTimeout(()=>showcasePick('vsepr-h2o'),1600)"><span>H₂O</span>Water</button>
+      <button class="intro-feat-card" onclick="enterApp(false);setTimeout(()=>showcasePick('org-benz'),1600)"><span>C₆H₆</span>Benzene</button>
+      <button class="intro-feat-card" onclick="enterApp(false);setTimeout(()=>showcasePick('bio-chol'),1600)"><span>C₂₇H₄₆O</span>Cholesterol</button>
+      <button class="intro-feat-card" onclick="enterApp(false);setTimeout(()=>showcasePick('vsepr-sf6'),1600)"><span>SF₆</span>SF₆</button>
+      <button class="intro-feat-card" onclick="enterApp(false);setTimeout(()=>showcasePick('bio-gluc'),1600)"><span>C₆H₁₂O₆</span>Glucose</button>
     </div>
   </div>
-  <div class="intro-badge">FREE FOR ALL STUDENTS Â· SEARCH ANY MOLECULE Â· NCI CACTUS</div>
+  <div class="intro-badge">FREE FOR ALL STUDENTS · SEARCH ANY MOLECULE · NCI CACTUS</div>
   <!-- Feature 7: Institutional badge -->
   <div class="intro-inst">Institution-ready interactive STEM visualization platform</div>
 </div>
 
-<!-- â”€â”€â”€ ENTRY TRANSITION OVERLAY â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+<!-- ─── ENTRY TRANSITION OVERLAY ─────────────────────────── -->
 <div id="entry-transition">
   <div class="et-glow"></div>
   <div class="et-logo">CS</div>
-  <div class="et-text">Entering Molecular Spaceâ€¦</div>
+  <div class="et-text">Entering Molecular Space…</div>
   <div class="et-sub">Loading Interactive Chemistry Environment</div>
 </div>
 
-<!-- â”€â”€â”€ FEATURED MOLECULE SHOWCASE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+<!-- ─── FEATURED MOLECULE SHOWCASE ───────────────────────── -->
 <div id="showcase-screen">
   <div class="sc-logo">CS</div>
   <div class="sc-title">Explore Molecules in 3D</div>
@@ -59,30 +59,30 @@
   <div class="sc-label">Featured Molecules</div>
   <div class="sc-grid" id="sc-grid"><!-- filled by JS --></div>
   <div class="sc-actions">
-    <button class="sc-btn-primary" onclick="startMiniDemo()">â–¶ Mini Tour</button>
-    <button class="sc-btn-secondary" onclick="dismissShowcase()">Browse All â†’</button>
+    <button class="sc-btn-primary" onclick="startMiniDemo()">▶ Mini Tour</button>
+    <button class="sc-btn-secondary" onclick="dismissShowcase()">Browse All →</button>
   </div>
   <div class="sc-skip">or use the sidebar to search any molecule</div>
 </div>
 
-<!-- â”€â”€â”€ HEADER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+<!-- ─── HEADER ─────────────────────────────────────────────── -->
 <header>
   <a class="logo" href="#">
     <div class="lm">CS</div>
-    <div class="lt"><h1>ChemSphere</h1><p>NEET Â· JEE Â· Class 11 &amp; 12</p></div>
+    <div class="lt"><h1>ChemSphere</h1><p>NEET · JEE · Class 11 &amp; 12</p></div>
   </a>
 
   <div class="dtabs">
     <button class="dtab on"  id="d3d"    onclick="setMode('3d')">3D Model</button>
     <button class="dtab"     id="d2d"    onclick="setMode('2d')">2D Structure</button>
     <button class="dtab"     id="dpr"    onclick="setMode('props')">Properties</button>
-    <button class="dtab"     id="dqz"    onclick="setMode('quiz')" style="color:var(--org);border-color:rgba(255,107,53,.25)">âš¡ Quiz</button>
+    <button class="dtab"     id="dqz"    onclick="setMode('quiz')" style="color:var(--org);border-color:rgba(255,107,53,.25)">⚡ Quiz</button>
   </div>
 
   <div class="hr">
     <span class="fbdg">FREE FOR ALL</span>
-    <button id="demo-btn"  class="hdr-btn" onclick="toggleDemo()"  aria-label="Toggle guided demo">â–¶ Demo</button>
-    <button id="pmode-btn" class="hdr-btn" onclick="togglePmode()" aria-label="Toggle presentation mode">âŠž Present</button>
+    <button id="demo-btn"  class="hdr-btn" onclick="toggleDemo()"  aria-label="Toggle guided demo">▶ Demo</button>
+    <button id="pmode-btn" class="hdr-btn" onclick="togglePmode()" aria-label="Toggle presentation mode">⊞ Present</button>
     <button class="hmb" id="hmb" onclick="togDrawer()" aria-label="Molecules">
       <em></em><em></em><em></em>
     </button>
@@ -92,7 +92,7 @@
 <!-- drawer backdrop -->
 <div class="dovl" id="dovl" onclick="closeDrawer()"></div>
 
-<!-- â”€â”€â”€ MAIN APP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+<!-- ─── MAIN APP ────────────────────────────────────────────── -->
 <div class="app">
 
   <!-- SIDEBAR -->
@@ -102,8 +102,8 @@
     <div class="ss">
       <div class="sl">Search Any Molecule</div>
       <div class="srw">
-        <input class="si" id="mol-in" placeholder="caffeine, aspirin, benzeneâ€¦" autocomplete="off">
-        <button class="bgo" onclick="doSearch()">Go â†’</button>
+        <input class="si" id="mol-in" placeholder="caffeine, aspirin, benzene…" autocomplete="off">
+        <button class="bgo" onclick="doSearch()">Go →</button>
       </div>
       <div class="eb" id="eb"></div>
     </div>
@@ -159,25 +159,25 @@
       <div class="sl">Molecule Info</div>
       <div class="ic" id="ic">
         <div>
-          <div class="inn" id="i-nm">â€”</div>
-          <div class="inf" id="i-fm">â€”</div>
+          <div class="inn" id="i-nm">—</div>
+          <div class="inf" id="i-fm">—</div>
         </div>
         <div class="idv"></div>
         <div class="igr">
-          <div class="ist"><div class="istl">Mol. Weight</div><div class="istv" id="i-wt">â€”</div></div>
-          <div class="ist"><div class="istl">Hybridization</div><div class="istv" id="i-hy">â€”</div></div>
-          <div class="ist"><div class="istl">Bond Angle</div><div class="istv" id="i-an">â€”</div></div>
-          <div class="ist"><div class="istl">Dipole Moment</div><div class="istv" id="i-dp">â€”</div></div>
+          <div class="ist"><div class="istl">Mol. Weight</div><div class="istv" id="i-wt">—</div></div>
+          <div class="ist"><div class="istl">Hybridization</div><div class="istv" id="i-hy">—</div></div>
+          <div class="ist"><div class="istl">Bond Angle</div><div class="istv" id="i-an">—</div></div>
+          <div class="ist"><div class="istl">Dipole Moment</div><div class="istv" id="i-dp">—</div></div>
         </div>
         <div class="geo">
           <div class="geol">VSEPR Geometry</div>
-          <div class="geov" id="i-go">â€”</div>
+          <div class="geov" id="i-go">—</div>
         </div>
         <div class="fct">
-          <div class="fctl">âš¡ NEET / JEE Fact</div>
-          <div class="fctv" id="i-fc">â€”</div>
+          <div class="fctl">⚡ NEET / JEE Fact</div>
+          <div class="fctv" id="i-fc">—</div>
         </div>
-        <!-- Learning Insights â€” filled by EDU_CONTENT -->
+        <!-- Learning Insights — filled by EDU_CONTENT -->
         <div class="edu-insights" id="edu-insights" style="display:none">
           <div class="edu-ins-label">Learning Insights</div>
           <div id="edu-chips"><!-- 3 chips injected by JS --></div>
@@ -194,26 +194,26 @@
     <div class="ldr" id="ldr">
       <div class="spn"></div>
       <div class="lmol" id="lmol"></div>
-      <div class="ltx"  id="ltx">LOADINGâ€¦</div>
+      <div class="ltx"  id="ltx">LOADING…</div>
     </div>
 
     <!-- Empty state -->
     <div class="emp" id="emp">
-      <div class="ei">â¬¡</div>
+      <div class="ei">⬡</div>
       <div class="et">SELECT A MOLECULE TO BEGIN</div>
     </div>
 
     <!-- 3D panel -->
     <div id="p3d"><div id="c3d"></div></div>
 
-    <!-- 2D panel â€” SmilesDrawer SVG rendering -->
+    <!-- 2D panel — SmilesDrawer SVG rendering -->
     <div id="p2d">
       <div class="sp2" id="sp2"></div>
       <div class="f2d" id="f2d">
         <canvas id="sd-canvas" aria-label="2D molecular structure"></canvas>
         <div class="sd-zoom" role="group" aria-label="Zoom controls">
           <button class="sd-zb" id="sd-zin"  title="Zoom in"   aria-label="Zoom in">+</button>
-          <button class="sd-zb" id="sd-zout" title="Zoom out"  aria-label="Zoom out">âˆ’</button>
+          <button class="sd-zb" id="sd-zout" title="Zoom out"  aria-label="Zoom out">−</button>
         </div>
         <button class="sd-zoom-reset" id="sd-zreset" title="Reset zoom">1:1</button>
       </div>
@@ -224,113 +224,113 @@
     <div id="ppr">
       <div>
         <div class="prt" id="prt">Properties</div>
-        <div class="prs">Live data Â· NCI Cactus API</div>
+        <div class="prs">Live data · NCI Cactus API</div>
       </div>
       <div class="prg" id="prg"></div>
     </div>
 
     <!-- Molecule name badge -->
-    <div class="bdg" id="bdg"><span class="dot"></span><span id="bnm">â€”</span></div>
+    <div class="bdg" id="bdg"><span class="dot"></span><span id="bnm">—</span></div>
 
     <!-- 3D Viewer control buttons -->
     <div class="vc" id="vc" role="group" aria-label="Viewer controls">
-      <button class="vb" onclick="resetV()" title="Reset view"   aria-label="Reset view">âŒ–</button>
+      <button class="vb" onclick="resetV()" title="Reset view"   aria-label="Reset view">⌖</button>
       <button class="vb" onclick="zoomV(1.3)" title="Zoom in"   aria-label="Zoom in">+</button>
-      <button class="vb" onclick="zoomV(0.7)" title="Zoom out"  aria-label="Zoom out">âˆ’</button>
+      <button class="vb" onclick="zoomV(0.7)" title="Zoom out"  aria-label="Zoom out">−</button>
     </div>
 
     <div class="libst" id="libst"></div>
 
-    <!-- â”€â”€â”€ ATOM COLOR LEGEND â”€â”€â”€ -->
+    <!-- ─── ATOM COLOR LEGEND ─── -->
     <div id="atom-legend">
       <div class="aleg-header" onclick="toggleLegend()">
         <span class="aleg-title">Atoms</span>
-        <span class="aleg-toggle">â–¾</span>
+        <span class="aleg-toggle">▾</span>
       </div>
       <div class="aleg-body" id="aleg-body">
         <!-- filled by JS -->
       </div>
     </div>
 
-    <!-- â”€â”€â”€ EDUCATIONAL OVERLAY â”€â”€â”€ -->
+    <!-- ─── EDUCATIONAL OVERLAY ─── -->
     <div id="edu-card">
-      <div class="edu-mol-name" id="edu-name">â€”</div>
+      <div class="edu-mol-name" id="edu-name">—</div>
       <div class="edu-row">
         <span class="edu-label">Geometry</span>
-        <span class="edu-val" id="edu-geo">â€”</span>
+        <span class="edu-val" id="edu-geo">—</span>
       </div>
       <div class="edu-row">
         <span class="edu-label">Hybrid.</span>
-        <span class="edu-val" id="edu-hyb">â€”</span>
+        <span class="edu-val" id="edu-hyb">—</span>
       </div>
       <div class="edu-row">
         <span class="edu-label">Angle</span>
-        <span class="edu-val" id="edu-ang">â€”</span>
+        <span class="edu-val" id="edu-ang">—</span>
       </div>
       <div class="edu-divider"></div>
-      <div class="edu-insight" id="edu-ins">â€”</div>
+      <div class="edu-insight" id="edu-ins">—</div>
     </div>
 
-    <!-- â”€â”€â”€ ONBOARDING HINTS â”€â”€â”€ -->
+    <!-- ─── ONBOARDING HINTS ─── -->
     <div id="hint-bar">
-      <div class="hint-chip">âŸ³ Drag to rotate</div>
-      <div class="hint-chip">âŠ• Scroll to zoom</div>
-      <div class="hint-chip">â¬¡ Tap Molecules to explore</div>
+      <div class="hint-chip">⟳ Drag to rotate</div>
+      <div class="hint-chip">⊕ Scroll to zoom</div>
+      <div class="hint-chip">⬡ Tap Molecules to explore</div>
     </div>
 
-    <!-- â”€â”€â”€ GUIDED DEMO BAR â”€â”€â”€ -->
+    <!-- ─── GUIDED DEMO BAR ─── -->
     <div id="demo-bar">
       <span id="demo-mol-name">Demo</span>
       <div class="demo-prog" id="demo-prog"></div>
-      <button id="demo-exit" onclick="stopDemo()">âœ• Exit</button>
+      <button id="demo-exit" onclick="stopDemo()">✕ Exit</button>
     </div>
 
-    <!-- â”€â”€â”€ EDUCATIONAL HIGHLIGHT â”€â”€â”€ -->
+    <!-- ─── EDUCATIONAL HIGHLIGHT ─── -->
     <div id="edu-highlight">
       <div class="hl-title" id="hl-title">Key Concept</div>
-      <div class="hl-text"  id="hl-text">â€”</div>
+      <div class="hl-text"  id="hl-text">—</div>
     </div>
 
-    <!-- â”€â”€â”€ BOND ANGLE SVG â”€â”€â”€ -->
+    <!-- ─── BOND ANGLE SVG ─── -->
     <svg id="bond-angle-svg" width="120" height="70" viewBox="0 0 120 70">
       <path id="ba-arc" d="" stroke="rgba(0,229,180,.75)" stroke-width="2" fill="rgba(0,229,180,.1)" />
-      <text id="ba-label" x="60" y="62" text-anchor="middle" font-family="JetBrains Mono,monospace" style="font-size:12px;font-weight:700" fill="rgba(0,229,180,1)">â€”</text>
+      <text id="ba-label" x="60" y="62" text-anchor="middle" font-family="JetBrains Mono,monospace" style="font-size:12px;font-weight:700" fill="rgba(0,229,180,1)">—</text>
     </svg>
     <span id="ba-reason"></span>
-    <!-- â”€â”€â”€ PMODE GEOMETRY BADGE: compact label above bond-angle SVG â”€â”€â”€ -->
+    <!-- ─── PMODE GEOMETRY BADGE: compact label above bond-angle SVG ─── -->
     <span id="pmode-geo-badge"></span>
 
-    <!-- â”€â”€â”€ SMART CLASSROOM PANEL (pmode desktop only) â”€â”€â”€ -->
+    <!-- ─── SMART CLASSROOM PANEL (pmode desktop only) ─── -->
     <div id="pmode-panel">
       <div class="pmp-card" id="pmp-geo-card" style="display:none">
         <div class="pmp-label">VSEPR Geometry</div>
-        <div class="pmp-value" id="pmp-geo">â€”</div>
-        <div class="pmp-fact" id="pmp-geo-fact">â€”</div>
+        <div class="pmp-value" id="pmp-geo">—</div>
+        <div class="pmp-fact" id="pmp-geo-fact">—</div>
       </div>
       <div class="pmp-card" id="pmp-hyb-card" style="display:none">
         <div class="pmp-label">Hybridization &amp; Angle</div>
-        <div class="pmp-value" id="pmp-hyb">â€”</div>
-        <span class="pmp-badge" id="pmp-angle">â€”</span>
+        <div class="pmp-value" id="pmp-hyb">—</div>
+        <span class="pmp-badge" id="pmp-angle">—</span>
       </div>
-      <!-- Teaching steps card â€” pmode only -->
+      <!-- Teaching steps card — pmode only -->
       <div class="pmp-card" id="pmp-steps-card" style="display:none">
         <div class="pmp-label">Step-by-Step</div>
         <ul class="pmp-steps" id="pmp-steps"><!-- filled by JS --></ul>
         <div class="pmp-rw" id="pmp-rw" style="display:none">
           <span class="pmp-rw-k">Real World</span>
-          <span id="pmp-rw-text">â€”</span>
+          <span id="pmp-rw-text">—</span>
         </div>
       </div>
     </div>
 
   </div><!-- /.vw -->
 
-  <!-- â”€â”€â”€ DESKTOP RIGHT EDUCATIONAL PANEL â”€â”€â”€ -->
-  <!-- Shown on desktop â‰¥768px in 3D mode. Replaces the small edu-card overlay. -->
+  <!-- ─── DESKTOP RIGHT EDUCATIONAL PANEL ─── -->
+  <!-- Shown on desktop ≥768px in 3D mode. Replaces the small edu-card overlay. -->
   <div id="edu-right-panel">
     <div class="erp-label">Molecule</div>
-    <div class="erp-mol-name" id="erp-name">â€”</div>
-    <div class="erp-formula"  id="erp-formula">â€”</div>
+    <div class="erp-mol-name" id="erp-name">—</div>
+    <div class="erp-formula"  id="erp-formula">—</div>
 
     <div class="erp-card" id="erp-geo-card" style="display:none">
       <div class="erp-card-k geo" style="color:var(--tea)">VSEPR Geometry</div>
@@ -339,9 +339,9 @@
     </div>
 
     <div style="display:flex;flex-direction:column;gap:4px" id="erp-rows">
-      <div class="erp-row"><span class="erp-key">Hybridization</span><span class="erp-val" id="erp-hyb">â€”</span></div>
-      <div class="erp-row"><span class="erp-key">Bond Angle</span><span class="erp-val" id="erp-ang">â€”</span></div>
-      <div class="erp-row"><span class="erp-key">Dipole</span><span class="erp-val" id="erp-dip">â€”</span></div>
+      <div class="erp-row"><span class="erp-key">Hybridization</span><span class="erp-val" id="erp-hyb">—</span></div>
+      <div class="erp-row"><span class="erp-key">Bond Angle</span><span class="erp-val" id="erp-ang">—</span></div>
+      <div class="erp-row"><span class="erp-key">Dipole</span><span class="erp-val" id="erp-dip">—</span></div>
     </div>
 
     <div class="erp-card geo" id="erp-polarity-card" style="display:none">
@@ -355,12 +355,12 @@
     </div>
 
     <div class="erp-card tip" id="erp-tip-card" style="display:none">
-      <div class="erp-card-k">âš¡ Exam Tip</div>
+      <div class="erp-card-k">⚡ Exam Tip</div>
       <div class="erp-card-v" id="erp-tip"></div>
     </div>
   </div>
 
-<!-- â”€â”€â”€ PMODE MOLECULE NAV DOCK (desktop/smartboard only) â”€â”€â”€ -->
+<!-- ─── PMODE MOLECULE NAV DOCK (desktop/smartboard only) ─── -->
 <div id="pmode-nav-dock">
   <!-- Category filter pills -->
   <div class="pnd-cats" id="pnd-cats">
@@ -373,24 +373,24 @@
   </div>
   <!-- Scrollable molecule pill strip -->
   <div class="pnd-pills-wrap" id="pnd-pills-wrap">
-    <button class="pnd-arrow left"  id="pnd-left"  onclick="pndScroll(-1)" aria-label="Scroll left">â€¹</button>
+    <button class="pnd-arrow left"  id="pnd-left"  onclick="pndScroll(-1)" aria-label="Scroll left">‹</button>
     <div    class="pnd-pills"       id="pnd-pills"></div>
-    <button class="pnd-arrow right" id="pnd-right" onclick="pndScroll(1)"  aria-label="Scroll right">â€º</button>
+    <button class="pnd-arrow right" id="pnd-right" onclick="pndScroll(1)"  aria-label="Scroll right">›</button>
   </div>
 </div>
 
-<!-- â”€â”€â”€ PMODE EXIT HINT â”€â”€â”€ -->
-<div id="pmode-exit-hint">Press ESC or click âŠž to exit presentation</div>
+<!-- ─── PMODE EXIT HINT ─── -->
+<div id="pmode-exit-hint">Press ESC or click ⊞ to exit presentation</div>
 
-<!-- â”€â”€â”€ MOBILE MOLECULE SCREEN â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+<!-- ─── MOBILE MOLECULE SCREEN ───────────────────────────────── -->
 <!-- Completely separate from .app div. WebGL is inside .app, this is outside.
      No GPU compositing battle. No z-index tricks needed. Just works. -->
 <div id="mol-screen">
   <!-- Search -->
   <div class="ms-search">
     <div class="ms-srw">
-      <input class="ms-input" id="ms-in" placeholder="Search: caffeine, aspirin, benzeneâ€¦" autocomplete="off">
-      <button class="ms-go" onclick="msSearch()">Go â†’</button>
+      <input class="ms-input" id="ms-in" placeholder="Search: caffeine, aspirin, benzene…" autocomplete="off">
+      <button class="ms-go" onclick="msSearch()">Go →</button>
     </div>
     <div class="ms-err" id="ms-err"></div>
   </div>
@@ -407,7 +407,7 @@
     <div class="ms-label">Quick Load</div>
     <div class="ms-grid" id="ms-grid"></div>
   </div>
-  <!-- Mobile 3D Controls â€” synced with desktop sidebar selects -->
+  <!-- Mobile 3D Controls — synced with desktop sidebar selects -->
   <div class="ms-ctrls" id="ms-ctrls">
     <div class="ms-ctrl-label">3D Display</div>
     <div class="ms-ctrl-row">
@@ -427,31 +427,31 @@
   </div>
 </div>
 
-<!-- â”€â”€â”€ MOBILE EDUCATIONAL BOTTOM SHEET â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+<!-- ─── MOBILE EDUCATIONAL BOTTOM SHEET ──────────────────── -->
 <!-- Mobile-only collapsible card. Replaces edu-card overlay on small screens. -->
 <div id="edu-bottom-sheet">
   <div class="bs-handle" id="bs-handle"></div>
   <div class="bs-header" id="bs-header-tap">
     <div class="bs-title-wrap">
-      <div class="bs-title" id="bs-title">â€”</div>
-      <div class="bs-preview" id="bs-preview">â€”</div>
+      <div class="bs-title" id="bs-title">—</div>
+      <div class="bs-preview" id="bs-preview">—</div>
     </div>
     <button class="bs-toggle" id="bs-toggle-btn">Tap to expand</button>
   </div>
   <div class="bs-body" id="bs-body">
     <div class="bs-divider"></div>
     <div style="display:flex;flex-direction:column;gap:3px">
-      <div class="bs-row"><span class="bs-row-k">Geometry</span><span class="bs-row-v" id="bs-geo">â€”</span></div>
-      <div class="bs-row"><span class="bs-row-k">Hybridization</span><span class="bs-row-v" id="bs-hyb">â€”</span></div>
-      <div class="bs-row"><span class="bs-row-k">Bond Angle</span><span class="bs-row-v" id="bs-ang">â€”</span></div>
-      <div class="bs-row"><span class="bs-row-k">Dipole</span><span class="bs-row-v" id="bs-dip">â€”</span></div>
+      <div class="bs-row"><span class="bs-row-k">Geometry</span><span class="bs-row-v" id="bs-geo">—</span></div>
+      <div class="bs-row"><span class="bs-row-k">Hybridization</span><span class="bs-row-v" id="bs-hyb">—</span></div>
+      <div class="bs-row"><span class="bs-row-k">Bond Angle</span><span class="bs-row-v" id="bs-ang">—</span></div>
+      <div class="bs-row"><span class="bs-row-k">Dipole</span><span class="bs-row-v" id="bs-dip">—</span></div>
     </div>
     <div class="bs-insight" id="bs-insight"></div>
     <div id="bs-chips"><!-- edu chips injected by JS --></div>
   </div>
 </div>
 
-<!-- â”€â”€â”€ BOTTOM TAB BAR (mobile only) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+<!-- ─── BOTTOM TAB BAR (mobile only) ───────────────────────── -->
 <div class="btbar">
   <div class="bti">
     <button class="bt on" id="b3d" onclick="setMode('3d')" aria-label="3D Model view">
@@ -495,9 +495,9 @@
 <script src="presentationMode.js"></script>
 <script src="eduContent.js"></script>
 
-<!-- â•â• CHEMSPHERE ADDITIONS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<!-- ══ CHEMSPHERE ADDITIONS ══════════════════════════════ -->
 
-<!-- Token overlay removed â€” fully public access -->
+<!-- Token overlay removed — fully public access -->
 
 <!-- FOOTER -->
 <div id="cs-footer" style="
@@ -506,34 +506,34 @@
   padding:6px 20px;display:flex;align-items:center;
   justify-content:space-between;flex-wrap:wrap;gap:8px;
   font-size:0.68rem;color:#334155;font-family:monospace;">
-  <span id="cs-footer-inst">Â© ChemSphere by Praveen Â· Bastar, Chhattisgarh</span>
+  <span id="cs-footer-inst">© ChemSphere by Praveen · Bastar, Chhattisgarh</span>
   <span style="display:flex;gap:16px;align-items:center;">
-    <span>3Dmol.js Â· NCI Cactus Â· PubChem</span>
+    <span>3Dmol.js · NCI Cactus · PubChem</span>
     <a href="mailto:praveen@chemsphere.in" style="color:#22d3ee;text-decoration:none;">
-      ðŸ“§ License enquiry
+      📧 License enquiry
     </a>
   </span>
 </div>
 
 <script src="pubchemFallback.js"></script>
 
-<!-- â•â• CHEMSPHERE QUIZ PANEL â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
-<!-- Integrated quiz mode â€” lives inside .vw as a full-overlay panel -->
+<!-- ══ CHEMSPHERE QUIZ PANEL ══════════════════════════════ -->
+<!-- Integrated quiz mode — lives inside .vw as a full-overlay panel -->
 <div id="quiz-panel">
-  <div class="streak-toast" id="streak-toast">ðŸ”¥ <span id="streak-text"></span></div>
+  <div class="streak-toast" id="streak-toast">🔥 <span id="streak-text"></span></div>
 
   <div class="qp-page">
 
-    <!-- â”€â”€ HUB â”€â”€ -->
+    <!-- ── HUB ── -->
     <div id="qz-hub">
       <div class="hub-hero">
         <div class="hub-eyebrow">ChemSphere Quiz Engine</div>
         <h2 class="hub-title">Test Your<br>Chemistry.</h2>
-        <p class="hub-sub">Adaptive NEET &amp; JEE practice â€” geometry, hybridization, bond angles, facts &amp; more. Same molecules as the 3D visualizer.</p>
+        <p class="hub-sub">Adaptive NEET &amp; JEE practice — geometry, hybridization, bond angles, facts &amp; more. Same molecules as the 3D visualizer.</p>
         <div class="hub-stats">
           <div class="hstat"><div class="hstat-val" id="stat-q">50+</div><div class="hstat-lbl">Questions</div></div>
           <div class="hstat"><div class="hstat-val" id="stat-mol">40+</div><div class="hstat-lbl">Molecules</div></div>
-          <div class="hstat"><div class="hstat-val" id="stat-best" style="color:var(--gold)">â€”</div><div class="hstat-lbl">Best Score</div></div>
+          <div class="hstat"><div class="hstat-val" id="stat-best" style="color:var(--gold)">—</div><div class="hstat-lbl">Best Score</div></div>
           <div class="hstat"><div class="hstat-val" id="stat-done">0</div><div class="hstat-lbl">Quizzes Done</div></div>
         </div>
       </div>
@@ -541,28 +541,28 @@
       <div class="hub-modes-label">Choose a Mode</div>
       <div class="mode-grid">
         <button class="mode-card m-quick"   onclick="qzOpenSettings('quick')">
-          <span class="mode-icon">âš¡</span>
+          <span class="mode-icon">⚡</span>
           <div class="mode-name">Quick Fire</div>
           <div class="mode-desc">10 random questions from all topics. 20 sec per question.</div>
-          <span class="mode-badge">10 Questions Â· Timed</span>
+          <span class="mode-badge">10 Questions · Timed</span>
         </button>
         <button class="mode-card m-chapter" onclick="qzOpenSettings('chapter')">
-          <span class="mode-icon">ðŸ“–</span>
+          <span class="mode-icon">📖</span>
           <div class="mode-name">Chapter Drill</div>
           <div class="mode-desc">Focus on one chapter: VSEPR, Organic, Inorganic, or Biomolecules.</div>
-          <span class="mode-badge">Custom Â· Chapter Focus</span>
+          <span class="mode-badge">Custom · Chapter Focus</span>
         </button>
         <button class="mode-card m-exam"    onclick="qzOpenSettings('exam')">
-          <span class="mode-icon">ðŸŽ¯</span>
+          <span class="mode-icon">🎯</span>
           <div class="mode-name">Exam Sim</div>
           <div class="mode-desc">Full 20-question mixed set. Mirrors NEET/JEE MCQ format.</div>
-          <span class="mode-badge">20 Questions Â· Full Test</span>
+          <span class="mode-badge">20 Questions · Full Test</span>
         </button>
         <button class="mode-card m-blitz"   onclick="qzOpenSettings('blitz')">
-          <span class="mode-icon">ðŸ†</span>
+          <span class="mode-icon">🏆</span>
           <div class="mode-name">Blitz Mode</div>
           <div class="mode-desc">8 questions, 8 seconds each. Maximum speed.</div>
-          <span class="mode-badge">8 Sec Â· High Stakes</span>
+          <span class="mode-badge">8 Sec · High Stakes</span>
         </button>
       </div>
 
@@ -578,10 +578,10 @@
       <div class="sep"></div>
 
       <div class="pitch">
-        <div class="pitch-icon">ðŸ§ª</div>
+        <div class="pitch-icon">🧪</div>
         <div class="pitch-body">
           <div class="pitch-title">Integrated with ChemSphere 3D Visualizer</div>
-          <div class="pitch-text">Every question links to the 3D model you can see in the viewer. Molecular geometry, lone pairs, bond angles, and dipole moments come alive â€” turning memorization into genuine understanding. Switch to the 3D tab anytime to review a molecule.</div>
+          <div class="pitch-text">Every question links to the 3D model you can see in the viewer. Molecular geometry, lone pairs, bond angles, and dipole moments come alive — turning memorization into genuine understanding. Switch to the 3D tab anytime to review a molecule.</div>
           <div class="pitch-tags">
             <span class="pitch-tag">NEET 2025</span>
             <span class="pitch-tag">JEE Advanced</span>
@@ -594,7 +594,7 @@
       </div>
     </div><!-- /#qz-hub -->
 
-    <!-- â”€â”€ QUIZ SCREEN â”€â”€ -->
+    <!-- ── QUIZ SCREEN ── -->
     <div id="qz-quiz">
       <div class="qbar">
         <div class="qbar-left">
@@ -607,7 +607,7 @@
             <span id="score-total">0</span>
             <span style="font-size:9px;color:var(--mu);margin-left:2px">correct</span>
           </div>
-          <button class="exit-btn" onclick="qzExitQuiz()">âœ• Exit</button>
+          <button class="exit-btn" onclick="qzExitQuiz()">✕ Exit</button>
         </div>
       </div>
       <div class="qprogress"><div class="qpbar" id="qpbar" style="width:0%"></div></div>
@@ -631,12 +631,12 @@
         </div>
       </div>
       <div class="qactions">
-        <button class="btn-skip" id="btn-skip" onclick="qzSkipQ()">Skip â†’</button>
-        <button class="btn-next" id="btn-next" onclick="qzNextQ()">Next Question â†’</button>
+        <button class="btn-skip" id="btn-skip" onclick="qzSkipQ()">Skip →</button>
+        <button class="btn-next" id="btn-next" onclick="qzNextQ()">Next Question →</button>
       </div>
     </div><!-- /#qz-quiz -->
 
-    <!-- â”€â”€ RESULTS SCREEN â”€â”€ -->
+    <!-- ── RESULTS SCREEN ── -->
     <div id="qz-results">
       <div class="res-wrap">
         <div class="res-ring">
@@ -651,7 +651,7 @@
         <div class="res-sub" id="res-sub"></div>
       </div>
       <div class="lb-bar">
-        <span class="lb-icon">ðŸ†</span>
+        <span class="lb-icon">🏆</span>
         <div class="lb-info">
           <div class="lb-title" id="lb-title">Session Best</div>
           <div class="lb-detail" id="lb-detail"></div>
@@ -662,21 +662,21 @@
         <div class="rstat c"><div class="rstat-val" id="r-correct">0</div><div class="rstat-lbl">Correct</div></div>
         <div class="rstat w"><div class="rstat-val" id="r-wrong">0</div><div class="rstat-lbl">Wrong</div></div>
         <div class="rstat s"><div class="rstat-val" id="r-skip">0</div><div class="rstat-lbl">Skipped</div></div>
-        <div class="rstat t"><div class="rstat-val" id="r-time">â€”</div><div class="rstat-lbl">Avg Time</div></div>
+        <div class="rstat t"><div class="rstat-val" id="r-time">—</div><div class="rstat-lbl">Avg Time</div></div>
       </div>
       <div class="review-label">Question Review</div>
       <div id="review-list"></div>
       <div class="res-actions">
-        <button class="btn-redo" onclick="qzRedoQuiz()">â†º Retry</button>
-        <button class="btn-open-vis" onclick="setMode('3d')">â†— Open 3D Visualizer</button>
-        <button class="btn-new" onclick="qzGoHub()">New Quiz â†’</button>
+        <button class="btn-redo" onclick="qzRedoQuiz()">↺ Retry</button>
+        <button class="btn-open-vis" onclick="setMode('3d')">↗ Open 3D Visualizer</button>
+        <button class="btn-new" onclick="qzGoHub()">New Quiz →</button>
       </div>
       <div style="margin-top:22px">
         <div class="pitch">
-          <div class="pitch-icon">ðŸ’¡</div>
+          <div class="pitch-icon">💡</div>
           <div class="pitch-body">
             <div class="pitch-title">Struggling with geometry questions?</div>
-            <div class="pitch-text">Click "Open 3D Visualizer" above to see every molecule you got wrong. Seeing bond angles and lone pairs in 3D makes geometry unforgettable. Try rotating Hâ‚‚O, NHâ‚ƒ, or SFâ‚† and watch the shapes click into place.</div>
+            <div class="pitch-text">Click "Open 3D Visualizer" above to see every molecule you got wrong. Seeing bond angles and lone pairs in 3D makes geometry unforgettable. Try rotating H₂O, NH₃, or SF₆ and watch the shapes click into place.</div>
           </div>
         </div>
       </div>
@@ -685,7 +685,7 @@
   </div><!-- /.qp-page -->
 </div><!-- /#quiz-panel -->
 
-<!-- â”€â”€ QUIZ SETTINGS MODAL â”€â”€ -->
+<!-- ── QUIZ SETTINGS MODAL ── -->
 <div class="qz-modal-overlay" id="qz-modal">
   <div class="qz-modal">
     <div class="mod-title" id="mod-title">Quick Fire</div>
@@ -717,7 +717,7 @@
       <button class="mod-opt"      data-val="medium" onclick="qzSelOpt(this,'diff')">Medium</button>
       <button class="mod-opt"      data-val="hard"   onclick="qzSelOpt(this,'diff')">Hard</button>
     </div>
-    <button class="mod-start" onclick="qzStartQuiz()">Start Quiz â†’</button>
+    <button class="mod-start" onclick="qzStartQuiz()">Start Quiz →</button>
     <button class="mod-cancel" onclick="qzCloseModal()">Cancel</button>
   </div>
 </div>
